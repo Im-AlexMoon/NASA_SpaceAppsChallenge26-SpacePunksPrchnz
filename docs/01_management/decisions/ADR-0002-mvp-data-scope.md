@@ -1,0 +1,24 @@
+# ADR-0002 — Alcance de datos del MVP
+
+- **Estado:** Propuesto — **se completa y acepta al cerrar G1** (tarea DE-05)
+- **Tarea relacionada:** DE-05
+
+## Contexto
+PSI expone 24 investigaciones de combustión con ~13 TB registrados, dominados por video, imágenes y ZIP. Las tablas experimentales
+curadas son pequeñas y estructuradas. El reto pide resumir, comparar, rankear y modelar.
+
+## Hipótesis inicial (a verificar con la triage — no es una decisión todavía)
+
+Basada en la revisión preliminar del repositorio de referencia (ver ADR-0003), a confirmar contra el API en vivo:
+
+| Tier | Candidatas | Uso previsto |
+|---|---|---|
+| 1 — Primary | ACME Flame Design (PSI-10), ACME CFI-G (PSI-159), FLEX (PSI-69) | Estadística y modelos: O₂, presión, flujos, extinción, tasa de quemado, diluyentes |
+| 2 — Supporting | BASS / BASS-II (PSI-26/25), SAFFIRE-III (PSI-100), SAME-R / SAME (PSI-101/102), SAFFIRE-II (PSI-99), CFI (PSI-39), SPICE (PSI-107) | Contexto material/flujo, telemetría de incendio a escala, detección de humo |
+| 3 — Context | ACME BRE/CLD/E-FIELD/s-Flame, FLEX-2, SAFFIRE-I, SLICE, DAFT, investigaciones de tierra | Catálogo, ranking, RAG, brechas |
+
+## Decisión
+_Se completa en G1: lista final, archivos del manifest, bytes totales, justificación por la rúbrica de triage._
+
+## Consecuencias
+_Se completa en G1._

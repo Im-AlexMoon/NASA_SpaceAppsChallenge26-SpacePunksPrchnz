@@ -1,0 +1,9 @@
+# Filled during F4. Each model -> docs/03_data_science/model_cards/<id>.md
+random_seed: 42
+cv:
+  strategy: group_kfold        # groups = campaign/test-day to avoid leakage
+  n_splits: 5
+uncertainty:
+  method: conformal            # MAPIE; alpha = 0.1 -> 90% intervals
+  alpha: 0.1
+models: {}

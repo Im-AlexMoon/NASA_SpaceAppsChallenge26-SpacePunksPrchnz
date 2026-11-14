@@ -1,0 +1,27 @@
+# Data sources — single source of truth for ingestion (F1/F2).
+# Every value here must be verified against the live API and logged in
+# docs/02_data_engineering/DATA_SOURCES.md (verification log).
+psi:
+  base_url: https://psi.nasa.gov/geode-py/ws
+  endpoints:
+    search: /repo/search?source=psi&type=investigation&size=200&from=0
+    investigation: /repo/investigations/{psi_id}
+    download: /studies/{psi_id}/download?file={filename}
+  research_area_filter: "Combustion Science"
+  expected_combustion_investigations: 24   # verify at G1; drift = log it, don't force it
+  request:
+    timeout_s: 60
+    retries: 4
+    backoff_s: 2
+    user_agent: "flamesafe-research-client/0.1"
+
+# Download guardrails: we NEVER mirror the ~13 TB archive.
+download_budget:
+  max_files: 150
+  max_total_mb: 500
+  allow_extensions: [csv, txt, xlsx, xls, json, pdf, docx]
+  deny_extensions: [mp4, avi, mov, zip, ts, mdipsug]   # unlock per-file in manifest only with an ADR
+
+# Populated at G1 by the triage (docs/02_data_engineering/TRIAGE_METHODOLOGY.md).
+# tier: primary | supporting | context | out
+investigations: {}

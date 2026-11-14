@@ -1,0 +1,46 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.python-version
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# --- Secrets ---
+.env
+*.key
+
+# --- Data (medallion layers are reproducible: never commit them) ---
+data/bronze/*
+data/silver/*
+data/gold/*
+data/external/*
+!data/**/.gitkeep
+!data/README.md
+# data/sample/ IS committed: tiny fixtures for tests (< 1 MB total)
+
+# --- Generated artifacts ---
+artifacts/*
+!artifacts/.gitkeep
+reports/figures/*
+!reports/figures/.gitkeep
+
+# --- OS / IDE ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+
+# --- Streamlit ---
+.streamlit/secrets.toml
