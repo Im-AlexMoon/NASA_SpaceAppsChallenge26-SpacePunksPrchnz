@@ -1,0 +1,159 @@
+# DE-05 · Triage of the 24 PSI combustion investigations.
+# Method: docs/02_data_engineering/TRIAGE_METHODOLOGY.md §3. Evidence: docs/02_data_engineering/investigations/PSI-XX.md
+# Scores 0-3 per criterion are a DE proposal; PHY-02 validates pillar/environment and R1, and may add an `override`.
+# `flamesafe triage` computes score + tier and renders the matrix (never edit the rendered table by hand).
+
+weights: {R1: 0.30, R2: 0.15, R3: 0.20, R4: 0.20, R5: 0.10, R6: 0.05}
+thresholds: {tier1: 0.70, tier2: 0.45}
+gates:
+  # Added in DE-05 (see ADR-0002): a high weighted score alone must not promote a record with no analyzable outcome.
+  tier1: {R4_min: 3, R3_min: 2, R5_min: 2}   # measured outcome under varied conditions, tabular, n >= 30
+  tier2: {R3_or_R4_min: 2}                   # something analyzable; otherwise context only
+
+# pillars: prevencion | deteccion | supresion
+# environments: nave | estacion | base_lunar | rover | marte
+investigations:
+  PSI-159:
+    scores: {R1: 3, R2: 3, R3: 3, R4: 3, R5: 3, R6: 3}
+    pillars: [prevencion]
+    environments: [nave, estacion, base_lunar, rover, marte]
+    rqs: [RQ1, RQ5]
+    justification: "Ignición, autoextinción vs. corte de flujo y llama fría por prueba (333); XO2 0.12–0.85 y 0.5–3.3 bar cubren atmósferas de exploración."
+  PSI-10:
+    scores: {R1: 3, R2: 3, R3: 2, R4: 3, R5: 3, R6: 3}
+    pillars: [prevencion]
+    environments: [nave, estacion, base_lunar, rover, marte]
+    rqs: [RQ1, RQ5]
+    justification: "327 pruebas con XO2 hasta 0.85 y 0.42–3 atm; el resultado (ignición) solo existe en el EventData del Chamber Calculator: R4=3 condicionado a esa unión."
+  PSI-69:
+    scores: {R1: 3, R2: 2, R3: 3, R4: 3, R5: 3, R6: 2}
+    pillars: [supresion, prevencion]
+    environments: [nave, estacion, base_lunar, rover, marte]
+    rqs: [RQ2, RQ5]
+    justification: "274 gotas con O2/CO2/He/presión variados y extinción, tasa y tiempo de quemado medidos; experimental_table_only (archivo crudo no expuesto)."
+  PSI-39:
+    scores: {R1: 2, R2: 3, R3: 3, R4: 3, R5: 3, R6: 3}
+    pillars: [prevencion, supresion]
+    environments: [nave, estacion, base_lunar]
+    rqs: [RQ2, RQ1, RQ5]
+    justification: "DataSummary: k y Dext de llama caliente/fría en 146 pruebas, con He y 0.5–5 atm; comparable con FLEX y PSI-117."
+  PSI-101:
+    scores: {R1: 3, R2: 3, R3: 2, R4: 3, R5: 3, R6: 2}
+    pillars: [deteccion]
+    environments: [nave, estacion, base_lunar, rover]
+    rqs: [RQ4, RQ5]
+    justification: "109 pruebas de humo (material, velocidad, envejecimiento) con respuesta de detectores y aerosol en 44 corridas HKP; requiere unir HKP↔ET por número de prueba."
+  PSI-107:
+    scores: {R1: 2, R2: 3, R3: 2, R4: 3, R5: 3, R6: 2}
+    pillars: [deteccion, prevencion]
+    environments: [nave, estacion]
+    rqs: [RQ4, RQ5]
+    justification: "Longitud de punto de humo medida vs. combustible, boquilla, caudal y aire (SmokePointReview); relevancia indirecta (formación de hollín)."
+  PSI-25:
+    scores: {R1: 3, R2: 3, R3: 2, R4: 2, R5: 2, R6: 2}
+    pillars: [prevencion]
+    environments: [nave, estacion, base_lunar, rover]
+    rqs: [RQ3, RQ5]
+    justification: "Sólidos con O2 y flujo variados (129), pero sin resultado de inflamabilidad tabulado (propagación solo en video) → gate de Tier 1."
+  PSI-26:
+    scores: {R1: 3, R2: 3, R3: 2, R4: 2, R5: 2, R6: 2}
+    pillars: [prevencion]
+    environments: [nave, estacion, base_lunar, rover]
+    rqs: [RQ3, RQ5]
+    justification: "As-run matrix con O2, presión y CO2 (130); resultados solo como observaciones en texto libre."
+  PSI-98:
+    scores: {R1: 3, R2: 3, R3: 3, R4: 2, R5: 3, R6: 2}
+    pillars: [deteccion, prevencion]
+    environments: [nave, estacion]
+    rqs: [RQ4, RQ5]
+    justification: "Telemetría de incendio a escala (radiómetros, detectores de humo FIZ, P/T de cabina), disponible desde DE-01; condiciones casi fijas (2 muestras)."
+  PSI-100:
+    scores: {R1: 3, R2: 3, R3: 3, R4: 2, R5: 3, R6: 2}
+    pillars: [deteccion, prevencion]
+    environments: [nave, estacion]
+    rqs: [RQ4, RQ5]
+    justification: "Telemetría más rica de PSI; exportes CSV/XLSX que no deben concatenarse; 2 muestras → pocas condiciones."
+  PSI-102:
+    scores: {R1: 3, R2: 3, R3: 2, R4: 3, R5: 1, R6: 2}
+    pillars: [deteccion]
+    environments: [nave, estacion, base_lunar, rover]
+    rqs: [RQ4, RQ5]
+    justification: "Material, flujo y pérdida de masa medidos, pero solo 8 condiciones → gate de Tier 1 (n)."
+  PSI-99:
+    scores: {R1: 3, R2: 2, R3: 1, R4: 2, R5: 1, R6: 2}
+    pillars: [prevencion]
+    environments: [nave, estacion]
+    rqs: [RQ3, RQ5]
+    justification: "Única tabla con propagación en µg y en 1 g (9 muestras, en texto con unidades); valor narrativo para el acotamiento de gravedad."
+  PSI-117:
+    scores: {R1: 2, R2: 2, R3: 2, R4: 2, R5: 1, R6: 3}
+    pillars: [prevencion, supresion]
+    environments: [nave, estacion]
+    rqs: [RQ2, RQ5]
+    justification: "Investigación de tierra con datos de figuras (Dext, k; experimento vs. modelo); pocos puntos; útil como validación y baseline físico de M2."
+  PSI-47:
+    scores: {R1: 2, R2: 3, R3: 2, R4: 1, R5: 3, R6: 2}
+    pillars: [deteccion]
+    environments: [estacion, base_lunar, marte]
+    rqs: [RQ4, RQ5]
+    justification: "Lecturas de P-Trak/DustTrak de polvo en la ISS; contexto de falsas alarmas por polvo lunar; una sola condición."
+  PSI-23:
+    scores: {R1: 1, R2: 2, R3: 1, R4: 1, R5: 1, R6: 2}
+    pillars: [prevencion]
+    environments: [nave, estacion]
+    rqs: [RQ5]
+    justification: "Resumen por día (18) y test log; sin resultados medidos en tablas; relevancia indirecta (estructura de llamas con hollín)."
+  PSI-20:
+    scores: {R1: 2, R2: 2, R3: 1, R4: 1, R5: 1, R6: 2}
+    pillars: [prevencion]
+    environments: [nave, estacion]
+    rqs: [RQ3, RQ5]
+    justification: "Emulador de tasa de quemado de materiales (destacado en el reto) pero la tabla es por día, con O2 como lista y presión no identificada."
+  PSI-21:
+    scores: {R1: 1, R2: 2, R3: 1, R4: 1, R5: 2, R6: 2}
+    pillars: [prevencion]
+    environments: [nave, estacion]
+    rqs: [RQ5]
+    justification: "Resumen por día (32) con rangos en texto; sin resultados medidos."
+  PSI-22:
+    scores: {R1: 2, R2: 2, R3: 1, R4: 1, R5: 2, R6: 2}
+    pillars: [prevencion]
+    environments: [base_lunar, marte]
+    rqs: [RQ5]
+    justification: "Proxy de gravedad parcial (campo eléctrico) para la narrativa; experimental_table_only, solo resumen por día."
+  PSI-68:
+    scores: {R1: 3, R2: 2, R3: 1, R4: 1, R5: 1, R6: 2}
+    pillars: [supresion]
+    environments: [nave, estacion, base_lunar, rover, marte]
+    rqs: [RQ2, RQ5]
+    justification: "Solo rangos de condiciones por combustible (8 filas); define el espacio de diseño de FLEX-2 pero no es analizable."
+  PSI-106:
+    scores: {R1: 1, R2: 2, R3: 2, R4: 0, R5: 1, R6: 2}
+    pillars: [prevencion]
+    environments: [nave, estacion]
+    rqs: [RQ5]
+    justification: "Solo fecha y tipo de combustible (12)."
+  PSI-142:
+    scores: {R1: 1, R2: 2, R3: 2, R4: 1, R5: 1, R6: 0}
+    pillars: [prevencion]
+    environments: [nave, estacion]
+    rqs: [RQ5]
+    justification: "Índice de datos de figuras CFE/HFE; no comparable directamente con las tablas del MVP."
+  PSI-115:
+    scores: {R1: 2, R2: 2, R3: 1, R4: 1, R5: 0, R6: 2}
+    pillars: [deteccion]
+    environments: [nave, estacion]
+    rqs: [RQ4, RQ5]
+    justification: "Simulación de tierra del humo de SAME (.dat no perfilados); contexto de modelado."
+  PSI-60:
+    scores: {R1: 1, R2: 1, R3: 0, R4: 0, R5: 0, R6: 1}
+    pillars: [deteccion]
+    environments: [nave, estacion]
+    rqs: [RQ5]
+    justification: "Investigación de tierra; solo un archivo de metadatos."
+  PSI-62:
+    scores: {R1: 1, R2: 1, R3: 0, R4: 0, R5: 0, R6: 1}
+    pillars: [prevencion]
+    environments: [nave, estacion]
+    rqs: [RQ5]
+    justification: "Investigación de tierra; solo un archivo de metadatos."

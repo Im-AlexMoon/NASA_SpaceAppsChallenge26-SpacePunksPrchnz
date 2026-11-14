@@ -1,0 +1,17 @@
+layers:
+  bronze: data/bronze     # immutable raw copies + metadata sidecars (sha256, url, retrieved_at)
+  silver: data/silver     # typed, cleaned, unit-annotated, one table per source table (Parquet)
+  gold: data/gold         # analysis-ready, harmonized, documented (Parquet + DuckDB)
+  duckdb_file: data/gold/flamesafe.duckdb
+
+missing_tokens: ["", "n/a", "N/A", "na", "none", "None", "?", "-", "#DIV/0!", "#VALUE!", "#N/A", "OR"]
+# Missing tokens become NULL **plus** a <col>__flag column keeping the original token.
+
+units:
+  canonical:
+    oxygen: mole_fraction        # XO2 in [0,1]; O2 % vol is converted with explicit column
+    pressure: kPa
+    temperature: K
+    velocity: cm/s
+    mass_flow: mg/s
+    length: mm

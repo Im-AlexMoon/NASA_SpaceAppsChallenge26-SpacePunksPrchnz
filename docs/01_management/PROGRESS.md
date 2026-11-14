@@ -1,0 +1,132 @@
+# Progress — tablero de fases
+
+> Se actualiza en cada sync (cada 4 h) y al cerrar un gate.
+> Estado: ⬜ no iniciado · 🟦 en curso · 🟨 en riesgo · 🟥 bloqueado · ✅ cerrado
+
+**H+0 (inicio):** `____-__-__ __:__` · **Deadline:** `____-__-__ __:__`
+
+## Estado por fase
+
+| Fase | Gate | Objetivo | Estado | % | Responsable | Nota |
+|---|---|---|---|---|---|---|
+| F0 Setup y alineación | G0 | H+2 | 🟦 | 20 | | Repo + plan listos |
+| F1 Descubrimiento y triage | G1 | H+5 | 🟨 | 90 | DE | DE-01…05 ✔; **G1 espera a PHY-02** (ratificar pilar, entorno y R1) |
+| F2 Pipeline medallion | G2 | H+9 | ✅ | 100 | DE | **G2 cerrado**: gate de datos PASSED, rebuild determinista |
+| F3 EDA y estadística | G3 | H+14 | ⬜ | 0 | DS | desbloqueado: gold listo (`gas_flame_tests`, `droplet_tests`) |
+| F4 Modelado | G4 | H+17 | ⬜ | 0 | DS | desbloqueado (M1 con CFI-G; M2 con FLEX + CFI) |
+| F5 RAG | G5 | H+16 | ⬜ | 0 | | |
+| F6 Dashboard | G6 | H+20 | ⬜ | 0 | | |
+| F7 Física | G7 | H+20 | 🟦 | 5 | | Primer en borrador |
+| F8 Entrega | G8 | H+24 | ⬜ | 0 | | |
+
+## Bitácora de syncs
+
+<!-- Copia este bloque por cada sync -->
+### Sync H+0 — kick-off
+- ✔ Hecho: estructura del repo, plan ejecutivo, plantillas.
+- ▶ Siguiente: G0 (roles, entorno, RQ v0), arrancar DE-01/DE-02.
+- ⛔ Bloqueos: —
+- 🔀 Decisiones / recortes: —
+
+### DE-01 cerrado — 2026-11-14
+- ✔ Hecho: cliente PSI con reintentos (`psi_client.py`), comando `flamesafe verify-api`, reporte JSON de evidencia y 16 tests (2 en vivo).
+- 📌 Hallazgos:
+  - 133 investigaciones / 24 de combustión; todos los conteos de referencia coinciden.
+  - **La telemetría de SAFFIRE-I ya descarga (HTTP 200).** La referencia la daba por 404.
+  - Los datos PSI son **CC0 1.0** (23/24 registros).
+  - Un id de investigación inexistente devuelve 403, no 404.
+- ▶ Siguiente: DE-02 (catálogo de las 24 investigaciones a bronze) y DE-03 (aplanado del inventario).
+
+### DE-02 cerrado — 2026-11-14
+- ✔ Hecho: `flamesafe catalog` guarda un snapshot diario e inmutable en `data/bronze/catalog/`.
+  - Contenido: búsqueda + 24 detalles, byte a byte (21.7 MB), con manifest sha256.
+  - Re-correr el mismo día reanuda; detecta drift contra el snapshot anterior; solo actualiza `LATEST` si el snapshot está completo.
+  - 5 tests nuevos.
+- 📌 Validación: los conteos del snapshot son idénticos al reporte de DE-01.
+- ⚠️ Los JSON de detalle incluyen contactos de los PIs (nombres y emails). Bronze no se versiona y silver (DE-03) debe eliminarlos.
+- ▶ Siguiente: DE-03, aplanar el snapshot en `silver/catalog/{investigations,files,experimental_tables,publications}.parquet`.
+
+### DE-03 cerrado — 2026-11-14
+- ✔ Hecho: `flamesafe silver` (paso catálogo) genera 5 tablas Parquet en `data/silver/catalog/` y un reporte de parseo.
+  - Filas: investigations 24 · files 27,076 · experimental_tables 22 · publications 352 · contacts 86 (sin email, teléfono, fax ni dirección).
+  - Reconciliación 5/5 contra el JSON crudo; totales idénticos a DE-01. 0 errores; 1 aviso informativo: licencia vacía en PSI-10.
+  - 9 tests nuevos (29 unitarios en total). Diccionario de silver documentado en DATA_DICTIONARY.md.
+- 📌 Hallazgos:
+  - Bytes expuestos: 6,267 GB de 13,497 GB registrados. Casi todo es `Raw Data`, dominado por ZIP, TXT, CSV, MDIPSUG y MP4.
+  - SAFFIRE-I y SAFFIRE-III: el campo de hardware de PSI confirma **Cygnus**, aunque `Flight Platform` diga ISS.
+  - `experiment_hardware` es texto libre inconsistente: hay que normalizarlo a `hardware_family` para Compare y ranking.
+  - 284 de las 352 publicaciones tienen DOI y hay duplicados entre registros: deduplicar por DOI en gold y en el corpus RAG.
+- ▶ Siguiente: DE-04, perfiles de formato de las candidatas Tier 1/2 a partir de `silver/catalog/files`, y PHY-02, mapeo de pilar y entorno.
+
+### DE-04 cerrado — 2026-11-14
+- ✔ Hecho: `flamesafe profile` descarga las muestras L2 listadas en `configs/l2_samples.yaml` dentro del presupuesto y las perfila automáticamente.
+  - Descarga: 60 archivos, 50.3 MB, 60/60 OK; cada archivo con sidecar sha256 en `data/bronze/files/`.
+  - Perfilado: encoding, preámbulos, bloques lado a lado, tokens no numéricos y unidades del encabezado.
+  - Genera 24 perfiles `investigations/PSI-XX.md` con un bloque AUTO que se regenera y un bloque manual que se preserva. 12 tests nuevos (41 en total).
+- 📌 Hallazgos: ver [investigations/README.md](../02_data_engineering/investigations/README.md).
+  - **CFI (PSI-39) tiene resultados medidos procesados** (k y Dext de llama caliente y fría, 146 pruebas): sube a Tier 1.
+  - **PSI-10 no trae resultado en su tabla**: la ignición está en el Chamber Calculator. M1 se basará primero en CFI-G (PSI-159).
+  - Supresión: FLEX (CO₂ en 123 pruebas, He en 50; 186 extinciones) + CFI (He) → M2 es viable.
+  - Solo SAFFIRE-II tiene tasas de propagación en tabla (µg y 1 g, 9 muestras).
+- ▶ Siguiente: DE-05 (matriz de triage puntuada + manifest de adquisición + ADR-0002) con revisión PHY-02.
+
+### DE-05 cerrado — 2026-11-14
+- ✔ Hecho:
+  - `configs/triage.yaml` tiene puntajes R1–R6, pilares, entornos, RQ y justificación para las 24 investigaciones.
+  - `flamesafe triage` calcula el score, aplica los gates de tier y genera la matriz en TRIAGE_METHODOLOGY §4 y `triage_matrix.csv`.
+  - También resuelve `configs/acquisition_manifest.yaml` → `acquisition_manifest.csv` (lock que se commitea).
+  - 8 tests nuevos (49 en total).
+- 📌 Resultado:
+  - **Tier 1:** PSI-159, 10, 69, 101, 39, 107 · **Tier 2:** PSI-98, 100, 102, 25, 26, 47, 99, 117 · **Tier 3:** 10 registros.
+  - Manifest: 147 archivos, 263.3 MB.
+  - ADR-0002 aceptado por DE. MVP: RQ1 (CFI-G + Flame Design), RQ2 (FLEX + CFI, con PSI-117 como validación) y RQ5 (las 24). Stretch: RQ4 y RQ3.
+- ⚠️ Cambio de método: se añadieron **gates** a la rúbrica para que la relevancia sola no promueva registros sin resultado analizable.
+- ⛔ **G1 bloqueado por PHY-02:** PHY debe ratificar pilar, entorno y R1, o registrar un `override`.
+- ▶ Siguiente: PHY-02 para cerrar G1. En paralelo se puede arrancar DE-06 (descargar el manifest) y DS-02 (contrato de variables por RQ).
+
+### DE-06 cerrado — 2026-11-14
+- ✔ Hecho: `flamesafe bronze` descarga el lock `acquisition_manifest.csv`. También tiene `--dry-run` y `--verify-only`.
+  - Valida presupuesto y drift contra el catálogo, reutiliza lo ya descargado con sha256 válido y re-hashea todo al final.
+  - Reporte por grupo con duplicados. 6 tests nuevos (55 en total).
+- 📌 Resultado:
+  - **145/147** archivos (262.2 MB): 93 descargados y 52 reutilizados de L2. 0 diferencias de tamaño, 0 drift, integridad 153/153.
+  - **2 × HTTP 404** re-verificados: PDF de reportes finales en PSI-26 (BASS y SPICE). Solo afectan al corpus RAG.
+  - 3 PDF idénticos entre registros (SAFFIRE I/III, SAME/SAME-R): deduplicar por sha256 en el corpus RAG.
+- ▶ Siguiente: DS-02 (contrato de variables por RQ) → DE-07 (parsers silver de CFI-G, Flame Design + EventData, FLEX, CFI DataSummary y PSI-117).
+
+### DS-02 y DE-07 cerrados — 2026-11-14
+- ✔ DS-02: contrato de variables por RQ en RESEARCH_QUESTIONS.md y specs columna a columna de las tablas gold
+  `gas_flame_tests`, `droplet_tests`, `droplet_reference_points` e `investigations` en DATA_DICTIONARY.md.
+- ✔ DE-07: framework silver con specs declarativas (errores por drift de esquema, tokens → NULL + `__flag`, unidades de la fuente
+  en los nombres, procedencia por fila). Hay 7 parsers que producen 33 tablas: 11 semánticas MVP y 22 genéricas de tablas experimentales.
+  - 0 errores; 2 advertencias reales: FLEX con p = 0 mmHg en 1 fila y PSI-117 ReadMe con XN2 en %.
+  - 12 tests nuevos (64 unitarios + 3 de integración).
+- 📌 Hallazgo clave: **R-DE-05a resuelto**. `EventData` registra las inversas como `INV_TP`, así que Flame Design tiene resultado
+  de ignición en 325/327 pruebas. Para M1 hay ~660 pruebas con resultado (CFI-G 333 + Flame Design 325).
+  Además, en CFI-G `EventData` permite verificar `Hot ignition` en 331 pruebas.
+- ▶ Siguiente: DE-08, construir gold (`gas_flame_tests`, `droplet_tests`, `droplet_reference_points`, `investigations`), junto con DE-09 (pandera) y DE-10.
+
+### DE-08 cerrado — 2026-11-14
+- ✔ Hecho: `flamesafe gold` genera 5 tablas gold (Parquet) y `flamesafe.duckdb`. Las conversiones van por `physics/units.py`.
+  - Columnas derivadas explícitas: `po2_kpa`, `fuel_dilution_pct`, `x_co2_inferred`.
+  - El reporte incluye verificaciones cruzadas, cobertura de resultados e invariantes.
+  - 13 tests nuevos (85 en total, incluidos 4 de integración).
+- 📌 Resultado:
+  - `gas_flame_tests` 660 (650 con `ignited`) · `droplet_tests` 501 (148 con k caliente, 341 con Dext caliente, 274 con `test_end`)
+    · `droplet_reference_points` 15,861 · `investigations` 24 · `publications` 303 (235 DOI únicos; 44 DOI compartidos entre registros).
+  - Invariantes: 1 violación, CFI 1274A con Dext caliente 19 % mayor que D₀. Otros 8 casos con < 5 % de exceso son plausibles por hinchamiento térmico.
+- ⚠️ **R-DE-08a:** el `Ignite` de EventData es una decisión operativa. Coincide en 86 % con `Hot ignition` de CFI-G y discrepa sobre
+  todo en llamas breves. En Flame Design es casi constante. **M1 debe entrenarse con CFI-G** y Flame Design queda para contexto/validación (decisión PHY).
+- ▶ Siguiente: DE-09 (contratos pandera para silver/gold) y DE-10 (cerrar el data dictionary) → **G2**.
+
+### DE-09 y DE-10 cerrados · 🚦 G2 CERRADO — 2026-11-14
+- ✔ `flamesafe validate` implementa el gate G2 en código. Contratos: **37/37** (5 gold estrictos, 10 silver MVP y 22 genéricos de procedencia).
+  Reconciliación: **34/34** (bronze→silver y silver→gold). Ningún token convertido en valor: **19/19** columnas. Cobertura del diccionario: **5/5** tablas.
+- ✔ Rebuild desde bronze, con silver y gold borrados: **gold idéntico** (hash por tabla). `make pipeline` ahora termina en `validate`.
+- ✔ Fixtures de CI en `data/sample/gold_*.parquet` (160 KB, estratificados con casos borde). 16 tests nuevos (101 en total).
+- ✔ DATA_DICTIONARY completo para las 5 tablas gold; `validate` falla si se desincroniza.
+- ▶ Siguiente:
+  - **F3/F4 desbloqueados para DS** (DS-03…DS-13): EDA sobre gold y M1 con CFI-G.
+  - **F5:** RAG-01 puede usar los 29 PDF descargados y `publications`.
+  - **F6:** APP-02 puede hacer el vertical slice con DuckDB.
+  - **G1** sigue pendiente de PHY-02.

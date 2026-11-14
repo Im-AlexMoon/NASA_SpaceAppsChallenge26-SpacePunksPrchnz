@@ -1,0 +1,19 @@
+llm:
+  provider: anthropic
+  model_env: FLAMESAFE_LLM_MODEL   # default claude-sonnet-5-5 (see .env.example)
+  max_tokens: 1500
+  temperature: 0.0
+embeddings:
+  model: BAAI/bge-small-en-v1.5    # local, free, fast; swap only via ADR
+retrieval:
+  hybrid: true                     # BM25 + dense, reciprocal rank fusion
+  top_k: 8
+corpus:
+  - psi_investigation_metadata     # objectives, approach, hardware, publications (from catalog)
+  - publication_abstracts          # DOIs listed in PSI records
+  - project_findings               # docs/03_data_science/findings/*.md
+  - model_cards                    # docs/03_data_science/model_cards/*.md
+  - physics_docs                   # docs/04_physics/*.md
+answer_contract:
+  must_cite: true                  # every claim -> PSI accession / DOI / finding id
+  refuse_without_evidence: true

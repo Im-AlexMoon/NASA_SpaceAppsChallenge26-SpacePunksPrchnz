@@ -1,0 +1,73 @@
+# DE-05 · L3 acquisition manifest — the ONLY files that enter the medallion pipeline (downloaded in DE-06).
+# Resolved against the silver catalog by `flamesafe triage`; the resolved, byte-exact list is written to
+# docs/02_data_engineering/acquisition_manifest.csv (committed lock file). Decision record: ADR-0002.
+#
+# Entry forms per investigation:  "exact file name"  |  {pattern: "<regex on file_name>"}
+# Only the current `added` inventory (plus experimental tables) can be selected.
+budget:
+  max_total_mb: 500
+  max_file_mb: 50      # raised from 30 for the 49 MB BASS-II summary report (documents group), see ADR-0002
+  max_files: 150       # same as sources.yaml (resolved: 147)
+include_experimental_tables: true   # all 22 (catalog, Compare page, ranking)
+
+groups:
+  - name: mvp_rq1_gas_flames
+    purpose: "RQ1 · M1/M3 — ignition/extinction vs O2 and pressure"
+    files:
+      PSI-159:
+        - "PSI-159_Raw Data_Final ACME Chamber Calculator - 2021-03-09 to 2021-10-21.xlsx"
+      PSI-10:
+        - {pattern: "^PSI-10_Raw Data_Final ACME Chamber Calculator - .*\\.xlsx$"}   # EventData -> ignition outcome
+
+  - name: mvp_rq2_droplets_suppression
+    purpose: "RQ2 · M2 — extinction / burning rate vs diluent (CO2, He) and pressure"
+    files:
+      PSI-39:
+        - "PSI-39_Science Documents_CFI_DataSummary_Spreadsheet_Jan2021.xlsx"
+      PSI-117:
+        - {pattern: "^PSI-117_Analyzed Data_.*\\.(csv|xlsx)$"}
+
+  - name: stretch_rq4_detection
+    purpose: "RQ4 — smoke / detector response (SAME-R, SAME, SAFFIRE telemetry, SPICE smoke point, DAFT dust)"
+    files:
+      PSI-101:
+        - {pattern: "^PSI-101_Raw Data_HKPData_.*\\.csv$"}
+        - {pattern: "^PSI-101_Analyzed Data_.*\\.xlsx$"}
+      PSI-102:
+        - {pattern: "^PSI-102_Analyzed Data_.*\\.xlsx$"}
+      PSI-98:
+        - {pattern: "^PSI-98_Raw Data_.*\\.xlsx$"}
+      PSI-100:
+        - {pattern: "^PSI-100_Raw Data_.*\\.(csv|xlsx)$"}   # 3 telemetry exports kept separate (never concatenated)
+      PSI-107:
+        - {pattern: "^PSI-107_Raw Data_SmokePointReview.*\\.xlsx$"}
+        - "PSI-107_Raw Data_SPICE_Airflow_Test_VelocityData.xlsx"
+        - "PSI-107_Raw Data_Spice_Flight_Flamelength.xls"
+      PSI-47:
+        - "PSI-47_Analyzed Data_DAFT Retrieved Data Summary.xls"
+
+  - name: stretch_rq3_solids
+    purpose: "RQ3 — solids: O2 / flow / material context, µg vs 1 g spread (SAFFIRE-II table is an experimental table)"
+    files:
+      PSI-25:
+        - "PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx"
+        - "PSI-25_Reference Data_Fan calibration data.xlsx"
+      PSI-26:
+        - "PSI-26_Science Documents_As Run_Test Matrix.xlsx"
+        - "PSI-26_Science Documents_Planned_Test Matrix.xlsx"
+
+  - name: rag_documents
+    purpose: "F5 RAG corpus — final reports and science documents of Tier 1-2 records (PDF)"
+    files:
+      PSI-159: [{pattern: "^PSI-159_(Reports|Science Documents)_.*\\.pdf$"}]
+      PSI-10: [{pattern: "^PSI-10_(Reports|Science Documents)_.*\\.pdf$"}]
+      PSI-39: [{pattern: "^PSI-39_(Reports|Science Documents)_.*\\.pdf$"}]
+      PSI-117: [{pattern: "^PSI-117_(Reports|Science Documents)_.*\\.pdf$"}]
+      PSI-101: [{pattern: "^PSI-101_(Reports|Science Documents)_.*\\.pdf$"}]
+      PSI-102: [{pattern: "^PSI-102_(Reports|Science Documents)_.*\\.pdf$"}]
+      PSI-107: [{pattern: "^PSI-107_(Reports|Science Documents)_.*\\.pdf$"}]
+      PSI-25: [{pattern: "^PSI-25_(Reports|Science Documents)_.*\\.pdf$"}]
+      PSI-26: [{pattern: "^PSI-26_(Reports|Science Documents)_.*\\.pdf$"}]
+      PSI-98: [{pattern: "^PSI-98_(Reports|Science Documents)_.*\\.pdf$"}]
+      PSI-100: [{pattern: "^PSI-100_(Reports|Science Documents)_.*\\.pdf$"}]
+      PSI-47: [{pattern: "^PSI-47_(Reports|Science Documents)_.*\\.pdf$"}]
