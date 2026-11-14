@@ -20,6 +20,11 @@ Basada en la revisión preliminar del repositorio de referencia (ver ADR-0003), 
 **Actualización DE-01 (2026-11-14):** los 3 XLSX de telemetría y sensores de SAFFIRE-I (PSI-98), que la referencia reportaba como
 404, hoy devuelven HTTP 200. Evaluar SAFFIRE-I como fuente de telemetría en la triage.
 
+**Actualización DE-04 (2026-11-14), tiers en borrador** ([investigations/README.md](../../02_data_engineering/investigations/README.md)):
+- **Tier 1:** CFI-G (PSI-159), FLEX (PSI-69), **CFI (PSI-39, sube: tiene resultados procesados)** y ACME Flame Design (PSI-10; requiere unir con `EventData` para obtener el resultado de ignición).
+- **Tier 2:** PSI-117 (de tierra, validación), BASS-II, BASS, SAFFIRE-I (sube: telemetría disponible), SAFFIRE-III, SAME-R, SAME, SPICE y SAFFIRE-II.
+- **Tier 3:** el resto.
+
 ## Decisión
 _Se completa en G1: lista final, archivos del manifest, bytes totales, justificación por la rúbrica de triage._
 

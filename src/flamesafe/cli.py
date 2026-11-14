@@ -55,6 +55,39 @@ def catalog(
 
 
 @app.command()
+def profile(
+    docs: bool = typer.Option(True, help="Render docs/02_data_engineering/investigations/PSI-XX.md"),
+) -> None:
+    """F1 - DE-04: download L2 samples (configs/l2_samples.yaml), profile them, render investigation profiles."""
+    import json
+    from collections import Counter
+
+    from flamesafe import config
+    from flamesafe.ingestion import download as dl
+    from flamesafe.ingestion import profile_docs
+    from flamesafe.ingestion.profile import profile_file
+    from flamesafe.pipeline.silver_catalog import silver_catalog_dir
+
+    cfg = config.load("l2_samples")
+    reqs = dl.requests_from_l2(cfg, silver_catalog_dir())
+    total = dl.check_budget(reqs, cfg["budget"]["max_total_mb"], cfg["budget"]["max_file_mb"],
+                            config.load("sources")["download_budget"]["deny_extensions"])
+    typer.echo(f"L2 selection: {len(reqs)} files, {total / 1e6:.1f} MB (budget {cfg['budget']['max_total_mb']} MB)")
+    results = dl.fetch(reqs, progress=lambda r, a: a in ("fetched", "reused") or typer.echo(f"  {r.psi_id} {r.file_name}: {a}"))
+    report = dl.write_report(results, "l2_samples")
+    by_key = {f"{r['psi_id']}/{r['file_name']}": r for r in results}
+    profiles = {k: profile_file(dl.files_root() / k) for k, r in by_key.items() if r.get("http_status") == 200}
+    prof_path = report.parent / "l2_profiles.json"
+    prof_path.write_text(json.dumps(profiles, indent=1, default=str, ensure_ascii=False), encoding="utf-8")
+    ok = sum(r.get("http_status") == 200 for r in results)
+    typer.echo(f"Downloaded/verified {ok}/{len(results)} - profiled {sum(p.get('profiled', True) for p in profiles.values())}"
+               f" - reports: {report.name}, {prof_path.name}")
+    if docs:
+        actions = profile_docs.render_all(silver_catalog_dir(), by_key, profiles)
+        typer.echo(f"Investigation profiles: {dict(Counter(actions.values()))}")
+
+
+@app.command()
 def bronze() -> None:
     """F2 - DE-06: download manifest-selected files into bronze (sha256 + sidecar)."""
     _todo("DE-06")

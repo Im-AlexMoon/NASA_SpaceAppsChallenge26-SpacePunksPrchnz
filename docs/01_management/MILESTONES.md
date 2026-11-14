@@ -16,7 +16,7 @@
 - [x] DE-01 Endpoints PSI verificados y registrados — 2026-11-14 · `flamesafe verify-api` + DATA_SOURCES.md
 - [x] DE-02 Catálogo de 24 investigaciones en bronze — 2026-11-14 · `flamesafe catalog` (snapshot + manifest sha256)
 - [x] DE-03 Inventario aplanado (investigaciones, archivos, tablas experimentales, publicaciones) — 2026-11-14 · `flamesafe silver` → `silver/catalog/*.parquet`
-- [ ] DE-04 Perfiles de formato (Tier 1/2 completos, resto mínimo)
+- [x] DE-04 Perfiles de formato (Tier 1/2 completos, resto mínimo) — 2026-11-14 · `flamesafe profile` → 24 perfiles + 60 muestras L2
 - [ ] DE-05 Matriz de triage + manifest de descarga + ADR-0002
 - [ ] PHY-02 Mapeo pilar/entorno validado
 - [ ] 🚦 **G1** cerrado — datasets MVP congelados

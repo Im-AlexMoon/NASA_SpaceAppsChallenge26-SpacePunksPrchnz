@@ -10,7 +10,7 @@
 | Fase | Gate | Objetivo | Estado | % | Responsable | Nota |
 |---|---|---|---|---|---|---|
 | F0 Setup y alineación | G0 | H+2 | 🟦 | 20 | | Repo + plan listos |
-| F1 Descubrimiento y triage | G1 | H+5 | 🟦 | 50 | DE | DE-01 ✔ DE-02 ✔ DE-03 ✔; siguiente DE-04 (perfiles de formato) + PHY-02 |
+| F1 Descubrimiento y triage | G1 | H+5 | 🟦 | 75 | DE | DE-01…04 ✔; siguiente DE-05 (matriz de triage + ADR-0002) + PHY-02 |
 | F2 Pipeline medallion | G2 | H+9 | ⬜ | 0 | | |
 | F3 EDA y estadística | G3 | H+14 | ⬜ | 0 | | |
 | F4 Modelado | G4 | H+17 | ⬜ | 0 | | |
@@ -57,3 +57,15 @@
   - `experiment_hardware` es texto libre inconsistente: hay que normalizarlo a `hardware_family` para Compare y ranking.
   - 284 de las 352 publicaciones tienen DOI y hay duplicados entre registros: deduplicar por DOI en gold y en el corpus RAG.
 - ▶ Siguiente: DE-04, perfiles de formato de las candidatas Tier 1/2 a partir de `silver/catalog/files`, y PHY-02, mapeo de pilar y entorno.
+
+### DE-04 cerrado — 2026-11-14
+- ✔ Hecho: `flamesafe profile` descarga las muestras L2 listadas en `configs/l2_samples.yaml` dentro del presupuesto y las perfila automáticamente.
+  - Descarga: 60 archivos, 50.3 MB, 60/60 OK; cada archivo con sidecar sha256 en `data/bronze/files/`.
+  - Perfilado: encoding, preámbulos, bloques lado a lado, tokens no numéricos y unidades del encabezado.
+  - Genera 24 perfiles `investigations/PSI-XX.md` con un bloque AUTO que se regenera y un bloque manual que se preserva. 12 tests nuevos (41 en total).
+- 📌 Hallazgos: ver [investigations/README.md](../02_data_engineering/investigations/README.md).
+  - **CFI (PSI-39) tiene resultados medidos procesados** (k y Dext de llama caliente y fría, 146 pruebas): sube a Tier 1.
+  - **PSI-10 no trae resultado en su tabla**: la ignición está en el Chamber Calculator. M1 se basará primero en CFI-G (PSI-159).
+  - Supresión: FLEX (CO₂ en 123 pruebas, He en 50; 186 extinciones) + CFI (He) → M2 es viable.
+  - Solo SAFFIRE-II tiene tasas de propagación en tabla (µg y 1 g, 9 muestras).
+- ▶ Siguiente: DE-05 (matriz de triage puntuada + manifest de adquisición + ADR-0002) con revisión PHY-02.

@@ -16,6 +16,9 @@ Regla de presupuesto: L2 ≤ 100 MB total, L3 ≤ 500 MB total. Video/ZIP/imáge
 
 ## 2. Perfil de formato (L2)
 
+> **Ejecutado en DE-04 (2026-11-14):** `flamesafe profile` → 60 archivos, 50.3 MB. Perfiles e índice con tiers en borrador:
+> [investigations/README.md](investigations/README.md).
+
 Por cada investigación candidata, llenar [investigations/_TEMPLATE.md](investigations/_TEMPLATE.md):
 estructura de carpetas · formatos · encabezados reales · unidades · tokens faltantes/errores · granularidad (fila = prueba, día,
 punto de telemetría, resumen) · variables controladas vs. medidas vs. calculadas · documentos de ayuda (readme, test matrix) ·

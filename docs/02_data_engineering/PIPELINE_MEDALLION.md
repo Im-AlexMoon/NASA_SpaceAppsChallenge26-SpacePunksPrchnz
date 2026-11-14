@@ -23,8 +23,8 @@ data/
     catalog/snapshot_YYYY-MM-DD/                # 1 snapshot inmutable por día UTC; re-correr el mismo día reanuda
       search.json, PSI-XX.json                  # respuestas del API byte a byte (incluyen contactos de PIs → silver los elimina)
       manifest.json                             # url, retrieved_at_utc, http_status, bytes, sha256 por archivo + drift vs snapshot previo
-    PSI-XX/<archivo original> + <archivo>.meta.json
-    _reports/acquisition_report.json
+    files/PSI-XX/<archivo original> + <archivo>.meta.json   # psi_id, list_source, source_url, retrieved_at_utc, http_status, bytes, sha256, size_matches
+    _reports/acquisition_<selección>.json, l2_profiles.json
   silver/
     catalog/investigations.parquet, files.parquet, publications.parquet
     psi_xx__<tabla>.parquet
