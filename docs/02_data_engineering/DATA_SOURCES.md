@@ -74,8 +74,11 @@ Investigaciones de tierra (no microgravedad): PSI-60, PSI-62, PSI-115, PSI-117 y
 | PSI-142 | — (tierra) | Spacecraft Fire Safety | N/A | 2 | 1 | 3 | 12 | 0.00 | available |
 | PSI-159 | ACME CFI-G | Flames of Gaseous Fuels | ISS | 3,756 | 2 | 0 | 2 | 2,085.59 | available |
 
-"Plataforma" se transcribe tal como la reporta PSI. Ojo: SAFFIRE voló en Cygnus en todas sus ediciones, pero PSI solo lo indica para
-SAFFIRE-II. Hay que confirmarlo con la literatura antes de mostrarlo.
+"Plataforma" se transcribe tal como la reporta PSI en `Flight Platform`. Para SAFFIRE-I y SAFFIRE-III ese campo dice ISS, pero el
+campo `experimentHardware` del propio registro dice "Saffire 1 enclosure in Cygnus" y "Saffire III enclosure in Cygnus". El
+dashboard debe mostrar **Cygnus** (verificado DE-03 con el mismo registro PSI).
+
+Bytes expuestos en `added`: **6,267.02 GB** de los 13,496.77 GB registrados. Casi todo es `Raw Data` (15,792 archivos, 6,263.78 GB).
 
 ## 3. Contraste con el repositorio de referencia (ADR-0003)
 
@@ -108,6 +111,7 @@ SAFFIRE-II. Hay que confirmarlo con la literatura antes de mostrarlo.
 | 2026-11-14 | DE (DE-01) | Descarga de las 22 tablas experimentales | 22/22 HTTP 200, 22/22 tamaño = listado, sha256 registrados | ídem |
 | 2026-11-14 | DE (DE-01) | Re-chequeo de 404 de SAFFIRE-I (3 XLSX) | 3/3 HTTP 200 | ídem |
 | 2026-11-14 | DE (DE-01) | Controles negativos | archivo inexistente 404 · id inexistente 403 | ídem |
+| 2026-11-14 | DE (DE-03) | Aplanado a `silver/catalog` (`flamesafe silver`) | 24 investigaciones, 27,076 archivos (16,354 added + 10,722 removed), 22 tablas, 352 publicaciones (284 con DOI), 86 contactos sin PII; reconciliación 5/5 OK, 0 errores | `data/silver/catalog/_reports/catalog_parse_report.json` (local) |
 | 2026-11-14 | DE (DE-02) | Snapshot de catálogo en bronze (`flamesafe catalog`) | 25 archivos (búsqueda + 24 detalles), 21,689,225 bytes, completo; conteos idénticos al reporte DE-01 | `data/bronze/catalog/snapshot_2026-11-14/manifest.json` (local, no versionado) |
 
 ## 6. Atribución

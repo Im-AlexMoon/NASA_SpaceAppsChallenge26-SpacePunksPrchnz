@@ -62,8 +62,19 @@ def bronze() -> None:
 
 @app.command()
 def silver() -> None:
-    """F2 - DE-07: parse, type, clean and unit-annotate bronze -> silver."""
-    _todo("DE-07")
+    """F1/F2 - DE-03 + DE-07: bronze -> silver (catalog flattening now; data-table parsers in DE-07)."""
+    from flamesafe.pipeline import silver_catalog
+
+    rep = silver_catalog.run()
+    typer.echo(f"Catalog -> {rep['out_dir']}")
+    for name, n in rep["row_counts"].items():
+        typer.echo(f"  {name:<20} {n:>6} rows")
+    bad = {k: v for k, v in rep["reconciliation"].items() if not v["ok"]}
+    typer.echo(f"Reconciliation vs raw JSON: {bad or 'OK'} - issues: {len(rep['issues'])} "
+               f"({rep['n_errors']} errors)")
+    typer.secho("Experimental-table parsers: pending (DE-07)", fg=typer.colors.YELLOW)
+    if rep["n_errors"]:
+        raise typer.Exit(code=1)
 
 
 @app.command()

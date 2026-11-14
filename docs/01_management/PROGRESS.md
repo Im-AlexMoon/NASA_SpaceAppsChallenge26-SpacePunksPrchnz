@@ -10,7 +10,7 @@
 | Fase | Gate | Objetivo | Estado | % | Responsable | Nota |
 |---|---|---|---|---|---|---|
 | F0 Setup y alineación | G0 | H+2 | 🟦 | 20 | | Repo + plan listos |
-| F1 Descubrimiento y triage | G1 | H+5 | 🟦 | 30 | DE | DE-01 ✔ DE-02 ✔; siguiente DE-03 (aplanar inventario) |
+| F1 Descubrimiento y triage | G1 | H+5 | 🟦 | 50 | DE | DE-01 ✔ DE-02 ✔ DE-03 ✔; siguiente DE-04 (perfiles de formato) + PHY-02 |
 | F2 Pipeline medallion | G2 | H+9 | ⬜ | 0 | | |
 | F3 EDA y estadística | G3 | H+14 | ⬜ | 0 | | |
 | F4 Modelado | G4 | H+17 | ⬜ | 0 | | |
@@ -45,3 +45,15 @@
 - 📌 Validación: los conteos del snapshot son idénticos al reporte de DE-01.
 - ⚠️ Los JSON de detalle incluyen contactos de los PIs (nombres y emails). Bronze no se versiona y silver (DE-03) debe eliminarlos.
 - ▶ Siguiente: DE-03, aplanar el snapshot en `silver/catalog/{investigations,files,experimental_tables,publications}.parquet`.
+
+### DE-03 cerrado — 2026-11-14
+- ✔ Hecho: `flamesafe silver` (paso catálogo) genera 5 tablas Parquet en `data/silver/catalog/` y un reporte de parseo.
+  - Filas: investigations 24 · files 27,076 · experimental_tables 22 · publications 352 · contacts 86 (sin email, teléfono, fax ni dirección).
+  - Reconciliación 5/5 contra el JSON crudo; totales idénticos a DE-01. 0 errores; 1 aviso informativo: licencia vacía en PSI-10.
+  - 9 tests nuevos (29 unitarios en total). Diccionario de silver documentado en DATA_DICTIONARY.md.
+- 📌 Hallazgos:
+  - Bytes expuestos: 6,267 GB de 13,497 GB registrados. Casi todo es `Raw Data`, dominado por ZIP, TXT, CSV, MDIPSUG y MP4.
+  - SAFFIRE-I y SAFFIRE-III: el campo de hardware de PSI confirma **Cygnus**, aunque `Flight Platform` diga ISS.
+  - `experiment_hardware` es texto libre inconsistente: hay que normalizarlo a `hardware_family` para Compare y ranking.
+  - 284 de las 352 publicaciones tienen DOI y hay duplicados entre registros: deduplicar por DOI en gold y en el corpus RAG.
+- ▶ Siguiente: DE-04, perfiles de formato de las candidatas Tier 1/2 a partir de `silver/catalog/files`, y PHY-02, mapeo de pilar y entorno.
