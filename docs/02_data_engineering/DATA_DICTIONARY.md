@@ -83,12 +83,91 @@ Una misma publicación puede aparecer en varios registros: deduplicar por `doi` 
 
 ---
 
+## Silver · tablas de datos (`data/silver/tables/`, DE-07, `flamesafe silver`)
+
+Parsers con **specs declarativas** en `src/flamesafe/pipeline/silver_parsers.py`. Si falta una columna de la spec, es error (drift de
+esquema). Una columna inesperada no vacía se conserva como texto y genera una advertencia. Los tokens no tipables quedan como
+NULL + `<col>__flag` con el token original. Las unidades de la fuente van en el nombre de la columna. Todas las tablas incluyen
+`psi_id`, `source_file`, `source_sha256` y `source_row` (fila física, 1-based). Reporte: `data/silver/_reports/tables_parse_report.json`.
+
+| Tabla | Fuente | Filas | Valores marcados (`__flag`) | Notas |
+|---|---|---:|---|---|
+| `psi159__normal_flames` | ET CFI-G Normal | 179 | `extinction_mode` 46 (`-`), `peak_burner_t_c` 46 (`-`), `tad_k`/`zst` 2 (`#DIV/0!`) | `ignition_outcome` yes/no; `cool_flame_raw` texto |
+| `psi159__inverse_flames` | ET CFI-G Inverse | 154 (861 filas vacías descartadas) | `extinction_mode` 15, `color` 24, T pico 2+2 (`-`, `#VALUE!`) | `ignition_outcome` yes/no/**flash** |
+| `psi10__normal_flames` | ET Flame Design Normal | 207 | 60 filas × 6 columnas (`RAMP`/`RAMPED`) | sin resultado en la tabla |
+| `psi10__inverse_flames` | ET Flame Design Inverse | 120 | 11 filas (`RAMP`/`LOW O2`) | sin resultado en la tabla |
+| `psi10__eventdata` | 2 Chamber Calculators `EventData` | 604 eventos | — | `op` = TP (normales) / **INV_TP (inversas)**; `ignite` bool; `tpid` |
+| `psi159__eventdata` | Chamber Calculator `EventData` | 675 eventos | `t_end_gmt` 1 | verificación cruzada de `Hot ignition` |
+| `psi69__flex_droplets` | ET FLEX (cp1252) | 274 | `d0_mm` 6 y `d_ext_visible_mm` 28 (`–`), `burn_time_s` 2 (`~6`, `~9`) | encabezados O/N/CO renombrados a `x_o2`/`x_n2`/`x_co2`; `burning_rate_k` con unidad dudosa; 1 fila con p = 0 |
+| `psi39__cfi_tests` | DataSummary `Master Sheet` | 227 | — | `pressure_raw` ("1 atm") → `p_atm` |
+| `psi39__cfi_results` | DataSummary `DATA` | 227 (146 con análisis completo) | — | `k_hot_mm2_s`, `k_cool_mm2_s`, `d_ext_hot_mm`, `d_ext_cool_mm` |
+| `psi117__figure_points` | 9 CSV de figuras | 15,861 puntos | — | formato largo; `role` = experiment / model / error_bar / unknown (historias temporales sin etiqueta) |
+| `psi117__readme` | ReadMe XLSX | 9 | — | condiciones crudas por archivo; 2 filas con XN2 en % (advertencia) |
+| `et__<psi>__<tabla>` (×22) | todas las tablas experimentales | 2–469 | variable | tipado genérico (≥50 % numérico → float) para Compare y RQ5 |
+
+---
+
 ## Gold
 
-### `<tabla_gold>`
-- **Granularidad:** una fila = …
-- **Fuente(s):** PSI-XX `<archivo>`
-- **Filtros aplicados:**
+> **Contrato DS-02 v1 (2026-11-14).** Specs acordadas antes de construir (DE-08). Unidades canónicas según `configs/pipeline.yaml`
+> (kPa, K, mg/s, mm, fracción molar). Convierten solo las funciones de `physics/units.py`.
 
-| Columna | Tipo | Unidad | Origen (col. fuente) | Transformación | Medida/Calc./Log | Nulos permitidos | Notas |
+### `gas_flame_tests` (RQ1 · M1/M3)
+- **Granularidad:** una fila = una prueba de llama esférica de gas (punto de prueba ACME).
+- **Fuentes:** silver `psi159__normal_flames`, `psi159__inverse_flames`, `psi10__normal_flames`, `psi10__inverse_flames`,
+  `psi10__eventdata` (resultado `Ignite` de Flame Design; `op` TP = normales, INV_TP = inversas) y `psi159__eventdata` (verificación cruzada).
+
+| Columna | Tipo | Unidad | Origen | Transformación | M/C/L | Nulos | Notas |
 |---|---|---|---|---|---|---|---|
+| `psi_id`, `campaign` | str | — | — | `CFI-G` / `Flame Design` | L | no | |
+| `test_id` | str | — | `Test` | sin espacios, mayúsculas | L | no | clave con `psi_id` |
+| `test_day` | int | — | `Day` | — | L | no | grupo de CV |
+| `flame_type` | cat | — | `Flame Type` | minúsculas | L | no | normal / inverse |
+| `fuel` | cat | — | `Fuel` / `Fuel Type` (EventData) / implícito C2H4 | nombres canónicos | L | no | Flame Design inversa = etileno ambiental |
+| `xo2` | float | fracción | normal: `XO2 (init)` / `XO2 before test` · inversa: `XO2` | — | M (control) | no | lado oxidante |
+| `xo2_final` | float | fracción | `XO2 (final)` / `XO2 after test` | — | M | sí | |
+| `x_fuel` | float | fracción | `Xfuel` / `Xf` / `XC2H4 initial` / `Xf before test` | tokens → flag | M (control) | sí | |
+| `p_kpa` | float | kPa | `pmean (atm)` (o `pinit`) / `approx p (bar)` | atm→kPa, bar→kPa | M | no | |
+| `po2_kpa` | float | kPa | derivada | `xo2 × p_kpa` | C | no | revisar PHY-04 en inversas |
+| `m_fuel_mg_s`, `m_o2_mg_s`, `m_n2_mg_s`, `m_total_mg_s` | float | mg/s | columnas de caudal | tokens `RAMP` → NULL + flag | M (control) | sí | |
+| `zst`, `tad_k` | float | —, K | `mean Zst`/`Zst`, `Tad (K)` | `#DIV/0!` → NULL + flag | **C** | sí | nunca en el mismo eje que T medida |
+| `ignited` | bool | — | CFI-G `Hot ignition` · FD EventData `Ignite` (`TP` normales, `INV_TP` inversas) | yes/no → bool; `flash` → NULL | M | sí | FD: 207/207 normales y 118/120 inversas unidas |
+| `ignition_outcome` | cat | — | ídem | yes / no / flash | M | sí | |
+| `outcome_source` | cat | — | — | `experimental_table` / `eventdata` / `none` | L | no | |
+| `extinction_mode` | cat | — | `Self-ext or flow term` | SE → self_extinguished, FT → flow_terminated, `-` → NULL | M | sí | solo CFI-G |
+| `burn_time_s` | float | s | `burn time (sec)` | — | M | sí | solo CFI-G |
+| `cool_flame` | bool | — | `Cool flame?` | empieza con yes/no | M | sí | solo CFI-G normal (8 informadas) |
+| `peak_burner_t_k` | float | K | `Peak burner T (C )` / `Peak burner temp (K)` | °C → K | M | sí | |
+| `qualifier` | str | — | tokens `RAMP`, `RAMPED`, `LOW O2` | — | L | sí | prueba no estacionaria |
+| `source_file`, `source_row` | str, int | — | — | — | L | no | procedencia |
+
+### `droplet_tests` (RQ2 · M2)
+- **Granularidad:** una fila = una prueba de gota (FLEX o CFI).
+- **Fuentes:** silver `psi69__flex_droplets` y `psi39__cfi_tests` ⋈ `psi39__cfi_results` (por `flex_number`).
+
+| Columna | Tipo | Unidad | Origen | Transformación | M/C/L | Nulos | Notas |
+|---|---|---|---|---|---|---|---|
+| `psi_id`, `campaign`, `test_id` | str | — | `FLEX Test #` / `Flex Number` | — | L | no | |
+| `test_date` | date | — | `Test Date` | — | L | sí | grupo de CV |
+| `fuel` | cat | — | `Fuel` | nombres canónicos | L | no | |
+| `p_kpa` | float | kPa | FLEX `Ambient pressure; mmHg` · CFI `Pressure` ("1 atm") | mmHg→kPa, atm→kPa | M | no | p = 0 → error |
+| `x_o2`, `x_n2`, `x_co2`, `x_he` | float | fracción | FLEX `O/N/CO/He initial…` · CFI `Oxygen/Nitrogen/Helium` | encabezados FLEX sin subíndice (renombrado explícito) | M (control) | no | CFI sin CO₂ → 0 explícito solo si la fuente lo implica (no imputar) |
+| `d0_mm` | float | mm | `Droplet initial diameter; mm` / `D0 ( mm )` | `–` → NULL + flag | M | sí | |
+| `fiber` | bool | — | CFI `Fiber` | — | L | sí | FLEX NULL |
+| `test_end` | cat | — | FLEX `Test end` | extinction / disruption / completion | M | sí | CFI NULL |
+| `d_ext_hot_mm` | float | mm | FLEX `Visible flame extinction diameter` · CFI `Dext, hot` | — | M | sí | |
+| `d_ext_cool_mm` | float | mm | CFI `Dext,cool` | `NaN` literal → NULL + flag | M | sí | |
+| `k_hot_mm2_s` | float | mm²/s | CFI `khot` · FLEX `Burning rate` (si PHY confirma R-DE-05b) | — | M | sí | |
+| `k_cool_mm2_s` | float | mm²/s | CFI `kcool` | — | M | sí | |
+| `burn_time_s` | float | s | FLEX `Burn time; s` · CFI `HF Burn Time` | `~6` → NULL + flag | M | sí | |
+| `reignitions` | int | — | CFI `Reignitions` | — | M | sí | |
+| `analysis_complete` | bool | — | CFI `Completed Analysis?` | — | L | sí | |
+
+### `droplet_reference_points` (validación de M2)
+- **Granularidad:** un punto de figura publicada (PSI-117), en formato largo: `data_file`, `block`, `role` (experiment / model / unknown),
+  `x_name`, `x`, `y_name`, `y`, más las condiciones del ReadMe (`fuel`, `d0_mm`, `p_atm`, `xo2`, `doi`, `figure`).
+  **Los puntos `model` nunca se usan como mediciones.**
+
+### `investigations` (RQ5)
+- **Granularidad:** una investigación (24). Une silver `catalog/investigations` con el triage (`configs/triage.yaml`): R1–R6, score,
+  tier, pilares, entornos, RQ. Añade `hardware_family` normalizado (CIR-ACME, CIR-MDCA, MSG, Saffire-Cygnus, SAME, otro).

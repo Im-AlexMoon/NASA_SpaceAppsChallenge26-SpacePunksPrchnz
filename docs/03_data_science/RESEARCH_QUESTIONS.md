@@ -32,11 +32,25 @@ enriquecidas en O₂ y de baja presión previstas para la base lunar, los rovers
 
 ## Variables necesarias por RQ (contrato DS→DE, tarea DS-02)
 
+> **DS-02 (2026-11-14), contrato v1.** Basado en las fuentes congeladas en ADR-0002 y en los perfiles DE-04. Las especificaciones
+> columna a columna están en [DATA_DICTIONARY.md § Gold](../02_data_engineering/DATA_DICTIONARY.md#gold).
+
 | RQ | Variables de condición | Variables de resultado | Agrupación (para CV) | Tabla gold |
 |---|---|---|---|---|
-| RQ1 | _por llenar tras G1_ | | | `gas_flame_tests` |
-| RQ2 | | | | `droplet_tests` |
-| RQ5 | | | | `investigations` |
+| RQ1 | `flame_type` (normal/inversa), `fuel`, `xo2` del lado oxidante, `x_fuel`, `p_kpa`, `po2_kpa` (derivada), caudales (`m_fuel_mg_s`, `m_o2_mg_s`, `m_n2_mg_s`), `zst` y `tad_k` (**calculadas**: etiquetarlas así) | `ignited` (bool) + `ignition_outcome` (yes/no/flash), `extinction_mode` (self_extinguished / flow_terminated), `burn_time_s`, `cool_flame`, `peak_burner_t_k` | `test_day` (día de operación) dentro de `campaign` | `gas_flame_tests` |
+| RQ2 | `fuel`, `p_kpa`, `x_o2`, `x_n2`, `x_co2`, `x_he`, `d0_mm`, `fiber` (CFI) | `test_end` (extinction / disruption / completion, solo FLEX), `d_ext_hot_mm`, `d_ext_cool_mm`, `k_hot_mm2_s`, `k_cool_mm2_s`, `burn_time_s`, `reignitions` | `test_date` dentro de `campaign` | `droplet_tests` (+ `droplet_reference_points` de PSI-117 para validar) |
+| RQ5 | pilar, entorno, hardware (normalizado), plataforma, tipo (vuelo/tierra), estado de acceso | puntajes R1–R6, tier, n de pruebas y variables disponibles | — | `investigations` |
+
+**Decisiones del contrato:**
+- `ignited` de Flame Design normal (PSI-10) viene del `EventData` del Chamber Calculator (columna `Ignite`, decisión operativa).
+  En CFI-G viene de `Hot ignition` en la tabla experimental. Se guarda `outcome_source` para no confundirlos.
+  **Actualización DE-07:** las inversas de PSI-10 aparecen en `EventData` como `INV_TP`. La unión cubre 207/207 normales y 118/120
+  inversas, así que solo 2 pruebas quedan sin resultado. En CFI-G, `EventData` permite verificar `Hot ignition` en 331 pruebas.
+- `flash` (CFI-G inversas, 8 casos) **no** se mapea a sí/no sin decisión de PHY: queda en `ignition_outcome` y `ignited = NULL`.
+- La "tasa de quemado" de FLEX entra como `k_hot_mm2_s` solo cuando PHY confirme la unidad (R-DE-05b). Hasta entonces silver la guarda
+  como `burning_rate_k` con la unidad del encabezado ("mm").
+- En llamas inversas el O₂ sale del quemador: `xo2` = fracción del lado oxidante. `po2_kpa` = `xo2` × `p_kpa` es una variable derivada
+  cuya interpretación requiere revisión PHY (PHY-04).
 
 ## Cómo se convierte una RQ en dashboard
 RQ → finding(s) → figura con fuente → interpretación física → recomendación → página *Insights* / *Habitat Risk Explorer*.

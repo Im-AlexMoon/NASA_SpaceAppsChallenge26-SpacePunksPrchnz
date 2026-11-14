@@ -11,7 +11,7 @@
 |---|---|---|---|---|---|---|
 | F0 Setup y alineación | G0 | H+2 | 🟦 | 20 | | Repo + plan listos |
 | F1 Descubrimiento y triage | G1 | H+5 | 🟨 | 90 | DE | DE-01…05 ✔; **G1 espera a PHY-02** (ratificar pilar, entorno y R1) |
-| F2 Pipeline medallion | G2 | H+9 | 🟦 | 15 | DE | DE-06 ✔ (bronze L3); siguiente DS-02 + DE-07 (parsers silver) |
+| F2 Pipeline medallion | G2 | H+9 | 🟦 | 55 | DE | DE-06 ✔ DS-02 ✔ DE-07 ✔; siguiente DE-08 (gold) + DE-09/10 |
 | F3 EDA y estadística | G3 | H+14 | ⬜ | 0 | | |
 | F4 Modelado | G4 | H+17 | ⬜ | 0 | | |
 | F5 RAG | G5 | H+16 | ⬜ | 0 | | |
@@ -93,3 +93,15 @@
   - **2 × HTTP 404** re-verificados: PDF de reportes finales en PSI-26 (BASS y SPICE). Solo afectan al corpus RAG.
   - 3 PDF idénticos entre registros (SAFFIRE I/III, SAME/SAME-R): deduplicar por sha256 en el corpus RAG.
 - ▶ Siguiente: DS-02 (contrato de variables por RQ) → DE-07 (parsers silver de CFI-G, Flame Design + EventData, FLEX, CFI DataSummary y PSI-117).
+
+### DS-02 y DE-07 cerrados — 2026-11-14
+- ✔ DS-02: contrato de variables por RQ en RESEARCH_QUESTIONS.md y specs columna a columna de las tablas gold
+  `gas_flame_tests`, `droplet_tests`, `droplet_reference_points` e `investigations` en DATA_DICTIONARY.md.
+- ✔ DE-07: framework silver con specs declarativas (errores por drift de esquema, tokens → NULL + `__flag`, unidades de la fuente
+  en los nombres, procedencia por fila). Hay 7 parsers que producen 33 tablas: 11 semánticas MVP y 22 genéricas de tablas experimentales.
+  - 0 errores; 2 advertencias reales: FLEX con p = 0 mmHg en 1 fila y PSI-117 ReadMe con XN2 en %.
+  - 12 tests nuevos (64 unitarios + 3 de integración).
+- 📌 Hallazgo clave: **R-DE-05a resuelto**. `EventData` registra las inversas como `INV_TP`, así que Flame Design tiene resultado
+  de ignición en 325/327 pruebas. Para M1 hay ~660 pruebas con resultado (CFI-G 333 + Flame Design 325).
+  Además, en CFI-G `EventData` permite verificar `Hot ignition` en 331 pruebas.
+- ▶ Siguiente: DE-08, construir gold (`gas_flame_tests`, `droplet_tests`, `droplet_reference_points`, `investigations`), junto con DE-09 (pandera) y DE-10.

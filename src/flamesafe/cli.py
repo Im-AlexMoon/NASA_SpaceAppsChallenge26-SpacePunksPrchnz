@@ -161,19 +161,30 @@ def bronze(
 
 
 @app.command()
-def silver() -> None:
-    """F1/F2 - DE-03 + DE-07: bronze -> silver (catalog flattening now; data-table parsers in DE-07)."""
-    from flamesafe.pipeline import silver_catalog
+def silver(
+    only: list[str] = typer.Option(None, help="Run only these table parsers (see silver_parsers REGISTRY)"),
+    skip_catalog: bool = typer.Option(False, help="Skip the catalog flattening step (DE-03)"),
+) -> None:
+    """F1/F2 - DE-03 + DE-07: bronze -> silver (catalog tables + data-table parsers)."""
+    from flamesafe.pipeline import silver, silver_catalog
 
-    rep = silver_catalog.run()
-    typer.echo(f"Catalog -> {rep['out_dir']}")
-    for name, n in rep["row_counts"].items():
-        typer.echo(f"  {name:<20} {n:>6} rows")
-    bad = {k: v for k, v in rep["reconciliation"].items() if not v["ok"]}
-    typer.echo(f"Reconciliation vs raw JSON: {bad or 'OK'} - issues: {len(rep['issues'])} "
-               f"({rep['n_errors']} errors)")
-    typer.secho("Experimental-table parsers: pending (DE-07)", fg=typer.colors.YELLOW)
-    if rep["n_errors"]:
+    errors = 0
+    if not skip_catalog:
+        rep = silver_catalog.run()
+        bad = {k: v for k, v in rep["reconciliation"].items() if not v["ok"]}
+        typer.echo(f"Catalog -> {rep['out_dir']}: {rep['row_counts']} - reconciliation {bad or 'OK'}")
+        errors += rep["n_errors"]
+    trep = silver.run(only=only or None)
+    typer.echo(f"Data tables -> {trep['out_dir']}")
+    for name, t in trep["tables"].items():
+        flagged = sum(t["flagged_values"].values())
+        typer.echo(f"  {name:<44} {t['rows']:>6} rows {t['columns']:>4} cols  flagged values {flagged}")
+    for i in trep["issues"]:
+        if i["level"] != "info":
+            typer.secho(f"  [{i['level']}] {i['table']}: {i['issue']}", fg=typer.colors.RED if i["level"] == "error" else typer.colors.YELLOW)
+    errors += trep["n_errors"]
+    typer.echo(f"Errors: {errors} - warnings: {trep['n_warnings']}")
+    if errors:
         raise typer.Exit(code=1)
 
 

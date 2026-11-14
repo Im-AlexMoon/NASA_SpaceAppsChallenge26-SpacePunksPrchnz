@@ -27,8 +27,8 @@ data/
     _reports/acquisition_<selección>.json, l2_profiles.json
   silver/
     catalog/investigations.parquet, files.parquet, publications.parquet
-    psi_xx__<tabla>.parquet
-    _reports/parse_report.json                 # filas leídas/emitidas/descartadas + issues
+    tables/psi<nn>__<tabla>.parquet, tables/et__psi<nn>__<tabla>.parquet
+    _reports/catalog_parse_report.json, tables_parse_report.json   # filas, flags por columna, column_map, issues
   gold/
     <tabla_gold>.parquet
     flamesafe.duckdb

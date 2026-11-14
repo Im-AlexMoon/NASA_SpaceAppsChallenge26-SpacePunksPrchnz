@@ -62,6 +62,7 @@ Cambios de presupuesto respecto a `configs/sources.yaml`: `max_file_mb` sube de 
 
 ## Consecuencias
 - M1 se apoya primero en CFI-G, que trae los resultados en su tabla. PSI-10 aporta más datos solo tras unirlo con `EventData`: es el riesgo **R-DE-05a**.
+  **Resuelto en DE-07:** `EventData` trae `TP` (normales) e `INV_TP` (inversas); la unión cubre 325/327 pruebas.
 - M2 combina FLEX y CFI. Requiere armonizar unidades (mmHg vs atm; confirmar que la "tasa de quemado" de FLEX es K en mm²/s, **R-DE-05b**) y unir la `Master Sheet` con `DATA` de CFI.
 - Los datos de detección (RQ4) quedan descargados en DE-06 aunque su análisis sea stretch. Así no hay re-trabajo si hay tiempo.
 - PHY-02 puede añadir un `override` en `configs/triage.yaml` (con `tier`, `reason` y `by`) y regenerar con `flamesafe triage`.
