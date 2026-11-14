@@ -5,6 +5,11 @@ from __future__ import annotations
 PSI_TO_KPA = 6.894757
 ATM_TO_KPA = 101.325
 BAR_TO_KPA = 100.0
+MMHG_TO_KPA = 0.133322387415  # 101.325 / 760
+
+
+def mmhg_to_kpa(x: float) -> float:
+    return x * MMHG_TO_KPA
 
 
 def psi_to_kpa(x: float) -> float:

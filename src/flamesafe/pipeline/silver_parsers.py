@@ -387,6 +387,9 @@ def parse_psi117(issues: Issues):
     for i, r in enumerate(rrows, start=1):
         cells = [norm_header(c) for c in r]
         if "Fuel" in cells and "P (atm)" in cells:
+            # later sub-table headers omit the trailing "Data File / Reference / figure" labels: inherit them
+            if current is not None:
+                cells = [c or (current[k] if k >= 7 and k < len(current) else c) for k, c in enumerate(cells)]
             current = cells
             continue
         if current is None or all(not c for c in cells):

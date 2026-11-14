@@ -109,6 +109,16 @@ NULL + `<col>__flag` con el token original. Las unidades de la fuente van en el 
 
 ## Gold
 
+> **Construido en DE-08 (2026-11-14)** con `flamesafe gold` → `data/gold/*.parquet` + `data/gold/flamesafe.duckdb`.
+> Filas: `gas_flame_tests` 660 · `droplet_tests` 501 · `droplet_reference_points` 15,861 · `investigations` 24 · `publications` 303.
+> Reporte: `data/gold/_reports/gold_report.json` (reconciliación, verificaciones cruzadas, invariantes).
+>
+> ⚠️ **Semántica de `ignited` (R-DE-08a).** En CFI-G viene de `Hot ignition`. En Flame Design viene del `Ignite` de EventData, que es
+> una **decisión operativa** sobre si se consumió el gas, no una medición de ignición caliente. En CFI-G ambas fuentes coinciden en
+> 279/323 pruebas (86 %). En 42 casos la tabla dice "ignición caliente sí" y EventData dice "no"; son llamas breves (mediana 5 s frente a
+> 40 s de las concordantes). En Flame Design, `ignited` es casi constante (323 sí / 2 no). **No mezclar campañas** en un modelo de
+> ignición sin usar `outcome_source` como variable o sin una decisión de PHY.
+>
 > **Contrato DS-02 v1 (2026-11-14).** Specs acordadas antes de construir (DE-08). Unidades canónicas según `configs/pipeline.yaml`
 > (kPa, K, mg/s, mm, fracción molar). Convierten solo las funciones de `physics/units.py`.
 
@@ -134,6 +144,10 @@ NULL + `<col>__flag` con el token original. Las unidades de la fuente van en el 
 | `ignited` | bool | — | CFI-G `Hot ignition` · FD EventData `Ignite` (`TP` normales, `INV_TP` inversas) | yes/no → bool; `flash` → NULL | M | sí | FD: 207/207 normales y 118/120 inversas unidas |
 | `ignition_outcome` | cat | — | ídem | yes / no / flash | M | sí | |
 | `outcome_source` | cat | — | — | `experimental_table` / `eventdata` / `none` | L | no | |
+| `ignite_eventdata` | bool | — | EventData `Ignite` unido por `tpid` | — | L (decisión operativa) | sí | verificación cruzada en CFI-G |
+| `hc_burnrate_mg_s` | float | mg/s | CFI-G inversa `HC burnrate (mg/s)` | — | M (control) | sí | semántica por confirmar con PHY; no se mezcla con `m_fuel_mg_s` |
+| `fuel_dilution_pct` | float | % | prefijo "30% butane" | — | L | sí | % de combustible en la botella (resto N₂) |
+| `tfp` | bool | — | `TFP` | — | L | sí | acrónimo sin definir en la fuente |
 | `extinction_mode` | cat | — | `Self-ext or flow term` | SE → self_extinguished, FT → flow_terminated, `-` → NULL | M | sí | solo CFI-G |
 | `burn_time_s` | float | s | `burn time (sec)` | — | M | sí | solo CFI-G |
 | `cool_flame` | bool | — | `Cool flame?` | empieza con yes/no | M | sí | solo CFI-G normal (8 informadas) |
@@ -162,6 +176,10 @@ NULL + `<col>__flag` con el token original. Las unidades de la fuente van en el 
 | `burn_time_s` | float | s | FLEX `Burn time; s` · CFI `HF Burn Time` | `~6` → NULL + flag | M | sí | |
 | `reignitions` | int | — | CFI `Reignitions` | — | M | sí | |
 | `analysis_complete` | bool | — | CFI `Completed Analysis?` | — | L | sí | |
+| `x_co2_inferred` | bool | — | derivada | CFI: `x_co2 = 0` solo si O₂+N₂+He = 1 ± 0.005 (223/227) | L | no | en las 4 restantes `x_co2` queda NULL |
+| `flex_burning_rate_unverified` | float | ¿mm²/s? | FLEX `Burning rate; mm` | — | M | sí | fuera de `k_hot_mm2_s` hasta resolver R-DE-05b |
+| `fuel_blend` | str | — | CFI `[.60]/[.40] C12H26/iso-dodecane` | → "60/40" | L | sí | |
+| `quality_flags` | str | — | derivada | p ≤ 0 en la fuente (FLEX: 1 fila, `p_kpa` NULL); suma de fracciones ≠ 1 (CFI) | L | sí | |
 
 ### `droplet_reference_points` (validación de M2)
 - **Granularidad:** un punto de figura publicada (PSI-117), en formato largo: `data_file`, `block`, `role` (experiment / model / unknown),

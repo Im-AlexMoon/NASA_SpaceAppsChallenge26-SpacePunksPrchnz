@@ -25,6 +25,13 @@ Los datasets tabulares de PSI tienen **decenas a cientos de filas**. Eso define 
 | **M3** | Frontera de inflamabilidad O₂–presión con banda de incertidumbre | P(llama sostenida) = 0.5 / 0.05 | M1 (+ datos sólidos si alcanza) | derivado de M1 | **MVP** (salida de M1) |
 | **M4** | Alerta temprana de detección de humo | respuesta del detector vs. tiempo/material | `smoke_detection`, `fire_telemetry` | series de tiempo | Stretch 2 |
 
+### Datos disponibles tras DE-08 (2026-11-14)
+- **M1:** `gas_flame_tests`. **CFI-G** tiene 333 pruebas; 263 sí / 60 no en `ignited`, 8 `flash` y XO₂ de 0.12 a 0.85.
+  Es la base del clasificador. **Flame Design** tiene 325 pruebas con `ignited` casi constante (323 sí / 2 no) y procedente de una
+  decisión operativa (R-DE-08a). Sirve para describir el espacio de condiciones y como validación débil, **no** para entrenar sin cuidado.
+- **M2:** `droplet_tests`. CFI tiene `k_hot_mm2_s` en 148 pruebas (con He y 0.5–5 atm). FLEX y CFI tienen `d_ext_hot_mm` en 341.
+  FLEX tiene `test_end` en 274 (186 extinciones; CO₂ en 123 pruebas y He en 50). PSI-117 aporta 69 puntos experimentales y 4,237 de modelo.
+
 ## 3. Protocolo (por modelo)
 
 1. **Target y unidad de análisis** definidos con PHY; documentar clases y desbalance.

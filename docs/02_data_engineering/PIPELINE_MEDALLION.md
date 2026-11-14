@@ -30,9 +30,9 @@ data/
     tables/psi<nn>__<tabla>.parquet, tables/et__psi<nn>__<tabla>.parquet
     _reports/catalog_parse_report.json, tables_parse_report.json   # filas, flags por columna, column_map, issues
   gold/
-    <tabla_gold>.parquet
-    flamesafe.duckdb
-    _reports/quality_report.json
+    gas_flame_tests.parquet, droplet_tests.parquet, droplet_reference_points.parquet, investigations.parquet, publications.parquet
+    flamesafe.duckdb                          # mismas tablas, para SQL (dashboard y herramientas del RAG)
+    _reports/gold_report.json                 # filas, verificaciones cruzadas, cobertura de resultados, invariantes
 ```
 
 ### Adquisición bronze (DE-06)

@@ -11,7 +11,7 @@
 |---|---|---|---|---|---|---|
 | F0 Setup y alineación | G0 | H+2 | 🟦 | 20 | | Repo + plan listos |
 | F1 Descubrimiento y triage | G1 | H+5 | 🟨 | 90 | DE | DE-01…05 ✔; **G1 espera a PHY-02** (ratificar pilar, entorno y R1) |
-| F2 Pipeline medallion | G2 | H+9 | 🟦 | 55 | DE | DE-06 ✔ DS-02 ✔ DE-07 ✔; siguiente DE-08 (gold) + DE-09/10 |
+| F2 Pipeline medallion | G2 | H+9 | 🟦 | 80 | DE | DE-06…08 ✔; siguiente DE-09 (pandera) + DE-10 → G2 |
 | F3 EDA y estadística | G3 | H+14 | ⬜ | 0 | | |
 | F4 Modelado | G4 | H+17 | ⬜ | 0 | | |
 | F5 RAG | G5 | H+16 | ⬜ | 0 | | |
@@ -105,3 +105,16 @@
   de ignición en 325/327 pruebas. Para M1 hay ~660 pruebas con resultado (CFI-G 333 + Flame Design 325).
   Además, en CFI-G `EventData` permite verificar `Hot ignition` en 331 pruebas.
 - ▶ Siguiente: DE-08, construir gold (`gas_flame_tests`, `droplet_tests`, `droplet_reference_points`, `investigations`), junto con DE-09 (pandera) y DE-10.
+
+### DE-08 cerrado — 2026-11-14
+- ✔ Hecho: `flamesafe gold` genera 5 tablas gold (Parquet) y `flamesafe.duckdb`. Las conversiones van por `physics/units.py`.
+  - Columnas derivadas explícitas: `po2_kpa`, `fuel_dilution_pct`, `x_co2_inferred`.
+  - El reporte incluye verificaciones cruzadas, cobertura de resultados e invariantes.
+  - 13 tests nuevos (85 en total, incluidos 4 de integración).
+- 📌 Resultado:
+  - `gas_flame_tests` 660 (650 con `ignited`) · `droplet_tests` 501 (148 con k caliente, 341 con Dext caliente, 274 con `test_end`)
+    · `droplet_reference_points` 15,861 · `investigations` 24 · `publications` 303 (235 DOI únicos; 44 DOI compartidos entre registros).
+  - Invariantes: 1 violación, CFI 1274A con Dext caliente 19 % mayor que D₀. Otros 8 casos con < 5 % de exceso son plausibles por hinchamiento térmico.
+- ⚠️ **R-DE-08a:** el `Ignite` de EventData es una decisión operativa. Coincide en 86 % con `Hot ignition` de CFI-G y discrepa sobre
+  todo en llamas breves. En Flame Design es casi constante. **M1 debe entrenarse con CFI-G** y Flame Design queda para contexto/validación (decisión PHY).
+- ▶ Siguiente: DE-09 (contratos pandera para silver/gold) y DE-10 (cerrar el data dictionary) → **G2**.

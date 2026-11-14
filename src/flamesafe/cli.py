@@ -190,8 +190,18 @@ def silver(
 
 @app.command()
 def gold() -> None:
-    """F2 - DE-08: build harmonized analysis-ready tables -> gold."""
-    _todo("DE-08")
+    """F2 - DE-08: build harmonized analysis-ready tables -> data/gold (Parquet + DuckDB)."""
+    from flamesafe.pipeline import gold as g
+
+    rep = g.run()
+    typer.echo(f"Gold -> {rep['out_dir']}: {rep['row_counts']}")
+    for table, chk in rep["checks"].items():
+        typer.echo(f"  {table}: {chk}")
+    typer.echo(f"Outcome coverage: {rep['outcome_coverage']}")
+    for i in rep["invariants"]:
+        if i["violations"]:
+            typer.secho(f"  INVARIANT {i['table']}: {i['rule']} -> {i['violations']} violation(s)", fg=typer.colors.YELLOW)
+    typer.echo(f"Invariant violations: {rep['n_invariant_violations']}")
 
 
 @app.command()

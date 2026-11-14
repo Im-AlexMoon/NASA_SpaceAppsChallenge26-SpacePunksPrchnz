@@ -25,7 +25,7 @@
 - [x] DS-02 Contrato de variables por RQ (DS→DE) — 2026-11-14 · RESEARCH_QUESTIONS §variables + DATA_DICTIONARY § Gold
 - [x] DE-06 Bronze: descargas con sha256 + sidecars + reporte — 2026-11-14 · `flamesafe bronze` 145/147 (2 × 404 documentados), 262 MB
 - [x] DE-07 Silver: parsers por familia, flags de faltantes, unidades, procedencia — 2026-11-14 · 33 tablas silver, 0 errores
-- [ ] DE-08 Gold: tablas por RQ + DuckDB
+- [x] DE-08 Gold: tablas por RQ + DuckDB — 2026-11-14 · `flamesafe gold`: 5 tablas, 1 violación de invariante (CFI 1274A)
 - [ ] DE-09 Contratos pandera + tests con fixtures
 - [ ] DE-10 Data dictionary completo
 - [ ] 🚦 **G2** cerrado — `make pipeline` reproducible

@@ -13,3 +13,5 @@
 | R9 | Clave de API / costos del LLM | Baja | Medio | Modelo configurable por `.env`; caché de respuestas para la demo | RAG | Abierto |
 | R10 | Uso indebido de código de terceros (repo de referencia sin licencia) | Baja | Alto | ADR-0003: solo como referencia, citar, re-verificar | Todos | Abierto |
 | R11 | Fatiga del equipo | Alta | Medio | Turnos de sueño, scope freeze, recortes predefinidos | PM | Abierto |
+| R12 | El `Ignite` de EventData no equivale a la ignición caliente (86 % de concordancia en CFI-G; Flame Design casi siempre "sí") | Cierta | Medio | `outcome_source` en gold; M1 entrena con CFI-G; PHY decide cómo usar Flame Design (R-DE-08a) | DS/PHY | Abierto |
+| R13 | Unidad de la tasa de quemado de FLEX sin confirmar (encabezado "mm") | Media | Medio | Fuera de `k_hot_mm2_s` hasta confirmación (R-DE-05b) | PHY | Abierto |
