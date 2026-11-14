@@ -1,6 +1,6 @@
 # Requires GNU make (Git Bash / WSL / choco install make). Every target maps 1:1
 # to a `flamesafe` CLI command, so you can run those directly on Windows too.
-.PHONY: setup lint test catalog bronze silver gold pipeline eda train rag-index app clean
+.PHONY: setup lint test verify-api catalog bronze silver gold pipeline eda train rag-index app clean
 
 setup:        ## Install package with all extras in editable mode
 	pip install -e ".[all]"
@@ -10,6 +10,9 @@ lint:         ## Ruff lint + format check
 
 test:         ## Unit tests (no network)
 	pytest -m "not integration"
+
+verify-api:   ## F1 DE-01: verify PSI endpoints -> docs/02_data_engineering/verification/*.json
+	flamesafe verify-api
 
 catalog:      ## F1: fetch PSI combustion catalog -> data/bronze/catalog
 	flamesafe catalog

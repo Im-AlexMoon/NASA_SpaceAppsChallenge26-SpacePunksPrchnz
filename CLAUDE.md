@@ -8,7 +8,7 @@ combustión de NASA PSI para seguridad contra incendios en exploración espacial
 - Índice de docs: `docs/README.md`. Decisiones: `docs/01_management/decisions/`.
 
 ## Convenciones
-- Paquete Python en `src/flamesafe/`; CLI `flamesafe <catalog|bronze|silver|gold|train|rag-index>`; configs en `configs/*.yaml`.
+- Paquete Python en `src/flamesafe/`; CLI `flamesafe <verify-api|catalog|bronze|silver|gold|train|rag-index>`; configs en `configs/*.yaml`.
 - Docs internos en español; README raíz, UI del dashboard, código e identificadores en inglés.
 - Medallion: bronze inmutable con sidecar sha256 · silver tipado con `__flag` para tokens faltantes · gold armonizado por RQ.
 - Unidades canónicas y conversiones solo vía `src/flamesafe/physics/units.py`; atmósferas de referencia en `physics/atmospheres.py`.

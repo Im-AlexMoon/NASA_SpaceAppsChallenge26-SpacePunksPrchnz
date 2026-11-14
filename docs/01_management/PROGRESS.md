@@ -10,7 +10,7 @@
 | Fase | Gate | Objetivo | Estado | % | Responsable | Nota |
 |---|---|---|---|---|---|---|
 | F0 Setup y alineación | G0 | H+2 | 🟦 | 20 | | Repo + plan listos |
-| F1 Descubrimiento y triage | G1 | H+5 | ⬜ | 0 | | |
+| F1 Descubrimiento y triage | G1 | H+5 | 🟦 | 15 | DE | DE-01 ✔ (API verificado); siguiente DE-02 |
 | F2 Pipeline medallion | G2 | H+9 | ⬜ | 0 | | |
 | F3 EDA y estadística | G3 | H+14 | ⬜ | 0 | | |
 | F4 Modelado | G4 | H+17 | ⬜ | 0 | | |
@@ -27,3 +27,12 @@
 - ▶ Siguiente: G0 (roles, entorno, RQ v0), arrancar DE-01/DE-02.
 - ⛔ Bloqueos: —
 - 🔀 Decisiones / recortes: —
+
+### DE-01 cerrado — 2026-11-14
+- ✔ Hecho: cliente PSI con reintentos (`psi_client.py`), comando `flamesafe verify-api`, reporte JSON de evidencia y 16 tests (2 en vivo).
+- 📌 Hallazgos:
+  - 133 investigaciones / 24 de combustión; todos los conteos de referencia coinciden.
+  - **La telemetría de SAFFIRE-I ya descarga (HTTP 200).** La referencia la daba por 404.
+  - Los datos PSI son **CC0 1.0** (23/24 registros).
+  - Un id de investigación inexistente devuelve 403, no 404.
+- ▶ Siguiente: DE-02 (catálogo de las 24 investigaciones a bronze) y DE-03 (aplanado del inventario).

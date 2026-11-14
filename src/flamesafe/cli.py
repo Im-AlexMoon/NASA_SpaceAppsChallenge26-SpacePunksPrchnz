@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import typer
 
 app = typer.Typer(help="flamesafe pipeline CLI", no_args_is_help=True)
@@ -11,6 +13,26 @@ def _todo(task_id: str) -> None:
     typer.secho(f"Not implemented yet — see task {task_id} in docs/00_executive/EXECUTIVE_PLAN.md",
                 fg=typer.colors.YELLOW)
     raise typer.Exit(code=1)
+
+
+@app.command("verify-api")
+def verify_api(
+    out: Path = typer.Option(None, help="Report path (default: docs/02_data_engineering/verification/)"),
+    skip_downloads: bool = typer.Option(False, help="Do not download the experimental tables"),
+) -> None:
+    """F1 - DE-01: verify PSI endpoints and write a JSON evidence report (metadata only)."""
+    from flamesafe.ingestion import verify
+
+    report = verify.run(download_tables=not skip_downloads)
+    path = verify.write(report, out or verify.default_output())
+    c, t, e = report["collection"], report["totals"], report["endpoints"]
+    typer.echo(f"Investigations: {c['total_investigations']} total, {c['combustion_count']} combustion")
+    typer.echo(f"Detail 200: {e['investigation']['http_200']}/{e['investigation']['requested']} - "
+               f"tables 200: {e['download']['tables_http_200']}/{e['download']['tables_requested']}")
+    typer.echo(f"Access status: {t['access_status']}")
+    for k in report["known_issue_rechecks"]:
+        typer.echo(f"Re-check {k['psi_id']} '{k['file_name'][:50]}...': HTTP {k['http_status_now']}")
+    typer.echo(f"Report: {path}  ({report['elapsed_s']} s)")
 
 
 @app.command()

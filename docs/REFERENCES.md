@@ -2,7 +2,8 @@
 
 ## Data
 - NASA Physical Sciences Informatics (PSI) — Combustion Science investigations. <https://psi.nasa.gov>. Each dataset is cited
-  by its PSI accession and data DOI (see `docs/02_data_engineering/DATA_SOURCES.md`).
+  by its PSI accession and data DOI (see `docs/02_data_engineering/DATA_SOURCES.md`). PSI records declare
+  Creative Commons Zero v1.0 Universal (23 of 24 combustion records; PSI-10 leaves the field empty — verified 2026-11-14).
 
 ## Challenge
 - NASA Space Apps Challenge 2026 — *Flames in Free Fall*.

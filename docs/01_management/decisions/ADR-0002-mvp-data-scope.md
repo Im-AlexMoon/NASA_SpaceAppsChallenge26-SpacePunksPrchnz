@@ -17,6 +17,9 @@ Basada en la revisión preliminar del repositorio de referencia (ver ADR-0003), 
 | 2 — Supporting | BASS / BASS-II (PSI-26/25), SAFFIRE-III (PSI-100), SAME-R / SAME (PSI-101/102), SAFFIRE-II (PSI-99), CFI (PSI-39), SPICE (PSI-107) | Contexto material/flujo, telemetría de incendio a escala, detección de humo |
 | 3 — Context | ACME BRE/CLD/E-FIELD/s-Flame, FLEX-2, SAFFIRE-I, SLICE, DAFT, investigaciones de tierra | Catálogo, ranking, RAG, brechas |
 
+**Actualización DE-01 (2026-11-14):** los 3 XLSX de telemetría y sensores de SAFFIRE-I (PSI-98), que la referencia reportaba como
+404, hoy devuelven HTTP 200. Evaluar SAFFIRE-I como fuente de telemetría en la triage.
+
 ## Decisión
 _Se completa en G1: lista final, archivos del manifest, bytes totales, justificación por la rúbrica de triage._
 

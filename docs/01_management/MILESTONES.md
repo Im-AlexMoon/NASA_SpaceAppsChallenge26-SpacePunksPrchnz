@@ -13,7 +13,7 @@
 - [ ] 🚦 **G0** cerrado
 
 ## F1 · Descubrimiento y triage (objetivo H+5)
-- [ ] DE-01 Endpoints PSI verificados y registrados
+- [x] DE-01 Endpoints PSI verificados y registrados — 2026-11-14 · `flamesafe verify-api` + DATA_SOURCES.md
 - [ ] DE-02 Catálogo de 24 investigaciones en bronze
 - [ ] DE-03 Inventario aplanado (investigaciones, archivos, tablas experimentales, publicaciones)
 - [ ] DE-04 Perfiles de formato (Tier 1/2 completos, resto mínimo)
