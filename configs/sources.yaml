@@ -22,6 +22,5 @@ download_budget:
   allow_extensions: [csv, txt, xlsx, xls, json, pdf, docx]
   deny_extensions: [mp4, avi, mov, zip, ts, mdipsug]   # unlock per-file in manifest only with an ADR
 
-# Populated at G1 by the triage (docs/02_data_engineering/TRIAGE_METHODOLOGY.md).
-# tier: primary | supporting | context | out
-investigations: {}
+# Per-investigation tiers live in configs/triage.yaml (DE-05) and the L3 file selection in
+# configs/acquisition_manifest.yaml (ADR-0002). Not duplicated here.

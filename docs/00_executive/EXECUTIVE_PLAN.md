@@ -158,7 +158,7 @@ Una fase puede empezar cuando sus prerrequisitos están cumplidos aunque la ante
 | DE-02 | `flamesafe catalog`: bajar JSON de detalle de las 24 investigaciones a bronze | DE-01 | `data/bronze/catalog/` |
 | DE-03 | Aplanar inventario: investigaciones, archivos (`added`), tablas experimentales, publicaciones | DE-02 | `silver/catalog/*.parquet` |
 | DE-04 | **Exploración de formato** por investigación (plantilla de perfil) — al menos las candidatas Tier 1/2 | DE-03 | `investigations/PSI-XX.md` |
-| DE-05 | **Triage** con la rúbrica de [TRIAGE_METHODOLOGY.md](../02_data_engineering/TRIAGE_METHODOLOGY.md) → tiers + manifest de descarga | DE-04, DS-01 | `configs/sources.yaml::investigations` + ADR-0002 |
+| DE-05 | **Triage** con la rúbrica de [TRIAGE_METHODOLOGY.md](../02_data_engineering/TRIAGE_METHODOLOGY.md) → tiers + manifest de descarga | DE-04, DS-01 | `configs/triage.yaml` + `configs/acquisition_manifest.yaml` + ADR-0002 |
 | PHY-02 | Mapear cada investigación a pilar (prevención/detección/supresión) y entorno; validar relevancia física del triage | DE-03 | columna PHY en matriz de triage |
 
 **🚦 G1 — criterio de salida:** 24/24 investigaciones con perfil mínimo (metadatos + inventario) · matriz de triage con puntajes y

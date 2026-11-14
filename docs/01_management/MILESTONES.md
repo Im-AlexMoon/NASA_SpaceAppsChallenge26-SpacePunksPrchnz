@@ -17,7 +17,7 @@
 - [x] DE-02 Catálogo de 24 investigaciones en bronze — 2026-11-14 · `flamesafe catalog` (snapshot + manifest sha256)
 - [x] DE-03 Inventario aplanado (investigaciones, archivos, tablas experimentales, publicaciones) — 2026-11-14 · `flamesafe silver` → `silver/catalog/*.parquet`
 - [x] DE-04 Perfiles de formato (Tier 1/2 completos, resto mínimo) — 2026-11-14 · `flamesafe profile` → 24 perfiles + 60 muestras L2
-- [ ] DE-05 Matriz de triage + manifest de descarga + ADR-0002
+- [x] DE-05 Matriz de triage + manifest de descarga + ADR-0002 — 2026-11-14 · `flamesafe triage` (T1 6 · T2 8 · T3 10; manifest 147 archivos / 263 MB)
 - [ ] PHY-02 Mapeo pilar/entorno validado
 - [ ] 🚦 **G1** cerrado — datasets MVP congelados
 

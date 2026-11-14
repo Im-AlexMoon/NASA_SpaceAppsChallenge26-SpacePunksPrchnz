@@ -10,7 +10,7 @@
 | Fase | Gate | Objetivo | Estado | % | Responsable | Nota |
 |---|---|---|---|---|---|---|
 | F0 Setup y alineación | G0 | H+2 | 🟦 | 20 | | Repo + plan listos |
-| F1 Descubrimiento y triage | G1 | H+5 | 🟦 | 75 | DE | DE-01…04 ✔; siguiente DE-05 (matriz de triage + ADR-0002) + PHY-02 |
+| F1 Descubrimiento y triage | G1 | H+5 | 🟨 | 90 | DE | DE-01…05 ✔; **G1 espera a PHY-02** (ratificar pilar, entorno y R1) |
 | F2 Pipeline medallion | G2 | H+9 | ⬜ | 0 | | |
 | F3 EDA y estadística | G3 | H+14 | ⬜ | 0 | | |
 | F4 Modelado | G4 | H+17 | ⬜ | 0 | | |
@@ -69,3 +69,17 @@
   - Supresión: FLEX (CO₂ en 123 pruebas, He en 50; 186 extinciones) + CFI (He) → M2 es viable.
   - Solo SAFFIRE-II tiene tasas de propagación en tabla (µg y 1 g, 9 muestras).
 - ▶ Siguiente: DE-05 (matriz de triage puntuada + manifest de adquisición + ADR-0002) con revisión PHY-02.
+
+### DE-05 cerrado — 2026-11-14
+- ✔ Hecho:
+  - `configs/triage.yaml` tiene puntajes R1–R6, pilares, entornos, RQ y justificación para las 24 investigaciones.
+  - `flamesafe triage` calcula el score, aplica los gates de tier y genera la matriz en TRIAGE_METHODOLOGY §4 y `triage_matrix.csv`.
+  - También resuelve `configs/acquisition_manifest.yaml` → `acquisition_manifest.csv` (lock que se commitea).
+  - 8 tests nuevos (49 en total).
+- 📌 Resultado:
+  - **Tier 1:** PSI-159, 10, 69, 101, 39, 107 · **Tier 2:** PSI-98, 100, 102, 25, 26, 47, 99, 117 · **Tier 3:** 10 registros.
+  - Manifest: 147 archivos, 263.3 MB.
+  - ADR-0002 aceptado por DE. MVP: RQ1 (CFI-G + Flame Design), RQ2 (FLEX + CFI, con PSI-117 como validación) y RQ5 (las 24). Stretch: RQ4 y RQ3.
+- ⚠️ Cambio de método: se añadieron **gates** a la rúbrica para que la relevancia sola no promueva registros sin resultado analizable.
+- ⛔ **G1 bloqueado por PHY-02:** PHY debe ratificar pilar, entorno y R1, o registrar un `override`.
+- ▶ Siguiente: PHY-02 para cerrar G1. En paralelo se puede arrancar DE-06 (descargar el manifest) y DS-02 (contrato de variables por RQ).

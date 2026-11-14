@@ -50,8 +50,8 @@ data/
 | Tabla gold | Fuente candidata | Uso |
 |---|---|---|
 | `investigations` | catálogo L0/L1 + triage + ranking | Explorer, Compare, ranking, RAG |
-| `gas_flame_tests` | ACME Flame Design + CFI-G | RQ1, modelo de extinción/ignición |
-| `droplet_tests` | FLEX (+ CFI condiciones) | RQ2, modelo de supresión/tasa de quemado |
+| `gas_flame_tests` | **CFI-G (PSI-159)** + Flame Design (PSI-10) unido a `EventData` | RQ1, M1/M3 |
+| `droplet_tests` | **FLEX (PSI-69)** + **CFI DataSummary (PSI-39)**; PSI-117 como validación | RQ2, M2 |
 | `solid_material_tests` | BASS / BASS-II / SAFFIRE-II | RQ3, contexto material/flujo |
 | `smoke_detection` | SAME / SAME-R | RQ4, detección |
 | `fire_telemetry` (stretch) | SAFFIRE-III | series de tiempo de incendio a escala |

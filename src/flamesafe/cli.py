@@ -88,6 +88,36 @@ def profile(
 
 
 @app.command()
+def triage() -> None:
+    """F1 - DE-05: score/tier the 24 investigations and resolve the L3 acquisition manifest (no download)."""
+    import pandas as pd
+
+    from flamesafe import config
+    from flamesafe.ingestion import download as dl
+    from flamesafe.ingestion import triage as tri
+    from flamesafe.pipeline.silver_catalog import silver_catalog_dir
+
+    inv = pd.read_parquet(silver_catalog_dir() / "investigations.parquet")
+    df = tri.compute(config.load("triage"), inv)
+    doc, csv_path = tri.write_outputs(df)
+    typer.echo(f"Triage: {df['tier'].value_counts().sort_index().to_dict()} -> {csv_path.name}, {doc.name}")
+    for t in (1, 2):
+        typer.echo(f"  Tier {t}: " + ", ".join(f"{r.psi_id}({r.score:.2f})" for r in df[df.tier == t].itertuples()))
+
+    man = config.load("acquisition_manifest")
+    reqs = dl.requests_from_selection(man, silver_catalog_dir())
+    b = man["budget"]
+    total = dl.check_budget(reqs, b["max_total_mb"], b["max_file_mb"],
+                            config.load("sources")["download_budget"]["deny_extensions"], b.get("max_files"))
+    lock = dl.write_manifest_lock(reqs, config.ROOT / "docs" / "02_data_engineering" / "acquisition_manifest.csv")
+    by = pd.DataFrame([{"group": r.reason, "bytes": r.expected_bytes} for r in reqs]).groupby("group")["bytes"].agg(["size", "sum"])
+    typer.echo(f"Acquisition manifest: {len(reqs)} files, {total / 1e6:.1f} MB "
+               f"(budget {b['max_total_mb']} MB / {b.get('max_files')} files) -> {lock.name}")
+    for g, r in by.iterrows():
+        typer.echo(f"  {g:<30} {int(r['size']):>4} files {r['sum'] / 1e6:>8.1f} MB")
+
+
+@app.command()
 def bronze() -> None:
     """F2 - DE-06: download manifest-selected files into bronze (sha256 + sidecar)."""
     _todo("DE-06")

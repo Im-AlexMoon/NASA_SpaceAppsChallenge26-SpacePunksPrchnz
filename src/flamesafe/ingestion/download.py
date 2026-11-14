@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from collections.abc import Callable, Iterable
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
@@ -61,47 +62,76 @@ def _ext(name: str) -> str:
 
 
 # ----------------------------------------------------------------------------- selection
-def requests_from_l2(cfg: dict[str, Any], silver_dir: Path) -> list[FileRequest]:
-    """Resolve configs/l2_samples.yaml against the silver catalog. Unknown names raise (no silent typos)."""
+def requests_from_selection(cfg: dict[str, Any], silver_dir: Path) -> list[FileRequest]:
+    """Resolve a selection config against the silver catalog. Unknown names / empty patterns raise (no silent typos).
+
+    Supports configs/l2_samples.yaml (`samples: {psi: [names]}`) and configs/acquisition_manifest.yaml
+    (`groups: [{name, files: {psi: [name | {pattern: regex}]}}]`). Only the current `added` inventory is selectable.
+    """
     files = pd.read_parquet(silver_dir / "files.parquet")
-    added = files[files["inventory"] == "added"].set_index(["psi_id", "file_name"])
+    added_df = files[files["inventory"] == "added"]
+    added = added_df.set_index(["psi_id", "file_name"])
     tables = pd.read_parquet(silver_dir / "experimental_tables.parquet")
     out: dict[tuple[str, str], FileRequest] = {}
 
     if cfg.get("include_experimental_tables"):
         for t in tables.itertuples():
             out[(t.psi_id, t.file_name)] = FileRequest(
-                t.psi_id, t.file_name, int(t.listed_bytes), "experimentalTable", "experimental table")
+                t.psi_id, t.file_name, int(t.listed_bytes), "experimentalTable", "experimental_table")
 
-    missing = []
-    for psi_id, names in (cfg.get("samples") or {}).items():
+    selections: list[tuple[str, str, Any]] = [
+        ("L2 sample", psi, e) for psi, entries in (cfg.get("samples") or {}).items() for e in entries]
+    for group in cfg.get("groups") or []:
+        selections += [(group["name"], psi, e) for psi, entries in (group.get("files") or {}).items() for e in entries]
+
+    problems = []
+    for reason, psi_id, entry in selections:
+        if isinstance(entry, dict) and "pattern" in entry:
+            pool = added_df[added_df["psi_id"] == psi_id]
+            rx = re.compile(entry["pattern"])
+            names = [n for n in pool["file_name"] if rx.search(n)]
+            if not names:
+                problems.append(f"{psi_id}: pattern {entry['pattern']!r} matches nothing")
+        else:
+            names = [entry]
+            if (psi_id, entry) not in added.index and (psi_id, entry) not in out:
+                problems.append(f"{psi_id}: {entry} not in the current `added` inventory")
+                continue
         for name in names:
-            if (psi_id, name) in out:
-                continue
-            if (psi_id, name) not in added.index:
-                missing.append(f"{psi_id}: {name}")
-                continue
-            out[(psi_id, name)] = FileRequest(
-                psi_id, name, int(added.loc[(psi_id, name), "file_bytes"]), "added", "L2 sample")
-    if missing:
-        raise KeyError("Not in the current `added` inventory:\n  " + "\n  ".join(missing))
+            if (psi_id, name) not in out:
+                out[(psi_id, name)] = FileRequest(
+                    psi_id, name, int(added.loc[(psi_id, name), "file_bytes"]), "added", reason)
+    if problems:
+        raise KeyError("Selection problems:\n  " + "\n  ".join(problems))
     return sorted(out.values(), key=lambda r: (int(r.psi_id.split("-")[1]), r.file_name))
 
 
+requests_from_l2 = requests_from_selection  # backwards-compatible name used by DE-04
+
+
 def check_budget(reqs: Iterable[FileRequest], max_total_mb: float, max_file_mb: float,
-                 deny_extensions: Iterable[str] = ()) -> int:
+                 deny_extensions: Iterable[str] = (), max_files: int | None = None) -> int:
     reqs = list(reqs)
     deny = {e.lower() for e in deny_extensions}
     problems = [f"{r.psi_id}/{r.file_name}: extension .{_ext(r.file_name)} denied" for r in reqs
                 if _ext(r.file_name) in deny]
     problems += [f"{r.psi_id}/{r.file_name}: {r.expected_bytes / 1e6:.1f} MB > {max_file_mb} MB" for r in reqs
                  if (r.expected_bytes or 0) > max_file_mb * 1e6]
+    if max_files is not None and len(reqs) > max_files:
+        problems.append(f"{len(reqs)} files > {max_files}")
     total = sum(r.expected_bytes or 0 for r in reqs)
     if total > max_total_mb * 1e6:
         problems.append(f"total {total / 1e6:.1f} MB > {max_total_mb} MB")
     if problems:
         raise BudgetError("Download budget violated:\n  " + "\n  ".join(problems))
     return total
+
+
+def write_manifest_lock(reqs: list[FileRequest], path: Path) -> Path:
+    """Byte-exact resolved manifest (committed) — what DE-06 will download."""
+    df = pd.DataFrame([asdict(r) for r in reqs]).rename(columns={"reason": "group"})
+    df.to_csv(path, index=False, lineterminator="\n")
+    return path
 
 
 # ----------------------------------------------------------------------------- fetch
