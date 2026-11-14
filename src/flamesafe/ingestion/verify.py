@@ -185,5 +185,6 @@ def default_output() -> Path:
 
 def write(report: dict[str, Any], path: Path) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
     return path

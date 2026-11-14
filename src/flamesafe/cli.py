@@ -36,9 +36,22 @@ def verify_api(
 
 
 @app.command()
-def catalog() -> None:
-    """F1 - DE-02: fetch the PSI combustion catalog (metadata only) into bronze."""
-    _todo("DE-02")
+def catalog(
+    refresh: bool = typer.Option(False, help="Re-fetch files already present in today's snapshot"),
+) -> None:
+    """F1 - DE-02: snapshot the PSI combustion catalog (metadata only) into data/bronze/catalog."""
+    from flamesafe.ingestion import catalog as cat
+
+    res = cat.run(refresh=refresh, progress=lambda pid, msg: typer.echo(f"  {pid:<8} {msg}"))
+    typer.echo(f"Snapshot: {res.snapshot_dir}")
+    typer.echo(f"Combustion records: {len(res.combustion_ids)} - fetched {len(res.fetched)}, "
+               f"reused {len(res.reused)}, failed {len(res.failed)}")
+    if res.drift:
+        typer.echo(f"Drift vs {res.drift['compared_with'][0]}: changed={res.drift['changed']} "
+                   f"added={res.drift['added']} missing={res.drift['missing']}")
+    if not res.complete:
+        typer.secho(f"Incomplete snapshot (LATEST not updated): {res.failed}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
 
 @app.command()

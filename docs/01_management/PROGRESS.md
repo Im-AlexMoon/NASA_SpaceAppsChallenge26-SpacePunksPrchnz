@@ -10,7 +10,7 @@
 | Fase | Gate | Objetivo | Estado | % | Responsable | Nota |
 |---|---|---|---|---|---|---|
 | F0 Setup y alineación | G0 | H+2 | 🟦 | 20 | | Repo + plan listos |
-| F1 Descubrimiento y triage | G1 | H+5 | 🟦 | 15 | DE | DE-01 ✔ (API verificado); siguiente DE-02 |
+| F1 Descubrimiento y triage | G1 | H+5 | 🟦 | 30 | DE | DE-01 ✔ DE-02 ✔; siguiente DE-03 (aplanar inventario) |
 | F2 Pipeline medallion | G2 | H+9 | ⬜ | 0 | | |
 | F3 EDA y estadística | G3 | H+14 | ⬜ | 0 | | |
 | F4 Modelado | G4 | H+17 | ⬜ | 0 | | |
@@ -36,3 +36,12 @@
   - Los datos PSI son **CC0 1.0** (23/24 registros).
   - Un id de investigación inexistente devuelve 403, no 404.
 - ▶ Siguiente: DE-02 (catálogo de las 24 investigaciones a bronze) y DE-03 (aplanado del inventario).
+
+### DE-02 cerrado — 2026-11-14
+- ✔ Hecho: `flamesafe catalog` guarda un snapshot diario e inmutable en `data/bronze/catalog/`.
+  - Contenido: búsqueda + 24 detalles, byte a byte (21.7 MB), con manifest sha256.
+  - Re-correr el mismo día reanuda; detecta drift contra el snapshot anterior; solo actualiza `LATEST` si el snapshot está completo.
+  - 5 tests nuevos.
+- 📌 Validación: los conteos del snapshot son idénticos al reporte de DE-01.
+- ⚠️ Los JSON de detalle incluyen contactos de los PIs (nombres y emails). Bronze no se versiona y silver (DE-03) debe eliminarlos.
+- ▶ Siguiente: DE-03, aplanar el snapshot en `silver/catalog/{investigations,files,experimental_tables,publications}.parquet`.

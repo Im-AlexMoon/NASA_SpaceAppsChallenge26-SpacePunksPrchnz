@@ -14,7 +14,7 @@
 
 ## F1 · Descubrimiento y triage (objetivo H+5)
 - [x] DE-01 Endpoints PSI verificados y registrados — 2026-11-14 · `flamesafe verify-api` + DATA_SOURCES.md
-- [ ] DE-02 Catálogo de 24 investigaciones en bronze
+- [x] DE-02 Catálogo de 24 investigaciones en bronze — 2026-11-14 · `flamesafe catalog` (snapshot + manifest sha256)
 - [ ] DE-03 Inventario aplanado (investigaciones, archivos, tablas experimentales, publicaciones)
 - [ ] DE-04 Perfiles de formato (Tier 1/2 completos, resto mínimo)
 - [ ] DE-05 Matriz de triage + manifest de descarga + ADR-0002

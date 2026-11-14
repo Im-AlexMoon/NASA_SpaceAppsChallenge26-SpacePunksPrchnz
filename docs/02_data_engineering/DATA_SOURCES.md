@@ -108,6 +108,7 @@ SAFFIRE-II. Hay que confirmarlo con la literatura antes de mostrarlo.
 | 2026-11-14 | DE (DE-01) | Descarga de las 22 tablas experimentales | 22/22 HTTP 200, 22/22 tamaño = listado, sha256 registrados | ídem |
 | 2026-11-14 | DE (DE-01) | Re-chequeo de 404 de SAFFIRE-I (3 XLSX) | 3/3 HTTP 200 | ídem |
 | 2026-11-14 | DE (DE-01) | Controles negativos | archivo inexistente 404 · id inexistente 403 | ídem |
+| 2026-11-14 | DE (DE-02) | Snapshot de catálogo en bronze (`flamesafe catalog`) | 25 archivos (búsqueda + 24 detalles), 21,689,225 bytes, completo; conteos idénticos al reporte DE-01 | `data/bronze/catalog/snapshot_2026-11-14/manifest.json` (local, no versionado) |
 
 ## 6. Atribución
 Los datos son de NASA PSI (CC0 1.0 según el registro) y se citan por PSI-ID y DOI. No redistribuimos archivos crudos en el repositorio.

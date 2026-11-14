@@ -106,6 +106,10 @@ class PSIClient:
 
         return _call()
 
+    def get_raw(self, url: str) -> bytes:
+        """Response body exactly as served (for verbatim bronze storage)."""
+        return self._get(url).content
+
     # ------------------------------------------------------------------- api
     def search(self) -> dict[str, Any]:
         """Raw search response (all investigations, every research area)."""
