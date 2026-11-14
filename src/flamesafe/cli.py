@@ -118,9 +118,46 @@ def triage() -> None:
 
 
 @app.command()
-def bronze() -> None:
-    """F2 - DE-06: download manifest-selected files into bronze (sha256 + sidecar)."""
-    _todo("DE-06")
+def bronze(
+    dry_run: bool = typer.Option(False, help="Only resolve + check budget and drift; download nothing"),
+    verify_only: bool = typer.Option(False, help="Only re-hash existing files against their sidecars"),
+) -> None:
+    """F2 - DE-06: download the L3 manifest lock into data/bronze/files (sha256 sidecars, 404s recorded)."""
+    from flamesafe import config
+    from flamesafe.ingestion import download as dl
+    from flamesafe.pipeline.silver_catalog import silver_catalog_dir
+
+    if verify_only:
+        integ = dl.verify_integrity()
+        typer.echo(f"Integrity: {integ['files_checked']} files checked, problems={integ['problems']}, "
+                   f"orphans={len(integ['orphans'])}, partials={integ['partials']}")
+        raise typer.Exit(code=1 if integ["problems"] or integ["partials"] else 0)
+
+    lock = config.ROOT / "docs" / "02_data_engineering" / "acquisition_manifest.csv"
+    reqs = dl.requests_from_lock(lock)
+    b = config.load("acquisition_manifest")["budget"]
+    total = dl.check_budget(reqs, b["max_total_mb"], b["max_file_mb"],
+                            config.load("sources")["download_budget"]["deny_extensions"], b.get("max_files"))
+    drift = dl.lock_drift(reqs, silver_catalog_dir())
+    typer.echo(f"Manifest lock: {len(reqs)} files, {total / 1e6:.1f} MB - drift vs catalog: {len(drift)}")
+    for d in drift:
+        typer.secho(f"  DRIFT {d}", fg=typer.colors.YELLOW)
+    if dry_run:
+        return
+
+    def show(r, action):
+        if action not in ("fetched", "reused"):
+            typer.secho(f"  {r.psi_id} {r.file_name}: {action}", fg=typer.colors.YELLOW)
+
+    results = dl.fetch(reqs, progress=show)
+    integ = dl.verify_integrity()
+    report = dl.write_report(results, "l3_manifest", extra={"lock": lock.name, "lock_drift": drift, "integrity": integ})
+    ok = sum(r.get("http_status") == 200 for r in results)
+    mism = [r for r in results if r.get("size_matches") is False]
+    typer.echo(f"Acquired {ok}/{len(results)} ({sum(r.get('bytes', 0) for r in results) / 1e6:.1f} MB) - "
+               f"size mismatches {len(mism)} - integrity problems {len(integ['problems'])} - report {report.name}")
+    if mism or integ["problems"]:
+        raise typer.Exit(code=1)
 
 
 @app.command()

@@ -150,8 +150,10 @@ def fetch(
         if path.exists() and side.exists():
             meta = json.loads(side.read_text(encoding="utf-8"))
             if meta.get("http_status") == 200 and meta.get("sha256") == _sha256_file(path):
-                results.append({**meta, "action": "reused"})
-                say(req, "reused")
+                size_ok = req.expected_bytes is None or meta.get("bytes") == req.expected_bytes
+                results.append({**meta, **asdict(req), "size_matches": size_ok,
+                                "action": "reused" if size_ok else "reused_size_mismatch"})
+                say(req, "reused" if size_ok else "reused_size_mismatch")
                 continue
         meta: dict[str, Any] = {
             **asdict(req),
@@ -175,7 +177,59 @@ def fetch(
     return results
 
 
-def write_report(results: list[dict[str, Any]], name: str, root: Path | None = None) -> Path:
+def requests_from_lock(path: Path) -> list[FileRequest]:
+    """Read the committed, byte-exact manifest lock (docs/02_data_engineering/acquisition_manifest.csv)."""
+    df = pd.read_csv(path, dtype={"expected_bytes": "Int64"})
+    return [FileRequest(r.psi_id, r.file_name, None if pd.isna(r.expected_bytes) else int(r.expected_bytes),
+                        r.list_source, r.group) for r in df.itertuples()]
+
+
+def lock_drift(reqs: list[FileRequest], silver_dir: Path) -> list[str]:
+    """Lock entries whose name/size no longer match the current silver catalog (PSI changed since DE-05)."""
+    files = pd.read_parquet(silver_dir / "files.parquet")
+    added = files[files["inventory"] == "added"].set_index(["psi_id", "file_name"])["file_bytes"]
+    tables = pd.read_parquet(silver_dir / "experimental_tables.parquet").set_index(["psi_id", "file_name"])["listed_bytes"]
+    out = []
+    for r in reqs:
+        src = tables if r.list_source == "experimentalTable" else added
+        key = (r.psi_id, r.file_name)
+        if key not in src.index:
+            out.append(f"{r.psi_id}/{r.file_name}: no longer listed")
+        elif r.expected_bytes is not None and int(src.loc[key]) != r.expected_bytes:
+            out.append(f"{r.psi_id}/{r.file_name}: listed bytes {int(src.loc[key])} != lock {r.expected_bytes}")
+    return out
+
+
+def verify_integrity(root: Path | None = None) -> dict[str, Any]:
+    """Re-hash every downloaded file against its sidecar; flags missing/corrupt files and orphan data files."""
+    root = root or files_root()
+    checked, problems = 0, []
+    for side in sorted(root.glob("*/*.meta.json")):
+        meta = json.loads(side.read_text(encoding="utf-8"))
+        data = side.with_name(side.name[: -len(".meta.json")])
+        if meta.get("http_status") != 200:
+            continue
+        checked += 1
+        if not data.exists():
+            problems.append(f"missing: {data.parent.name}/{data.name}")
+        elif _sha256_file(data) != meta.get("sha256"):
+            problems.append(f"sha256 mismatch: {data.parent.name}/{data.name}")
+    orphans = [f"{p.parent.name}/{p.name}" for p in sorted(root.glob("*/*"))
+               if not p.name.endswith((".meta.json", ".part")) and not _sidecar(p).exists()]
+    return {"files_checked": checked, "problems": problems, "orphans": orphans,
+            "partials": [f"{p.parent.name}/{p.name}" for p in root.glob("*/*.part")]}
+
+
+def duplicate_groups(results: list[dict[str, Any]]) -> list[list[str]]:
+    by_sha: dict[str, list[str]] = {}
+    for r in results:
+        if r.get("sha256"):
+            by_sha.setdefault(r["sha256"], []).append(f"{r['psi_id']}/{r['file_name']}")
+    return [sorted(v) for v in by_sha.values() if len(v) > 1]
+
+
+def write_report(results: list[dict[str, Any]], name: str, root: Path | None = None,
+                 extra: dict[str, Any] | None = None) -> Path:
     root = (root or files_root()).parent / "_reports"
     root.mkdir(parents=True, exist_ok=True)
     path = root / f"acquisition_{name}.json"
@@ -186,6 +240,10 @@ def write_report(results: list[dict[str, Any]], name: str, root: Path | None = N
         "n_size_mismatch": sum(r.get("size_matches") is False for r in results),
         "bytes": sum(r.get("bytes", 0) for r in results),
         "by_action": pd.Series([r["action"] for r in results]).value_counts().to_dict() if results else {},
+        "by_group": (pd.DataFrame(results).groupby("reason").agg(n=("file_name", "size"), bytes=("bytes", "sum"))
+                     .astype(int).to_dict("index") if results else {}),
+        "duplicate_content_groups": duplicate_groups(results),
+        **(extra or {}),
         "files": results,
     }
     with open(path, "w", encoding="utf-8", newline="\n") as fh:

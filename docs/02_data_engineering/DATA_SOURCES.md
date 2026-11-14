@@ -91,6 +91,9 @@ Bytes expuestos en `added`: **6,267.02 GB** de los 13,496.77 GB registrados. Cas
 | sha256 de tablas PSI-10 (×2), PSI-69, PSI-159 (×2) | idénticos | ✔ coincide |
 | Telemetría y sensores XLSX de **SAFFIRE-I (PSI-98) → HTTP 404** | **HTTP 200**: XLSX válido, tamaño = listado (2,775,737 B la telemetría) | ✖ **ya no aplica**: estos archivos están disponibles |
 
+**Nuevos 404 (DE-06, 2026-11-14):** dos PDF listados en PSI-26 (BASS) devuelven 404: `Reports_BASS_FinalReport.pdf` y
+`Reports_SPICE_FinalReport.pdf`. No afectan a datos tabulares; el corpus RAG pierde esos dos reportes finales.
+
 **Implicación:** SAFFIRE-I se vuelve candidato a telemetría utilizable en la triage (DE-05). Hay que re-verificar en DE-06.
 
 ## 4. Fuentes complementarias
@@ -111,6 +114,7 @@ Bytes expuestos en `added`: **6,267.02 GB** de los 13,496.77 GB registrados. Cas
 | 2026-11-14 | DE (DE-01) | Descarga de las 22 tablas experimentales | 22/22 HTTP 200, 22/22 tamaño = listado, sha256 registrados | ídem |
 | 2026-11-14 | DE (DE-01) | Re-chequeo de 404 de SAFFIRE-I (3 XLSX) | 3/3 HTTP 200 | ídem |
 | 2026-11-14 | DE (DE-01) | Controles negativos | archivo inexistente 404 · id inexistente 403 | ídem |
+| 2026-11-14 | DE (DE-06) | Adquisición L3 (`flamesafe bronze`, lock de 147 archivos) | 145/147 HTTP 200 (262.2 MB), 0 diferencias de tamaño, 0 drift, integridad 153/153; **2 × HTTP 404** (re-verificados): `PSI-26_Reports_BASS_FinalReport.pdf`, `PSI-26_Reports_SPICE_FinalReport.pdf`; 3 PDFs duplicados entre registros (SAFFIRE I/III, SAME/SAME-R ×2) | `data/bronze/_reports/acquisition_l3_manifest.json` (local) |
 | 2026-11-14 | DE (DE-04) | Muestras L2 (`flamesafe profile`) | 60 archivos (22 tablas experimentales + 38 seleccionados), 50,266,513 bytes, 60/60 HTTP 200, 0 diferencias de tamaño | `data/bronze/_reports/acquisition_l2_samples.json`, `l2_profiles.json` (local) |
 | 2026-11-14 | DE (DE-03) | Aplanado a `silver/catalog` (`flamesafe silver`) | 24 investigaciones, 27,076 archivos (16,354 added + 10,722 removed), 22 tablas, 352 publicaciones (284 con DOI), 86 contactos sin PII; reconciliación 5/5 OK, 0 errores | `data/silver/catalog/_reports/catalog_parse_report.json` (local) |
 | 2026-11-14 | DE (DE-02) | Snapshot de catálogo en bronze (`flamesafe catalog`) | 25 archivos (búsqueda + 24 detalles), 21,689,225 bytes, completo; conteos idénticos al reporte DE-01 | `data/bronze/catalog/snapshot_2026-11-14/manifest.json` (local, no versionado) |

@@ -23,7 +23,7 @@
 
 ## F2 · Pipeline medallion (objetivo H+9/H+10)
 - [ ] DS-02 Contrato de variables por RQ (DS→DE)
-- [ ] DE-06 Bronze: descargas con sha256 + sidecars + reporte
+- [x] DE-06 Bronze: descargas con sha256 + sidecars + reporte — 2026-11-14 · `flamesafe bronze` 145/147 (2 × 404 documentados), 262 MB
 - [ ] DE-07 Silver: parsers por familia, flags de faltantes, unidades, procedencia
 - [ ] DE-08 Gold: tablas por RQ + DuckDB
 - [ ] DE-09 Contratos pandera + tests con fixtures

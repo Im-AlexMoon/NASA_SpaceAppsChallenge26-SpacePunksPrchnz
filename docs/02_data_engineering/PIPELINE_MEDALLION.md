@@ -35,6 +35,20 @@ data/
     _reports/quality_report.json
 ```
 
+### Adquisición bronze (DE-06)
+
+```bash
+flamesafe bronze --dry-run       # resuelve el lock, valida presupuesto y drift vs catálogo; no descarga
+flamesafe bronze                 # descarga docs/02_data_engineering/acquisition_manifest.csv → data/bronze/files/
+flamesafe bronze --verify-only   # re-hashea todo contra sus sidecars (corrupción, huérfanos, .part)
+```
+
+- La entrada es **el lock** (`acquisition_manifest.csv`, generado por `flamesafe triage` y versionado), no el YAML. Así lo
+  descargado es exactamente lo revisado en DE-05.
+- Lo ya descargado con sha256 válido se reutiliza (p. ej. las muestras L2). Los 404 se registran en el sidecar y no se ocultan.
+- Si un tamaño no coincide con el lock o falla la integridad, el comando sale con código 1. El drift (PSI cambió desde DE-05) se reporta.
+- Reporte: `data/bronze/_reports/acquisition_l3_manifest.json` (por grupo, duplicados por sha256, integridad, drift).
+
 ## 3. Reglas de transformación (no negociables)
 
 1. **Nunca** convertir faltantes, `#DIV/0!`, `#VALUE!`, `OR`, `RAMP`, etc. a 0. → `NULL` + columna `<col>__flag` con el token original.

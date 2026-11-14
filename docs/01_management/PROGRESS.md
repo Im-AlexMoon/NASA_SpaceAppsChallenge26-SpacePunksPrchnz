@@ -11,7 +11,7 @@
 |---|---|---|---|---|---|---|
 | F0 Setup y alineación | G0 | H+2 | 🟦 | 20 | | Repo + plan listos |
 | F1 Descubrimiento y triage | G1 | H+5 | 🟨 | 90 | DE | DE-01…05 ✔; **G1 espera a PHY-02** (ratificar pilar, entorno y R1) |
-| F2 Pipeline medallion | G2 | H+9 | ⬜ | 0 | | |
+| F2 Pipeline medallion | G2 | H+9 | 🟦 | 15 | DE | DE-06 ✔ (bronze L3); siguiente DS-02 + DE-07 (parsers silver) |
 | F3 EDA y estadística | G3 | H+14 | ⬜ | 0 | | |
 | F4 Modelado | G4 | H+17 | ⬜ | 0 | | |
 | F5 RAG | G5 | H+16 | ⬜ | 0 | | |
@@ -83,3 +83,13 @@
 - ⚠️ Cambio de método: se añadieron **gates** a la rúbrica para que la relevancia sola no promueva registros sin resultado analizable.
 - ⛔ **G1 bloqueado por PHY-02:** PHY debe ratificar pilar, entorno y R1, o registrar un `override`.
 - ▶ Siguiente: PHY-02 para cerrar G1. En paralelo se puede arrancar DE-06 (descargar el manifest) y DS-02 (contrato de variables por RQ).
+
+### DE-06 cerrado — 2026-11-14
+- ✔ Hecho: `flamesafe bronze` descarga el lock `acquisition_manifest.csv`. También tiene `--dry-run` y `--verify-only`.
+  - Valida presupuesto y drift contra el catálogo, reutiliza lo ya descargado con sha256 válido y re-hashea todo al final.
+  - Reporte por grupo con duplicados. 6 tests nuevos (55 en total).
+- 📌 Resultado:
+  - **145/147** archivos (262.2 MB): 93 descargados y 52 reutilizados de L2. 0 diferencias de tamaño, 0 drift, integridad 153/153.
+  - **2 × HTTP 404** re-verificados: PDF de reportes finales en PSI-26 (BASS y SPICE). Solo afectan al corpus RAG.
+  - 3 PDF idénticos entre registros (SAFFIRE I/III, SAME/SAME-R): deduplicar por sha256 en el corpus RAG.
+- ▶ Siguiente: DS-02 (contrato de variables por RQ) → DE-07 (parsers silver de CFI-G, Flame Design + EventData, FLEX, CFI DataSummary y PSI-117).
