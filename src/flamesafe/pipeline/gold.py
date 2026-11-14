@@ -145,6 +145,8 @@ def build_gas_flame_tests() -> tuple[pd.DataFrame, dict[str, Any]]:
              "m_total_mg_s", "zst", "tad_k", "ignited", "ignition_outcome", "outcome_source", "ignite_eventdata",
              "extinction_mode", "burn_time_s", "cool_flame", "peak_burner_t_k", "tfp", "qualifier", "source_file", "source_row"]
     g = g[order]
+    for c in ("cool_flame", "tfp", "ignited", "ignite_eventdata"):
+        g[c] = g[c].astype("boolean")
 
     cfig = g[(g.campaign == "CFI-G") & g.ignited.notna() & g.ignite_eventdata.notna()]
     checks["cfig_hot_ignition_vs_eventdata"] = {
@@ -198,6 +200,9 @@ def build_droplet_tests() -> tuple[pd.DataFrame, dict[str, Any]]:
     })
     checks["cfi_x_co2_inferred_zero"] = f"{int(inferred.sum())}/{len(c)}"
     d = pd.concat([f, c], ignore_index=True)
+    for col in ("fiber", "analysis_complete"):
+        d[col] = d[col].astype("boolean")
+    d["reignitions"] = d["reignitions"].astype("Int64")
     d["test_id"] = d["test_id"].astype(str)
     return d, checks
 

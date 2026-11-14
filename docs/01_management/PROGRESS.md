@@ -11,9 +11,9 @@
 |---|---|---|---|---|---|---|
 | F0 Setup y alineación | G0 | H+2 | 🟦 | 20 | | Repo + plan listos |
 | F1 Descubrimiento y triage | G1 | H+5 | 🟨 | 90 | DE | DE-01…05 ✔; **G1 espera a PHY-02** (ratificar pilar, entorno y R1) |
-| F2 Pipeline medallion | G2 | H+9 | 🟦 | 80 | DE | DE-06…08 ✔; siguiente DE-09 (pandera) + DE-10 → G2 |
-| F3 EDA y estadística | G3 | H+14 | ⬜ | 0 | | |
-| F4 Modelado | G4 | H+17 | ⬜ | 0 | | |
+| F2 Pipeline medallion | G2 | H+9 | ✅ | 100 | DE | **G2 cerrado**: gate de datos PASSED, rebuild determinista |
+| F3 EDA y estadística | G3 | H+14 | ⬜ | 0 | DS | desbloqueado: gold listo (`gas_flame_tests`, `droplet_tests`) |
+| F4 Modelado | G4 | H+17 | ⬜ | 0 | DS | desbloqueado (M1 con CFI-G; M2 con FLEX + CFI) |
 | F5 RAG | G5 | H+16 | ⬜ | 0 | | |
 | F6 Dashboard | G6 | H+20 | ⬜ | 0 | | |
 | F7 Física | G7 | H+20 | 🟦 | 5 | | Primer en borrador |
@@ -118,3 +118,15 @@
 - ⚠️ **R-DE-08a:** el `Ignite` de EventData es una decisión operativa. Coincide en 86 % con `Hot ignition` de CFI-G y discrepa sobre
   todo en llamas breves. En Flame Design es casi constante. **M1 debe entrenarse con CFI-G** y Flame Design queda para contexto/validación (decisión PHY).
 - ▶ Siguiente: DE-09 (contratos pandera para silver/gold) y DE-10 (cerrar el data dictionary) → **G2**.
+
+### DE-09 y DE-10 cerrados · 🚦 G2 CERRADO — 2026-11-14
+- ✔ `flamesafe validate` implementa el gate G2 en código. Contratos: **37/37** (5 gold estrictos, 10 silver MVP y 22 genéricos de procedencia).
+  Reconciliación: **34/34** (bronze→silver y silver→gold). Ningún token convertido en valor: **19/19** columnas. Cobertura del diccionario: **5/5** tablas.
+- ✔ Rebuild desde bronze, con silver y gold borrados: **gold idéntico** (hash por tabla). `make pipeline` ahora termina en `validate`.
+- ✔ Fixtures de CI en `data/sample/gold_*.parquet` (160 KB, estratificados con casos borde). 16 tests nuevos (101 en total).
+- ✔ DATA_DICTIONARY completo para las 5 tablas gold; `validate` falla si se desincroniza.
+- ▶ Siguiente:
+  - **F3/F4 desbloqueados para DS** (DS-03…DS-13): EDA sobre gold y M1 con CFI-G.
+  - **F5:** RAG-01 puede usar los 29 PDF descargados y `publications`.
+  - **F6:** APP-02 puede hacer el vertical slice con DuckDB.
+  - **G1** sigue pendiente de PHY-02.

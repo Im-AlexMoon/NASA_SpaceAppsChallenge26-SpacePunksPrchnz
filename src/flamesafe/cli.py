@@ -205,6 +205,35 @@ def gold() -> None:
 
 
 @app.command()
+def validate() -> None:
+    """F2 - DE-09/DE-10: G2 gate — pandera contracts, reconciliation, token->NULL, dictionary coverage."""
+    from flamesafe.quality import validate as v
+
+    rep = v.run()
+    for k, ok in rep["gate"].items():
+        typer.secho(f"  {'PASS' if ok else 'FAIL'}  {k}", fg=typer.colors.GREEN if ok else typer.colors.RED)
+    for name, c in rep["contracts"].items():
+        if not c["ok"]:
+            typer.secho(f"    contract {name}: {c['n_failures']} failure(s) e.g. {c['failures'][:3]}", fg=typer.colors.RED)
+    for r in rep["reconciliation"]:
+        if not r["ok"]:
+            typer.secho(f"    reconcile {r['stage']} {r['table']}: expected {r['expected']} got {r['actual']}", fg=typer.colors.RED)
+    for t in rep["tokens_never_valued"]:
+        if not t["ok"]:
+            typer.secho(f"    token->value {t['gold_table']}.{t['column']}: {t['valued_in_gold']} rows", fg=typer.colors.RED)
+    for c in rep["dictionary_coverage"]:
+        if not c["ok"]:
+            typer.secho(f"    dictionary {c['table']}: undocumented={c['undocumented']} missing={c['documented_but_missing']}",
+                        fg=typer.colors.RED)
+    n = len(rep["contracts"])
+    typer.echo(f"Contracts {sum(c['ok'] for c in rep['contracts'].values())}/{n} - reconciliation "
+               f"{sum(r['ok'] for r in rep['reconciliation'])}/{len(rep['reconciliation'])} - token checks "
+               f"{len(rep['tokens_never_valued'])} - G2 data gate: {'PASSED' if rep['passed'] else 'FAILED'}")
+    if not rep["passed"]:
+        raise typer.Exit(code=1)
+
+
+@app.command()
 def train() -> None:
     """F4 - DS-08: train/evaluate models declared in configs/models.yaml."""
     _todo("DS-08")

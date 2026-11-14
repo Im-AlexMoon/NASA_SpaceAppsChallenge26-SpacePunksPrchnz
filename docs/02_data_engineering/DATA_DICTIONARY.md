@@ -1,7 +1,7 @@
 # Data dictionary
 
-> Tarea DE-10. Las tablas gold **se documentan antes de construirse** (contrato DS→DE, tarea DS-02) y este archivo se actualiza
-> con cada cambio. Las tablas silver del catálogo (DE-03) ya están documentadas abajo.
+> Tarea DE-10 (**cerrada 2026-11-14**). Las tablas gold se documentan antes de construirse (contrato DS→DE, DS-02) y este archivo se
+> actualiza con cada cambio. **`flamesafe validate` falla si alguna columna gold no está documentada aquí o si se documenta una que no existe.**
 
 ## Convenciones
 - Nombres `snake_case`, sufijo de unidad: `_kpa`, `_k`, `_cm_s`, `_mg_s`, `_mm`, `_s`, `_bytes`; fracción molar `_xo2` (0–1).
@@ -138,6 +138,7 @@ NULL + `<col>__flag` con el token original. Las unidades de la fuente van en el 
 | `xo2_final` | float | fracción | `XO2 (final)` / `XO2 after test` | — | M | sí | |
 | `x_fuel` | float | fracción | `Xfuel` / `Xf` / `XC2H4 initial` / `Xf before test` | tokens → flag | M (control) | sí | |
 | `p_kpa` | float | kPa | `pmean (atm)` (o `pinit`) / `approx p (bar)` | atm→kPa, bar→kPa | M | no | |
+| `p_source` | cat | — | — | `approx p (bar)` / `pmean (atm)` / `pinit (atm)` (si falta `pmean`) | L | no | qué columna dio `p_kpa` |
 | `po2_kpa` | float | kPa | derivada | `xo2 × p_kpa` | C | no | revisar PHY-04 en inversas |
 | `m_fuel_mg_s`, `m_o2_mg_s`, `m_n2_mg_s`, `m_total_mg_s` | float | mg/s | columnas de caudal | tokens `RAMP` → NULL + flag | M (control) | sí | |
 | `zst`, `tad_k` | float | —, K | `mean Zst`/`Zst`, `Tad (K)` | `#DIV/0!` → NULL + flag | **C** | sí | nunca en el mismo eje que T medida |
@@ -180,12 +181,48 @@ NULL + `<col>__flag` con el token original. Las unidades de la fuente van en el 
 | `flex_burning_rate_unverified` | float | ¿mm²/s? | FLEX `Burning rate; mm` | — | M | sí | fuera de `k_hot_mm2_s` hasta resolver R-DE-05b |
 | `fuel_blend` | str | — | CFI `[.60]/[.40] C12H26/iso-dodecane` | → "60/40" | L | sí | |
 | `quality_flags` | str | — | derivada | p ≤ 0 en la fuente (FLEX: 1 fila, `p_kpa` NULL); suma de fracciones ≠ 1 (CFI) | L | sí | |
+| `source_file`, `source_row` | str, int | — | — | — | L | no | procedencia (CFI: fila de la `Master Sheet`) |
 
 ### `droplet_reference_points` (validación de M2)
-- **Granularidad:** un punto de figura publicada (PSI-117), en formato largo: `data_file`, `block`, `role` (experiment / model / unknown),
-  `x_name`, `x`, `y_name`, `y`, más las condiciones del ReadMe (`fuel`, `d0_mm`, `p_atm`, `xo2`, `doi`, `figure`).
-  **Los puntos `model` nunca se usan como mediciones.**
+- **Granularidad:** un punto (x, y) de una figura publicada (PSI-117, investigación de tierra), en formato largo.
+  **Los puntos `model` / `unknown` nunca se usan como mediciones.**
+
+| Columna | Tipo | Origen | Notas |
+|---|---|---|---|
+| `psi_id` | str | — | siempre PSI-117 |
+| `data_file` | str | nombre del CSV sin prefijo | une con el ReadMe |
+| `block`, `block_label`, `row_label` | int, str, str | bloque lado a lado y etiquetas (`C7`, `Expt`, `Sim`) | `row_label` se propaga a las filas siguientes del bloque |
+| `role` | cat | inferido de etiquetas y encabezados | experiment / model / error_bar / unknown (historias temporales sin etiqueta) |
+| `x_name`, `x`, `y_name`, `y` | str, float, str, float | encabezados y valores de la figura | unidades según el encabezado (p. ej. `P (atm)`, `Dext_HF`) |
+| `fuel`, `d0_mm_raw`, `p_atm_raw`, `xo2_raw`, `xn2_raw` | str | ReadMe | **texto crudo** (hay rangos "0.5 - 3.0" y XN2 en %) |
+| `third_component`, `third_component_raw` | str | ReadMe (7.ª columna: `XO3` o `XHe`) | |
+| `doi`, `figure` | str | ReadMe | referencia del artículo y figura |
+| `source_file`, `source_row`, `source_sha256` | str, int, str | — | procedencia |
 
 ### `investigations` (RQ5)
-- **Granularidad:** una investigación (24). Une silver `catalog/investigations` con el triage (`configs/triage.yaml`): R1–R6, score,
-  tier, pilares, entornos, RQ. Añade `hardware_family` normalizado (CIR-ACME, CIR-MDCA, MSG, Saffire-Cygnus, SAME, otro).
+- **Granularidad:** una investigación (24). Une `silver/catalog/investigations` (ver § Silver · catálogo, mismas columnas y
+  semántica) con el triage (`configs/triage.yaml`) y añade columnas derivadas.
+
+| Columna | Tipo | Origen | Notas |
+|---|---|---|---|
+| `psi_id`, `acronym`, `title`, `doi`, `research_area`, `sub_research_area`, `project_type`, `is_ground_investigation` | — | silver catalog | ver § Silver · catálogo |
+| `flight_program`, `flight_platform`, `experiment_hardware`, `experiment_hardware_link`, `managing_center`, `keywords`, `related_investigations` | — | silver catalog | |
+| `start_date`, `end_date`, `release_date`, `modified_date`, `record_version`, `version_reason`, `license_id`, `license_name` | — | silver catalog | |
+| `objective`, `approach`, `hypothesis`, `research_impacts`, `description` | str | silver catalog | corpus para RAG y fichas |
+| `n_added_files`, `n_removed_files`, `n_experimental_tables`, `n_tables_not_in_added`, `n_publications`, `n_publications_with_doi`, `added_bytes`, `registered_total_bytes`, `access_status` | — | silver catalog | |
+| `snapshot`, `source_file`, `source_sha256` | str | silver catalog | procedencia (snapshot bronze) |
+| `R1`, `R2`, `R3`, `R4`, `R5`, `R6`, `score`, `tier`, `tier_notes` | int / float / str | triage (DE-05) | puntajes y tier con gates |
+| `pillars`, `environments`, `rqs`, `justification` | str | triage (DE-05) | listas separadas por coma; pendiente ratificación PHY-02 |
+| `hardware_family` | cat | derivada de `experiment_hardware` | CIR-ACME, CIR-MDCA, MSG, Saffire (Cygnus), CSD (SAME), P-Trak (DAFT), Ground lab, unknown |
+| `n_gold_tests` | int | derivada | filas en `gas_flame_tests` + `droplet_tests` |
+| `mvp_role` | str | ADR-0002 | RQ1 / RQ2 / RQ2 (validation) / NULL |
+
+### `publications` (RAG y dashboard)
+- **Granularidad:** una publicación única. Se deduplica por DOI normalizado; las que no tienen DOI quedan una fila por registro.
+
+| Columna | Tipo | Origen | Notas |
+|---|---|---|---|
+| `doi` | str | silver `publications.doi` | NULL en 68 publicaciones sin DOI |
+| `title`, `author_list`, `status` | str | silver | primera aparición |
+| `psi_ids` | list[str] | silver | registros PSI que la citan |
+| `n_records` | int | derivada | 44 DOI aparecen en más de un registro |

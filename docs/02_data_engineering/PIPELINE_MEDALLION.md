@@ -71,9 +71,21 @@ flamesafe bronze --verify-only   # re-hashea todo contra sus sidecars (corrupci�
 | `fire_telemetry` (stretch) | SAFFIRE-III | series de tiempo de incendio a escala |
 | `reference_atmospheres` | `physics/atmospheres.py` | Habitat Risk Explorer |
 
-## 5. Calidad de datos (DE-09)
+## 5. Calidad de datos y gate G2 (DE-09 / DE-10)
 
-- Esquemas pandera para cada tabla silver y gold (`src/flamesafe/quality/`).
-- Reconciliación: `filas_bronze_validas == filas_silver == Σ filas_gold` (o diferencia explicada en el reporte).
-- Rangos físicos plausibles (p. ej. 0 ≤ XO₂ ≤ 1; presión > 0) → violación = error, no se corrige en silencio.
-- El `quality_report.json` alimenta la página *Methods & Sources*.
+`flamesafe validate` (o `make validate`) es **el gate G2 de datos, en código**. Escribe `data/gold/_reports/validation_report.json`
+y un resumen versionado en `docs/02_data_engineering/verification/pipeline_validation_<fecha>.json` (solo conteos y veredictos).
+
+| Criterio G2 | Cómo se verifica | Resultado 2026-11-14 |
+|---|---|---|
+| Validaciones al 100 % | Contratos pandera (`src/flamesafe/quality/schemas.py`): 5 gold estrictos (tipos, rangos físicos, categorías, claves y reglas como "flash nunca se fuerza a sí/no", "po2 = xo2·p", "k de FLEX fuera hasta R-DE-05b"), 10 silver MVP y procedencia en las 22 tablas genéricas | **37/37** |
+| Conteos reconciliados bronze ↔ silver ↔ gold | filas no vacías de bronze = filas de silver (por tabla); filas de silver = filas de gold según el mapeo documentado | **34/34** |
+| Ningún token faltante convertido a 0 | para cada `<col>__flag` en silver con columna homónima en gold, el valor gold es NULL en esas filas | **19/19** columnas, 0 fugas |
+| Cada columna gold documentada | parser del DATA_DICTIONARY § Gold vs. columnas reales (en ambos sentidos) | **5/5** tablas |
+| `make pipeline` reproducible | `silver` + `gold` + `validate` reconstruidos desde bronze con `data/silver` y `data/gold` borrados → contenido gold **idéntico** (hash por tabla) | ✔ (catálogo y bronze ya verificados por sha256 en DE-02/DE-06) |
+
+Las invariantes "blandas" del reporte gold (p. ej. Dext caliente > 1.05·D₀ en CFI 1274A) se reportan pero no bloquean: son hallazgos sobre la
+fuente y se discuten con PHY.
+
+**Fixtures para CI:** `data/sample/gold_*.parquet` (160 KB, generados con `scripts/make_samples.py`) son cortes estratificados de gold con todos
+los casos borde. CI valida los contratos y la cobertura del diccionario sobre ellos, sin red ni datos completos.

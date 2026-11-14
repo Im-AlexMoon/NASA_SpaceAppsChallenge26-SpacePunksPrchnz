@@ -1,6 +1,6 @@
 # Requires GNU make (Git Bash / WSL / choco install make). Every target maps 1:1
 # to a `flamesafe` CLI command, so you can run those directly on Windows too.
-.PHONY: setup lint test verify-api catalog profile triage bronze silver gold pipeline eda train rag-index app clean
+.PHONY: setup lint test verify-api catalog profile triage bronze silver gold validate pipeline samples eda train rag-index app clean
 
 setup:        ## Install package with all extras in editable mode
 	pip install -e ".[all]"
@@ -32,7 +32,13 @@ silver:       ## F2: parse/clean/standardize -> data/silver
 gold:         ## F2: analysis-ready tables -> data/gold
 	flamesafe gold
 
-pipeline: catalog bronze silver gold  ## Full medallion run
+validate:     ## F2 DE-09/10: G2 data gate (contracts, reconciliation, token->NULL, dictionary)
+	flamesafe validate
+
+samples:      ## Regenerate committed gold fixtures in data/sample/ (after gold)
+	python scripts/make_samples.py
+
+pipeline: catalog bronze silver gold validate  ## Full medallion run + G2 gate
 
 train:        ## F4: train + evaluate models -> artifacts/models
 	flamesafe train

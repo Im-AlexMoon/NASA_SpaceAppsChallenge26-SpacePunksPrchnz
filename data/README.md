@@ -8,7 +8,7 @@ Capas medallion **reproducibles** — nada aquí se versiona salvo `sample/` y e
 | `silver/` | Una tabla por tabla fuente: tipada, limpia, unidades explícitas, flags de faltantes, columnas de procedencia. | Parquet | `flamesafe silver` |
 | `gold/` | Tablas armonizadas listas para análisis/modelos/dashboard, definidas por las preguntas de investigación. | Parquet + DuckDB | `flamesafe gold` |
 | `external/` | Insumos no-PSI (abstracts de publicaciones, estándares) con su fuente. | varios | manual / scripts |
-| `sample/` | Fixtures diminutos para tests (< 1 MB total). **Sí se versiona.** | csv/json | manual |
+| `sample/` | Fixtures diminutos para tests: cortes estratificados de gold (`gold_*.parquet`, ~160 KB). **Sí se versiona.** | parquet | `python scripts/make_samples.py` |
 
-Regenerar todo: `make pipeline` (o `flamesafe catalog && flamesafe bronze && flamesafe silver && flamesafe gold`).
+Regenerar todo: `make pipeline` (o `flamesafe catalog && flamesafe bronze && flamesafe silver && flamesafe gold && flamesafe validate`).
 Detalle: [docs/02_data_engineering/PIPELINE_MEDALLION.md](../docs/02_data_engineering/PIPELINE_MEDALLION.md).

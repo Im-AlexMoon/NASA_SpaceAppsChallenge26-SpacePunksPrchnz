@@ -26,9 +26,9 @@
 - [x] DE-06 Bronze: descargas con sha256 + sidecars + reporte — 2026-11-14 · `flamesafe bronze` 145/147 (2 × 404 documentados), 262 MB
 - [x] DE-07 Silver: parsers por familia, flags de faltantes, unidades, procedencia — 2026-11-14 · 33 tablas silver, 0 errores
 - [x] DE-08 Gold: tablas por RQ + DuckDB — 2026-11-14 · `flamesafe gold`: 5 tablas, 1 violación de invariante (CFI 1274A)
-- [ ] DE-09 Contratos pandera + tests con fixtures
-- [ ] DE-10 Data dictionary completo
-- [ ] 🚦 **G2** cerrado — `make pipeline` reproducible
+- [x] DE-09 Contratos pandera + tests con fixtures — 2026-11-14 · 37/37 contratos; fixtures `data/sample/gold_*.parquet`
+- [x] DE-10 Data dictionary completo — 2026-11-14 · cobertura verificada por `flamesafe validate`
+- [x] 🚦 **G2** cerrado — `make pipeline` reproducible — 2026-11-14 · gate de datos PASSED (contratos 37/37, reconciliación 34/34, tokens 19/19, diccionario 5/5; rebuild determinista)
 - [ ] ⭐ Vertical slice end-to-end (H+10)
 - [ ] 🧊 Scope freeze (H+12)
 

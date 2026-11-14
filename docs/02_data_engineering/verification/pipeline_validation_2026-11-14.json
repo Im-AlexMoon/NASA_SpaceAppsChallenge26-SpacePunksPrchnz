@@ -1,0 +1,456 @@
+{
+  "validated_at": "2026-11-14T15:49:17-06:00",
+  "passed": true,
+  "gate": {
+    "contracts_ok": true,
+    "reconciliation_ok": true,
+    "tokens_never_valued_ok": true,
+    "dictionary_coverage_ok": true
+  },
+  "contracts": {
+    "gold.gas_flame_tests": true,
+    "gold.droplet_tests": true,
+    "gold.droplet_reference_points": true,
+    "gold.investigations": true,
+    "gold.publications": true,
+    "silver.psi159__normal_flames": true,
+    "silver.psi159__inverse_flames": true,
+    "silver.psi10__normal_flames": true,
+    "silver.psi10__inverse_flames": true,
+    "silver.psi10__eventdata": true,
+    "silver.psi159__eventdata": true,
+    "silver.psi69__flex_droplets": true,
+    "silver.psi39__cfi_tests": true,
+    "silver.psi39__cfi_results": true,
+    "silver.psi117__figure_points": true,
+    "silver.et__psi100__saffire_3": true,
+    "silver.et__psi101__same_r": true,
+    "silver.et__psi102__same": true,
+    "silver.et__psi106__slice": true,
+    "silver.et__psi107__spice": true,
+    "silver.et__psi10__flame_design_inverse_flame": true,
+    "silver.et__psi10__flame_design_normal_flame": true,
+    "silver.et__psi142__data_summary_table": true,
+    "silver.et__psi159__cfi_g_inverse_flames": true,
+    "silver.et__psi159__cfi_g_normal_flames": true,
+    "silver.et__psi20__acme_bre": true,
+    "silver.et__psi21__cld_flame": true,
+    "silver.et__psi22__acme_e_field_flames": true,
+    "silver.et__psi23__acme_s_flame": true,
+    "silver.et__psi25__bass_ii": true,
+    "silver.et__psi26__bass": true,
+    "silver.et__psi39__cfi": true,
+    "silver.et__psi47__daft": true,
+    "silver.et__psi68__flex2": true,
+    "silver.et__psi69__flex": true,
+    "silver.et__psi98__saffire_1": true,
+    "silver.et__psi99__saffire_2": true
+  },
+  "reconciliation": [
+    {
+      "stage": "bronze->silver",
+      "table": "psi159__normal_flames",
+      "expected": 179,
+      "actual": 179,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "psi159__inverse_flames",
+      "expected": 154,
+      "actual": 154,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "psi10__normal_flames",
+      "expected": 207,
+      "actual": 207,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "psi10__inverse_flames",
+      "expected": 120,
+      "actual": 120,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "psi10__eventdata",
+      "expected": 604,
+      "actual": 604,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "psi159__eventdata",
+      "expected": 675,
+      "actual": 675,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "psi69__flex_droplets",
+      "expected": 274,
+      "actual": 274,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "psi39__cfi_tests",
+      "expected": 227,
+      "actual": 227,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "psi39__cfi_results",
+      "expected": 227,
+      "actual": 227,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi10__flame_design_inverse_flame",
+      "expected": 120,
+      "actual": 120,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi10__flame_design_normal_flame",
+      "expected": 207,
+      "actual": 207,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi20__acme_bre",
+      "expected": 18,
+      "actual": 18,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi21__cld_flame",
+      "expected": 32,
+      "actual": 32,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi22__acme_e_field_flames",
+      "expected": 32,
+      "actual": 32,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi23__acme_s_flame",
+      "expected": 18,
+      "actual": 18,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi25__bass_ii",
+      "expected": 129,
+      "actual": 129,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi26__bass",
+      "expected": 122,
+      "actual": 122,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi39__cfi",
+      "expected": 87,
+      "actual": 87,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi47__daft",
+      "expected": 2,
+      "actual": 2,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi68__flex2",
+      "expected": 8,
+      "actual": 8,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi69__flex",
+      "expected": 274,
+      "actual": 274,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi98__saffire_1",
+      "expected": 4,
+      "actual": 4,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi99__saffire_2",
+      "expected": 15,
+      "actual": 15,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi100__saffire_3",
+      "expected": 2,
+      "actual": 2,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi101__same_r",
+      "expected": 109,
+      "actual": 109,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi102__same",
+      "expected": 8,
+      "actual": 8,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi106__slice",
+      "expected": 12,
+      "actual": 12,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi107__spice",
+      "expected": 469,
+      "actual": 469,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi142__data_summary_table",
+      "expected": 8,
+      "actual": 8,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi159__cfi_g_inverse_flames",
+      "expected": 154,
+      "actual": 154,
+      "ok": true
+    },
+    {
+      "stage": "bronze->silver",
+      "table": "et__psi159__cfi_g_normal_flames",
+      "expected": 179,
+      "actual": 179,
+      "ok": true
+    },
+    {
+      "stage": "silver->gold",
+      "table": "gas_flame_tests",
+      "expected": 660,
+      "actual": 660,
+      "ok": true
+    },
+    {
+      "stage": "silver->gold",
+      "table": "droplet_tests",
+      "expected": 501,
+      "actual": 501,
+      "ok": true
+    },
+    {
+      "stage": "silver->gold",
+      "table": "droplet_reference_points",
+      "expected": 15861,
+      "actual": 15861,
+      "ok": true
+    }
+  ],
+  "tokens_never_valued": [
+    {
+      "gold_table": "gas_flame_tests",
+      "column": "tad_k",
+      "flagged_rows": 2,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "gas_flame_tests",
+      "column": "zst",
+      "flagged_rows": 2,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "gas_flame_tests",
+      "column": "extinction_mode",
+      "flagged_rows": 46,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "gas_flame_tests",
+      "column": "extinction_mode",
+      "flagged_rows": 15,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "gas_flame_tests",
+      "column": "peak_burner_t_k",
+      "flagged_rows": 2,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "gas_flame_tests",
+      "column": "x_fuel",
+      "flagged_rows": 60,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "gas_flame_tests",
+      "column": "m_fuel_mg_s",
+      "flagged_rows": 60,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "gas_flame_tests",
+      "column": "m_n2_mg_s",
+      "flagged_rows": 60,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "gas_flame_tests",
+      "column": "m_total_mg_s",
+      "flagged_rows": 60,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "gas_flame_tests",
+      "column": "zst",
+      "flagged_rows": 60,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "gas_flame_tests",
+      "column": "tad_k",
+      "flagged_rows": 60,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "gas_flame_tests",
+      "column": "xo2",
+      "flagged_rows": 11,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "gas_flame_tests",
+      "column": "m_o2_mg_s",
+      "flagged_rows": 8,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "gas_flame_tests",
+      "column": "m_n2_mg_s",
+      "flagged_rows": 11,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "gas_flame_tests",
+      "column": "m_total_mg_s",
+      "flagged_rows": 11,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "gas_flame_tests",
+      "column": "zst",
+      "flagged_rows": 11,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "gas_flame_tests",
+      "column": "tad_k",
+      "flagged_rows": 11,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "droplet_tests",
+      "column": "d0_mm",
+      "flagged_rows": 6,
+      "valued_in_gold": 0,
+      "ok": true
+    },
+    {
+      "gold_table": "droplet_tests",
+      "column": "burn_time_s",
+      "flagged_rows": 2,
+      "valued_in_gold": 0,
+      "ok": true
+    }
+  ],
+  "dictionary_coverage": [
+    {
+      "table": "gas_flame_tests",
+      "undocumented": [],
+      "documented_but_missing": [],
+      "ok": true
+    },
+    {
+      "table": "droplet_tests",
+      "undocumented": [],
+      "documented_but_missing": [],
+      "ok": true
+    },
+    {
+      "table": "droplet_reference_points",
+      "undocumented": [],
+      "documented_but_missing": [],
+      "ok": true
+    },
+    {
+      "table": "investigations",
+      "undocumented": [],
+      "documented_but_missing": [],
+      "ok": true
+    },
+    {
+      "table": "publications",
+      "undocumented": [],
+      "documented_but_missing": [],
+      "ok": true
+    }
+  ]
+}
