@@ -243,6 +243,79 @@ estacionarias: dispersión 0.1 % en combustible y 0.3 % en N₂).
 - ✘ No demuestra: el efecto de la gravedad parcial, la validez para otros combustibles o sólidos, ni una ley de caudal crítico.
 - **Experimento que más reduciría la incertidumbre:** llamas normales a 30 % O₂ y 70 kPa (hoy 0 pruebas) y, en general, O₂ entre 0.24 y 0.33.
 
+## Iteración 4 (2026-11-16) — ¿el video de la ISS permite medir la llama? (ADR-0009, fase 1)
+
+**Reproducible:** `flamesafe video-samples` (4 archivos, 494 MB, 0 diferencias de tamaño) →
+`python scripts/research/r04_video_feasibility.py --burner-px 30`. Requiere `opencv-python-headless`.
+
+### R16. Sí: la llama esférica es medible en el video de operaciones, y el video ve lo que los sensores no
+Video: cámara analógica de operaciones grabada en tierra desde el enlace de bajada (CFI-G final report), 640×480 a 29.97 cps.
+La cámara científica de alta definición (1024×1024, 30 cps) está en los `.zip`, mucho más pesados.
+
+| Prueba | Llama | Duración: investigador / serie / **video** | Radio estable | Brillo amarillo a la mitad, antes del final |
+|---|---|---|---|---|
+| 21137A4 | normal, propano, 36 % O₂, 1 atm, autoextinguida | 35 / 35.8 / **36.0 s** | 79 px (~17 mm ⚠️) | 17 s antes |
+| 21174F2 | normal, butano, 39 % O₂, 2 atm, cortada por flujo | 24 / 24.4 / **25.1 s** | 83 px (~18 mm ⚠️) | no ocurre (brillante hasta el corte) |
+| 21228J1 | inversa, propano, 85 % O₂, 1.1 bar, autoextinguida | 18 / 17.9 / **17.8 s** | 36 px (~8 mm ⚠️) | 14 s antes |
+
+- **La duración medida en el video coincide con las otras dos fuentes** con diferencias de 1 s o menos.
+- **El radio se mide con claridad:** esfera casi redonda (redondez 0.85–0.87 en normales) sobre fondo negro. Escala: el
+  quemador mide 6.35 mm (reporte final); ~30 px en un cuadro iluminado (⚠️ estimación visual, falta medirlo con precisión).
+- **Lo que solo se ve en video:** la llama normal tiene un núcleo amarillo (hollín) dentro de una capa azul. En la llama que se
+  autoextingue el amarillo se apaga **unos 17 s antes** de la extinción y al final solo queda la capa azul tenue; antes de
+  apagarse el radio oscila y se encoge. En la llama cortada por flujo el núcleo sigue brillante hasta el corte.
+  Es coherente con la extinción radiativa (el hollín radia calor y enfría la llama) y con la oscilación previa de R11.
+- ⚠️ El brillo no se puede comparar entre pruebas: la ganancia de la cámara se ajustaba a veces para llamas tenues. Sí sirve dentro
+  de una misma prueba (forma de la curva). Los puntos brillantes son píxeles calientes del sensor por radiación, no partículas.
+- Limitaciones: tres pruebas; resolución modesta; destello del ignitor al inicio; errores de decodificación benignos del flujo `.ts`.
+
+**Decisión:** la fase 1 es positiva. La fase 2 (336 videos de CFI-G en Google Cloud) queda justificada para medir radio y
+desaparición del hollín en todas las pruebas y contrastar la ley `r ∝ ṁ/L` y el precursor óptico.
+
+## Iteración 5 (2026-11-16) — el video de todas las pruebas de CFI-G, procesado en Google Cloud (ADR-0009, fase 2)
+
+**Reproducible:** Cloud Run Job `flamesafe-video` (335 tareas, ~11 min; ver `deploy/VIDEO_JOB.md`) →
+`flamesafe video-collect --source gs://flamesafe-psi-video/cfig-v2` → `python scripts/research/r05_video_all_cfig.py`.
+Dos fallas encontradas y corregidas en la prueba de humo: OpenCV en Linux devolvía cuadros negros (se decodifica con
+FFmpeg de `imageio-ffmpeg`) y el quemador incandescente tras la extinción se contaba como llama (regla de persistencia).
+
+### R17. La duración medida en video concuerda con el investigador en 264 pruebas
+334 videos procesados, llama vista en 331; 321 se unen a pruebas de gold. Contra la tabla del investigador: Spearman 0.97,
+diferencia mediana 0.0 s, 70 % dentro de 2 s y 83 % dentro de 5 s. Contra el detector de las series: Spearman 0.975.
+- Las discrepancias grandes son llamas **muy largas** (160–300 s) en las que el video pierde la llama antes: probablemente se
+  vuelve demasiado tenue para la cámara (⚠️ posible llama tibia o fría; por verificar).
+- **21112A6:** el video da 146 s, igual que las series (147 s); la tabla dice 259 s. Confirma el error sospechado en R7.
+
+### R18. El radio de la llama no sigue la ley estacionaria, pero sí es independiente de la presión (llamas normales)
+Teoría cuasi-estacionaria: radio ∝ ṁ/L (pendiente 1 en escala log). 83 llamas normales con radio de buena calidad, 11 días:
+- **Pendiente 0.50** (IC 95 % 0.30–0.71), R² 0.42, Spearman 0.72. El radio crece con ṁ/L, pero como su raíz, no linealmente.
+- Exponente de presión −0.04 (IC −0.25 a 0.17): **sin efecto de la presión**, como predice la teoría (ρD no depende de p).
+- Lectura: estas llamas no alcanzan el estado estacionario durante la prueba (o el radio visible no es la hoja de llama).
+  La ecuación de duración usa ṁ y L por separado, así que sigue siendo válida; lo que cae es la interpretación "radio estacionario".
+- Llamas inversas: casi sin relación (pendiente 0.20, IC −0.13 a 0.52) y fuerte dependencia de la presión (−0.62). Son tenues:
+  solo 55 con radio de buena calidad.
+
+### R19 (negativo). El apagado del hollín NO anticipa la autoextinción
+En las tres muestras de R16 el núcleo amarillo se apagaba antes de la extinción. Con todas las pruebas no se sostiene:
+en llamas normales el brillo cae a la mitad ≥ 5 s antes del final en el 60 % de las autoextinguidas **y** en el 60 % de las
+cortadas por flujo (AUC 0.45, IC 0.24–0.63). En inversas va al revés. El brillo decae con el tiempo en casi todas las llamas
+(y la ganancia de la cámara variaba): no es un precursor. **La observación de R16 era un artefacto de muestra pequeña.**
+
+### R20. El encogimiento de la llama sí anticipa la autoextinción (llamas normales)
+Radio relativo a su mediana de media vida, en ventanas antes del final (67 llamas normales con radio de buena calidad):
+
+| Ventana antes del final | Autoextinguidas (45) | Cortadas por flujo (22) | AUC "se va a apagar sola" (IC 95 %, bootstrap de días) |
+|---|---|---|---|
+| 15 a 10 s | 0.74 | 1.02 | 0.73 (0.62–0.84) |
+| 10 a 5 s | 0.62 | 0.99 | 0.76 (0.67–0.86) |
+| 5 a 0 s | 0.50 | 0.92 | — |
+
+- El 71 % de las llamas que se autoextinguen ya mide menos del 80 % de su radio de media vida **5–10 s antes** de apagarse,
+  frente al 32 % de las que siguen vivas hasta el corte. Coherente con la extinción radiativa y con la oscilación de R11.
+- Es una señal medible con una cámara simple y sin calibración absoluta (radio relativo a sí mismo).
+- ⚠️ Retrospectivo: aquí se conoce el final. Para una alarma en tiempo real hay que usar la caída respecto al máximo móvil y
+  medir falsas alarmas durante toda la vida de la llama. En inversas no hay suficientes llamas con radio medible.
+
 ## Agenda (ordenada por información ganada por esfuerzo)
 
 1. ✔ **Series temporales ingeridas** (ADR-0005) y reducidas a una fila por prueba. Pendiente dentro de este frente:

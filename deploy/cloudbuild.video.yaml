@@ -1,0 +1,9 @@
+# ADR-0009 phase 2 · builds deploy/Dockerfile.video into Artifact Registry. Usage in deploy/VIDEO_JOB.md.
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: ["build", "-f", "deploy/Dockerfile.video", "-t", "${_IMAGE}", "."]
+images: ["${_IMAGE}"]
+substitutions:
+  _IMAGE: us-west1-docker.pkg.dev/flamesafe-psi/flamesafe/video-job:latest
+options:
+  logging: CLOUD_LOGGING_ONLY
