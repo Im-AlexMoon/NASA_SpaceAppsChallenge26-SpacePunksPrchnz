@@ -12,7 +12,7 @@
 | F0 Setup y alineación | G0 | H+2 | 🟦 | 20 | | Repo + plan listos |
 | F1 Descubrimiento y triage | G1 | H+5 | 🟨 | 90 | DE | DE-01…05 ✔; **G1 espera a PHY-02** (ratificar pilar, entorno y R1) |
 | F2 Pipeline medallion | G2 | H+9 | ✅ | 100 | DE | **G2 cerrado**: gate de datos PASSED, rebuild determinista |
-| F3 EDA y estadística | G3 | H+14 | 🟦 | 10 | DS | discovery de gold hecho (`notebooks/01_discovery`); siguiente DS-03 + EDA RQ1 |
+| F3 EDA y estadística | G3 | H+14 | 🟦 | 40 | DS | discovery ✔ · EDA RQ1 v1 ✔ (4 candidatos a finding, pendiente PHY-03) · siguiente EDA RQ2 |
 | F4 Modelado | G4 | H+17 | ⬜ | 0 | DS | desbloqueado (M1 con CFI-G; M2 con FLEX + CFI) |
 | F5 RAG | G5 | H+16 | ⬜ | 0 | | |
 | F6 Dashboard | G6 | H+20 | ⬜ | 0 | | |
@@ -147,3 +147,21 @@
   - 9 pruebas de gotas con d_ext ≥ d₀ (1 FLEX, 8 CFI) para revisar en el EDA.
   - Corrección: CFI-G tiene 62 "no" (no 60); MODELING_PLAN actualizado.
 - ▶ Siguiente: ADR-0004 (decisiones PHY + R-DE-05b en el pipeline), DS-03 (ratificar RQs) y `02_eda` empezando por RQ1.
+
+### DS-04/DS-05 · EDA RQ1 v1 — 2026-11-14
+- ✔ `notebooks/02_eda/02_eda_rq1_ignition_boundary_am.ipynb` sobre CFI-G (normales e inversas por separado), con pruebas pre-registradas
+  T1–T4, SE robustos por `test_day`, Holm sobre la familia primaria y validación cruzada dejando fuera días completos.
+- ✔ `src/flamesafe/analysis/stats.py` (logit agrupado, Holm, CV por grupos, bootstrap por grupos, umbral logístico) + 4 tests.
+  CI instala ahora el extra `analysis`.
+- 📌 Resultados (candidatos a finding, pendientes de PHY-03):
+  - **F-01 (más fuerte):** en llamas normales encendidas, +0.05 de xo2 multiplica por ≈ 2.2 (IC 95 % 1.6–3.2) las odds de que la llama
+    siga hasta el corte de flujo en vez de autoextinguirse (exploratorio, p < 0.001).
+  - **F-02:** límite pobre claro (ninguna ignición con `x_fuel` < ~0.03); efecto del O₂ en la ignición en la dirección esperada
+    (OR ≈ 1.4 por +0.05) pero **no significativo tras Holm** (p_holm ≈ 0.11 en las 4 pruebas primarias).
+  - **F-03 (brecha):** H1 (xo2 + p vs. po2) no se puede decidir en llamas normales (ΔAIC ≈ 0); en inversas gana xo2 + p (ΔAIC ≈ 5.6).
+  - **F-04 (brecha):** ninguna prueba de llama normal cerca de la base lunar (30 % O₂, 70 kPa); cerca de la atmósfera de exploración, 19 de 3 días.
+  - Sensibilidad `flash`: OR(xo2) estable (1.22–1.25), la decisión PHY no sesga el resultado.
+- ⚠️ El modelo logístico lineal está mal especificado en llamas normales (efecto no monótono del combustible: tres regímenes).
+  **M1 debe tratar el combustible de forma no lineal.** Preguntas PHY: significado de `Xfuel` en CFI-G normal, dirección de la presión
+  en inversas, 2 pruebas con `x_fuel = 0` (21125A4, 21125H3).
+- ▶ Siguiente: PHY-03 sobre F-01…F-04, ADR-0004 (FLEX → `k_hot_mm2_s`) y EDA RQ2 (diluyentes en gotas).

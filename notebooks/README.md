@@ -13,6 +13,7 @@ Exploración y EDA. **Regla:** los notebooks exploran; el código reutilizable s
 | Notebook | Qué responde | Estado |
 |---|---|---|
 | `01_discovery/01_discovery_gold_coverage_am.ipynb` | Inventario de gold, diseño experimental, confusores, faltantes, cobertura cerca de los hábitats y evidencia para R-DE-05b | ✔ 2026-11-14 |
+| `02_eda/02_eda_rq1_ignition_boundary_am.ipynb` | RQ1: ignición y extinción de llamas de gas (CFI-G) frente a O₂, presión y combustible; pruebas pre-registradas T1–T4 | ✔ v1 2026-11-14 (pendiente PHY-03) |
 
 Orden recomendado: `01_discovery` → `02_eda` → `03_modeling`. `04_rag` es independiente y puede avanzar en paralelo.
 Para ejecutar: `pip install -e ".[analysis]"` y tener gold construido (`make pipeline`).
