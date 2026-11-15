@@ -283,3 +283,14 @@ Ejecución y límites: [RAG_RUNBOOK.md](../03_data_science/RAG_RUNBOOK.md).
 - ▶ Siguiente: piloto de video en la nube (requiere ADR y acceso confirmado), unificar el Cox de Hugo con la censura por límite
   térmico, llevar `acme__timeseries_features` a gold, revisión PHY, gotas y sólidos.
 
+### Investigación · iteración 4: factibilidad del video (ADR-0009, fase 1) — 2026-11-16
+- ✔ Google Cloud listo: proyecto `flamesafe-psi`, región `us-west1`, Cloud Run, Artifact Registry, Cloud Build y Cloud Storage
+  habilitados; facturación activa. Sin máquinas virtuales ni recursos con costo creados.
+- ✔ **ADR-0009** (fase 1 aceptada) y `flamesafe video-samples`: 4 archivos exactos, 494 MB.
+- ✔ `scripts/research/r04_video_feasibility.py` y RESEARCH_LOG R16.
+- 📌 **Fase 1 positiva:** la llama esférica es medible en el video de operaciones (640×480, 30 cps). La duración medida coincide con
+  el investigador a ≤ 1 s en las 3 pruebas; radio estable ~17 mm (normal) y ~8 mm (inversa), escala a confirmar. En las llamas que
+  se autoextinguen el núcleo de hollín se apaga ~14–17 s antes de la extinción; en la cortada por flujo no.
+- ⏸ Antes de la fase 2: alerta de presupuesto en la consola (usuario) y medición precisa de la escala del quemador.
+- ▶ Siguiente: fase 2 en Cloud Run Jobs (336 videos de CFI-G, ~82 GB) → tabla silver `acme__video_features`.
+

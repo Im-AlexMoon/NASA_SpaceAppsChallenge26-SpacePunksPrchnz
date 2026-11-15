@@ -1,0 +1,20 @@
+# ADR-0009 · Video feasibility sample: 3 downlinked ISS videos (+ 1 short mp4) of CFI-G spherical flames.
+# Goal: check whether the flame can be measured (radius vs time, extinction, cool flame) before any cloud processing.
+# Downloaded with `flamesafe video-samples`; lock: docs/02_data_engineering/video_samples.csv.
+# `unlock_extensions` lifts the global deny list ONLY for the exact files listed here (ADR-0009). Never patterns.
+budget:
+  max_total_mb: 800
+  max_file_mb: 260
+  max_files: 4
+include_experimental_tables: false
+unlock_extensions: [ts, mp4]
+
+groups:
+  - name: video_feasibility_sample
+    purpose: "normal self-extinguished (35 s), inverse self-extinguished (18 s), normal flow-terminated, short mp4"
+    files:
+      PSI-159:
+        - "PSI-159_Raw Data_vlc-record-2021-05-17-15h38m23s-udp____21137A4.ts"   # normal, propane, 36 % O2, 1 atm, SE 35 s
+        - "PSI-159_Raw Data_vlc-record-2021-08-16-21h25m04s-udp____21228J1.ts"   # inverse, propane, 85 % O2, 1.1 bar, SE 18 s
+        - "PSI-159_Raw Data_vlc-record-2021-06-23-20h46m26s-udp____21174F2.ts"   # normal, butane, 39 % O2, 2 atm, flow cut
+        - "PSI-159_Raw Data_vlc-record-2021-04-12-19h41m39s-udp____21102B1.mp4"  # the only mp4 in the record (21 MB)

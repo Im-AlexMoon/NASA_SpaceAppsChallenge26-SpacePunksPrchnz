@@ -160,6 +160,35 @@ def bronze(
         raise typer.Exit(code=1)
 
 
+@app.command("video-samples")
+def video_samples(dry_run: bool = typer.Option(False, help="Only resolve, lock and check the budget")) -> None:
+    """ADR-0009: download the explicit video feasibility sample (exact file names only) into data/bronze/files."""
+    from flamesafe import config
+    from flamesafe.ingestion import download as dl
+    from flamesafe.pipeline.silver_catalog import silver_catalog_dir
+
+    man = config.load("video_samples")
+    if any(isinstance(e, dict) for g in man["groups"] for es in g["files"].values() for e in es):
+        raise typer.BadParameter("video_samples.yaml must list exact file names, never patterns (ADR-0009)")
+    reqs = dl.requests_from_selection(man, silver_catalog_dir())
+    unlocked = {e.lower() for e in man.get("unlock_extensions", [])}
+    deny = [e for e in config.load("sources")["download_budget"]["deny_extensions"] if e.lower() not in unlocked]
+    b = man["budget"]
+    total = dl.check_budget(reqs, b["max_total_mb"], b["max_file_mb"], deny, b.get("max_files"))
+    lock = dl.write_manifest_lock(reqs, config.ROOT / "docs" / "02_data_engineering" / "video_samples.csv")
+    typer.echo(f"Video sample: {len(reqs)} files, {total / 1e6:.1f} MB (budget {b['max_total_mb']} MB) -> {lock.name}")
+    if dry_run:
+        return
+    results = dl.fetch(reqs, workers=2)
+    report = dl.write_report(results, "video_samples", extra={"lock": lock.name})
+    ok = sum(r.get("http_status") == 200 for r in results)
+    mism = [r for r in results if r.get("size_matches") is False]
+    typer.echo(f"Acquired {ok}/{len(results)} ({sum(r.get('bytes', 0) for r in results) / 1e6:.1f} MB) - "
+               f"size mismatches {len(mism)} - report {report.name}")
+    if mism or ok < len(results):
+        raise typer.Exit(code=1)
+
+
 @app.command()
 def timeseries(
     dry_run: bool = typer.Option(False, help="Only resolve the selection, write the lock and check the budget"),

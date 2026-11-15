@@ -243,6 +243,35 @@ estacionarias: dispersión 0.1 % en combustible y 0.3 % en N₂).
 - ✘ No demuestra: el efecto de la gravedad parcial, la validez para otros combustibles o sólidos, ni una ley de caudal crítico.
 - **Experimento que más reduciría la incertidumbre:** llamas normales a 30 % O₂ y 70 kPa (hoy 0 pruebas) y, en general, O₂ entre 0.24 y 0.33.
 
+## Iteración 4 (2026-11-16) — ¿el video de la ISS permite medir la llama? (ADR-0009, fase 1)
+
+**Reproducible:** `flamesafe video-samples` (4 archivos, 494 MB, 0 diferencias de tamaño) →
+`python scripts/research/r04_video_feasibility.py --burner-px 30`. Requiere `opencv-python-headless`.
+
+### R16. Sí: la llama esférica es medible en el video de operaciones, y el video ve lo que los sensores no
+Video: cámara analógica de operaciones grabada en tierra desde el enlace de bajada (CFI-G final report), 640×480 a 29.97 cps.
+La cámara científica de alta definición (1024×1024, 30 cps) está en los `.zip`, mucho más pesados.
+
+| Prueba | Llama | Duración: investigador / serie / **video** | Radio estable | Brillo amarillo a la mitad, antes del final |
+|---|---|---|---|---|
+| 21137A4 | normal, propano, 36 % O₂, 1 atm, autoextinguida | 35 / 35.8 / **36.0 s** | 79 px (~17 mm ⚠️) | 17 s antes |
+| 21174F2 | normal, butano, 39 % O₂, 2 atm, cortada por flujo | 24 / 24.4 / **25.1 s** | 83 px (~18 mm ⚠️) | no ocurre (brillante hasta el corte) |
+| 21228J1 | inversa, propano, 85 % O₂, 1.1 bar, autoextinguida | 18 / 17.9 / **17.8 s** | 36 px (~8 mm ⚠️) | 14 s antes |
+
+- **La duración medida en el video coincide con las otras dos fuentes** con diferencias de 1 s o menos.
+- **El radio se mide con claridad:** esfera casi redonda (redondez 0.85–0.87 en normales) sobre fondo negro. Escala: el
+  quemador mide 6.35 mm (reporte final); ~30 px en un cuadro iluminado (⚠️ estimación visual, falta medirlo con precisión).
+- **Lo que solo se ve en video:** la llama normal tiene un núcleo amarillo (hollín) dentro de una capa azul. En la llama que se
+  autoextingue el amarillo se apaga **unos 17 s antes** de la extinción y al final solo queda la capa azul tenue; antes de
+  apagarse el radio oscila y se encoge. En la llama cortada por flujo el núcleo sigue brillante hasta el corte.
+  Es coherente con la extinción radiativa (el hollín radia calor y enfría la llama) y con la oscilación previa de R11.
+- ⚠️ El brillo no se puede comparar entre pruebas: la ganancia de la cámara se ajustaba a veces para llamas tenues. Sí sirve dentro
+  de una misma prueba (forma de la curva). Los puntos brillantes son píxeles calientes del sensor por radiación, no partículas.
+- Limitaciones: tres pruebas; resolución modesta; destello del ignitor al inicio; errores de decodificación benignos del flujo `.ts`.
+
+**Decisión:** la fase 1 es positiva. La fase 2 (336 videos de CFI-G en Google Cloud) queda justificada para medir radio y
+desaparición del hollín en todas las pruebas y contrastar la ley `r ∝ ṁ/L` y el precursor óptico.
+
 ## Agenda (ordenada por información ganada por esfuerzo)
 
 1. ✔ **Series temporales ingeridas** (ADR-0005) y reducidas a una fila por prueba. Pendiente dentro de este frente:
