@@ -12,7 +12,7 @@
 | F0 Setup y alineación | G0 | H+2 | 🟦 | 20 | | Repo + plan listos |
 | F1 Descubrimiento y triage | G1 | H+5 | 🟨 | 90 | DE | DE-01…05 ✔; **G1 espera a PHY-02** (ratificar pilar, entorno y R1) |
 | F2 Pipeline medallion | G2 | H+9 | ✅ | 100 | DE | **G2 cerrado**: gate de datos PASSED, rebuild determinista |
-| F3 EDA y estadística | G3 | H+14 | ⬜ | 0 | DS | desbloqueado: gold listo (`gas_flame_tests`, `droplet_tests`) |
+| F3 EDA y estadística | G3 | H+14 | 🟦 | 10 | DS | discovery de gold hecho (`notebooks/01_discovery`); siguiente DS-03 + EDA RQ1 |
 | F4 Modelado | G4 | H+17 | ⬜ | 0 | DS | desbloqueado (M1 con CFI-G; M2 con FLEX + CFI) |
 | F5 RAG | G5 | H+16 | ⬜ | 0 | | |
 | F6 Dashboard | G6 | H+20 | ⬜ | 0 | | |
@@ -130,3 +130,20 @@
   - **F5:** RAG-01 puede usar los 29 PDF descargados y `publications`.
   - **F6:** APP-02 puede hacer el vertical slice con DuckDB.
   - **G1** sigue pendiente de PHY-02.
+
+### Decisiones PHY + notebook 01_discovery — 2026-11-14
+- ✔ **Decisiones PHY recibidas:**
+  - `flash` (8 casos de CFI-G): categoría propia, fuera del ajuste binario principal de M1, con análisis de sensibilidad (flash = sí / flash = no).
+  - Tasa de quemado de FLEX: **mm²/s**. Evidencia interna en el notebook: frente a K̂ = (d₀² − d_ext²)/t_quemado, cociente mediano 1.05
+    (IQR 1.03–1.09) y Spearman 0.96 en 196 pruebas (control CFI: 1.21 y 0.74). Falta formalizarlo en ADR-0004 y pasar la columna a `k_hot_mm2_s`.
+- ✔ `notebooks/01_discovery/01_discovery_gold_coverage_am.ipynb`: inventario, diseño experimental, confusores, faltantes, cobertura cerca
+  de los hábitats y material de validación. Lee solo DuckDB gold y corre completo ("Restart & Run All").
+- 📌 Hallazgos que condicionan el EDA:
+  - Los resultados secundarios (`extinction_mode`, `burn_time_s`, `peak_burner_t_k`, `tfp`) **solo existen en CFI-G**. Flame Design aporta
+    condiciones, `zst`/`tad_k` y un resultado casi siempre "yes" (98.8 %): sirve como soporte positivo, no como clase negativa.
+  - `xo2` y `p` se variaron casi de forma independiente (|ρ| ≤ 0.3), así que H1 (po2 vs. xo2) es contestable.
+  - Cerca de la base lunar (±0.05 xo2, ±25 % p) hay solo 6 pruebas (todas CFI-G); cerca de la atmósfera de exploración, 30. El traje
+    espacial queda fuera del dominio de gold.
+  - 9 pruebas de gotas con d_ext ≥ d₀ (1 FLEX, 8 CFI) para revisar en el EDA.
+  - Corrección: CFI-G tiene 62 "no" (no 60); MODELING_PLAN actualizado.
+- ▶ Siguiente: ADR-0004 (decisiones PHY + R-DE-05b en el pipeline), DS-03 (ratificar RQs) y `02_eda` empezando por RQ1.

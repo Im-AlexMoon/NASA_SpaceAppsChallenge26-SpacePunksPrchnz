@@ -26,7 +26,7 @@ Los datasets tabulares de PSI tienen **decenas a cientos de filas**. Eso define 
 | **M4** | Alerta temprana de detección de humo | respuesta del detector vs. tiempo/material | `smoke_detection`, `fire_telemetry` | series de tiempo | Stretch 2 |
 
 ### Datos disponibles tras DE-08 (2026-11-14)
-- **M1:** `gas_flame_tests`. **CFI-G** tiene 333 pruebas; 263 sí / 60 no en `ignited`, 8 `flash` y XO₂ de 0.12 a 0.85.
+- **M1:** `gas_flame_tests`. **CFI-G** tiene 333 pruebas; 263 sí / 62 no en `ignited`, 8 `flash` y XO₂ de 0.12 a 0.85.
   Es la base del clasificador. **Flame Design** tiene 325 pruebas con `ignited` casi constante (323 sí / 2 no) y procedente de una
   decisión operativa (R-DE-08a). Sirve para describir el espacio de condiciones y como validación débil, **no** para entrenar sin cuidado.
 - **M2:** `droplet_tests`. CFI tiene `k_hot_mm2_s` en 148 pruebas (con He y 0.5–5 atm). FLEX y CFI tienen `d_ext_hot_mm` en 341.
