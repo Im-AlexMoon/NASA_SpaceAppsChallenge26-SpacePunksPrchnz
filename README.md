@@ -9,7 +9,23 @@ pressurized rovers and Mars.
 > **Status:** 🚧 in development. Plan: [docs/00_executive/EXECUTIVE_PLAN.md](docs/00_executive/EXECUTIVE_PLAN.md) ·
 > Progress: [docs/01_management/PROGRESS.md](docs/01_management/PROGRESS.md)
 
-> **Current RAG and dashboard plan (2026-11-15):** follow [RAG_IMPLEMENTATION_PLAN.md](docs/03_data_science/RAG_IMPLEMENTATION_PLAN.md) and [ADR-0004](docs/01_management/decisions/ADR-0004-rag-web-architecture.md). They supersede conflicting earlier plans: migrate the dashboard to Next.js/Node.js with a separate Python backend; release bilingual document and exact-data answers first, with predictions deferred. Implementation is pending; the Streamlit layout and quickstart below describe the existing scaffold. Document architecture/scope changes before departing from the current plan.
+> **Current RAG and dashboard plan (2026-11-15):** follow [RAG_IMPLEMENTATION_PLAN.md](docs/03_data_science/RAG_IMPLEMENTATION_PLAN.md) and [ADR-0004](docs/01_management/decisions/ADR-0004-rag-web-architecture.md). A local Next.js/FastAPI pilot is implemented; its commands and explicit release limits are in [RAG_RUNBOOK.md](docs/03_data_science/RAG_RUNBOOK.md). Generation initially selects verified quotations; exact figures come from bounded database tools. Scientific approval, live-provider evaluation and deployment remain separate gates. Streamlit is retained during transition. Document architecture/scope changes before departing from the current plan.
+
+## Run the RAG pilot
+
+```powershell
+uv sync --locked --extra api --extra rag --extra rag-gemini --extra rag-openai --extra pipeline --extra analysis --extra dev
+uv run --no-sync flamesafe rag-index --source-mode sample --allow-model-download
+uv run --no-sync flamesafe rag-validate
+uv run --no-sync flamesafe rag-ask --evidence-only --question "Where does burn_time_s come from?"
+uv run --no-sync uvicorn flamesafe.api.main:app --host 127.0.0.1 --port 8000 --workers 1
+```
+
+Configure the private backend/dashboard tokens using `.env.example` and `web/.env.example`.
+Then run `npm --prefix web ci` and `npm --prefix web run dev` with Node LTS >=22.
+The backend runs without a generation key in evidence-only mode. Gemini/OpenAI generation
+requires an explicitly configured model and quotas; see the runbook before enabling it.
+Full-data builds use `--source-mode full`; samples are never silently substituted.
 
 ## What it does
 

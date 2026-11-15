@@ -1,0 +1,10 @@
+.git
+.env
+**/.env.local
+.venv
+data
+artifacts
+web/node_modules
+web/.next
+notebooks
+tests

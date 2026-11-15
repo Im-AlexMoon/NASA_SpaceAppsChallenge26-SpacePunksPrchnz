@@ -4,6 +4,12 @@
 
 ## Plan vigente de RAG y dashboard
 
+**Actualización de implementación:** el piloto local Next.js/FastAPI y RAG híbrido ya
+existe. Consultar [RAG_RUNBOOK.md](03_data_science/RAG_RUNBOOK.md) para ejecución y límites,
+y [ADR-0008](01_management/decisions/ADR-0008-rag-extractive-baseline.md) para el contrato
+extractivo. Permanecen pendientes evaluación live, aceptación científica y despliegue.
+Esta actualización sustituye las referencias históricas a implementación completamente pendiente.
+
 **Seguir [RAG_IMPLEMENTATION_PLAN.md](03_data_science/RAG_IMPLEMENTATION_PLAN.md), vigente desde el 2026-11-15, y [ADR-0004](01_management/decisions/ADR-0004-rag-web-architecture.md).** Es la referencia para trabajo nuevo de RAG y migración completa del dashboard a Node.js con backend Python. Prevalece sobre las instrucciones incompatibles de los diseños anteriores; los cambios de alcance/arquitectura deben documentarse y actualizar este plan. La implementación sigue pendiente: no asumir que la arquitectura objetivo ya existe ni habilitar predicciones por este cambio documental.
 
 | Carpeta | Qué contiene | Dueño |

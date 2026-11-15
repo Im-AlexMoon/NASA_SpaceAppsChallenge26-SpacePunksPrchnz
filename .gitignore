@@ -16,6 +16,11 @@ htmlcov/
 
 # --- Secrets ---
 .env
+.env.local
+node_modules/
+.next/
+*.tsbuildinfo
+web/next-env.d.ts
 *.key
 
 # --- Data (medallion layers are reproducible: never commit them) ---

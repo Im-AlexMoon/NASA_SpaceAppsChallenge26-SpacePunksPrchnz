@@ -1,0 +1,6 @@
+# Explicit source eligibility. No recursive indexing.
+catalog_fields: [objective, approach, hypothesis, research_impacts]
+dictionary: docs/02_data_engineering/DATA_DICTIONARY.md
+# Reviewed documents require path, sha256, reviewed_by, license_or_terms,
+# allow_provider: true and approved_sections (heading or page:N).
+documents: []

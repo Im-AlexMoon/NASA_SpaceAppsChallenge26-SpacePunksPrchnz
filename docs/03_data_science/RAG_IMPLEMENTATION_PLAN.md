@@ -2,10 +2,10 @@
 
 > **PLAN VIGENTE — SEGUIR ESTE DOCUMENTO.** Desde el **2026-11-15**, este es el plan de referencia para implementar el RAG y migrar el dashboard. Prevalece, en caso de contradicción, sobre el diseño RAG anterior, la especificación Streamlit y las decisiones tecnológicas anteriores relativas a estas capas. Los colaboradores y agentes deben seguirlo; cualquier cambio de arquitectura o alcance debe documentarse mediante un ADR y actualizar este plan antes de implementarse.
 >
-> **Estado: planificación acordada; implementación pendiente.** Publicar este documento no significa que sus módulos, comandos, dependencias, controles o despliegues ya existan. Tampoco habilita predicciones ni constituye aprobación científica, autorización de gasto o autorización de publicación.
+> **Estado: implementación local del piloto disponible; aceptación y publicación pendientes.** Consultar [RAG_RUNBOOK.md](RAG_RUNBOOK.md) para comandos, capacidades y límites verificados, y [ADR-0008](../01_management/decisions/ADR-0008-rag-extractive-baseline.md) para el contrato extractivo inicial. No confundir entrega local con aprobación científica, autorización de gasto o autorización de publicación. Las fases y gates de este plan siguen vigentes.
 
 - **Decisión de arquitectura:** [ADR-0004](../01_management/decisions/ADR-0004-rag-web-architecture.md).
-- **Visión de producto y alcance de las lecturas del modelo (2026-11-16):** [PRODUCT_VISION.md](../05_dashboard/PRODUCT_VISION.md) y [ADR-0007](../01_management/decisions/ADR-0007-evidence-tiers-in-dashboard.md). ADR-0007 modifica la fila «Predicciones» de la sección 1 y la ruta `/habitat` de la sección 13; **pendiente de incorporar en este plan por sus responsables**.
+- **Visión de producto y alcance de las lecturas del modelo (2026-11-16):** [PRODUCT_VISION.md](../05_dashboard/PRODUCT_VISION.md) y [ADR-0007](../01_management/decisions/ADR-0007-evidence-tiers-in-dashboard.md). Se incorpora su distinción entre lecturas controladas del dashboard y ausencia de predicciones en chat. El piloto mantiene activo el bloqueo de publicación hasta revisión de artefactos.
 - **Base inspeccionada:** commit `b1efca2`. Volver a comprobar el repositorio antes de implementar.
 - **Alcance:** tareas RAG-01 a RAG-05 y migración de las páginas APP; las fases de ejecución se detallan en la sección 17.
 - **Documentos anteriores:** [RAG_DESIGN.md](RAG_DESIGN.md), [DASHBOARD_SPEC.md](../05_dashboard/DASHBOARD_SPEC.md) y [ADR-0001](../01_management/decisions/ADR-0001-tech-stack.md) se conservan como antecedentes. Sus instrucciones incompatibles no deben guiar trabajo nuevo.
@@ -24,7 +24,7 @@ Las decisiones confirmadas para esta planificación son:
 | Hosting web | GoDaddy para la aplicación Node.js y el dominio |
 | Backend Python | Se permite un proveedor de hosting separado |
 | Generación | Describir e implementar adaptadores para OpenAI y Gemini; proveedor activo aún por decidir |
-| Predicciones | Versión posterior; no habilitarlas en la primera entrega |
+| Predicciones | Chat sin predicciones. Dashboard: lecturas controladas según ADR-0007, bloqueadas hasta artefacto y validación; no inventar tiers ni cifras |
 
 El objetivo es responder con evidencia trazable, distinguir poblaciones experimentales y permitir inspeccionar las fuentes y consultas que respaldan cada respuesta.
 
@@ -375,11 +375,11 @@ Next.js/TypeScript con layout compartido. Mantener UI en inglés conforme a la c
 | Investigation Explorer | `/investigations` | Filtros, fichas, publicaciones y cobertura |
 | Compare | `/compare` | Resúmenes compatibles lado a lado |
 | Insights | `/insights` | Findings aprobados o estado vacío explícito |
-| Habitat Risk Explorer | `/habitat` | Cobertura y estado de revisión; sin predicciones |
+| Habitat Risk Explorer | `/habitat` | Cobertura y estado de revisión; lecturas controladas ADR-0007 solo tras validación. Piloto con bloqueo activo |
 | Ask the Data | `/ask` | RAG bilingüe |
 | Methods & Sources | `/methods` | Procedencia, limitaciones, definiciones y construcción |
 
-Migrar todas las rutas no autoriza resultados científicos no aprobados. No inventar scores de ranking ni findings para llenar pantallas. Mantener controles predictivos inhabilitados hasta una entrega posterior; distinguir disponibilidad bibliográfica de conclusiones de los artículos.
+Migrar todas las rutas no autoriza resultados científicos no aprobados. No inventar scores de ranking ni findings para llenar pantallas. Mantener controles predictivos inhabilitados hasta que se satisfagan los requisitos de artefacto, validación y publicación de ADR-0007; distinguir disponibilidad bibliográfica de conclusiones de los artículos.
 
 Componentes compartidos: fuentes, tipo/revisión de evidencia, ámbito e instantánea, cobertura/faltantes, unidades, carga/vacío/indisponibilidad y tablas expandibles. Python entrega series numéricas tipadas para Plotly/React; no ejecutar código de gráficas generado por el modelo.
 

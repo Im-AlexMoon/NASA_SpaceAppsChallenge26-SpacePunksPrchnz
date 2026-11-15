@@ -5,6 +5,21 @@
 
 **H+0 (inicio):** `____-__-__ __:__` · **Deadline:** `____-__-__ __:__`
 
+## Actualización: piloto RAG y dashboard local
+
+Implementación sobre base `ba1e104`: FastAPI, nueve consultas parametrizadas, corpus
+elegible, E5 multilingüe local + BM25/LanceDB, snapshots verificables, adaptadores Gemini/
+OpenAI, cuotas persistentes y ocho rutas Next.js. Contrato extractivo: ADR-0008.
+
+Verificación local: 165 pruebas Python no integration, Ruff, lint/typecheck/build web,
+una prueba de gateway y dos pruebas de navegador aprobadas. Base de 60 preguntas
+bilingües de definiciones: 60/60 en herramienta y hit@8, sin evaluación live.
+Snapshot full validado; gold/silver y notebooks no modificados. No se publicaron servicios
+ni se hicieron llamadas generativas. No cerrar G5/G6 por esta entrega: siguen pendientes
+corpus revisado, evaluación semántica/live, aceptación de producto y despliegue.
+
+Ejecución y límites: [RAG_RUNBOOK.md](../03_data_science/RAG_RUNBOOK.md).
+
 ## Estado por fase
 
 | Fase | Gate | Objetivo | Estado | % | Responsable | Nota |

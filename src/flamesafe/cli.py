@@ -298,9 +298,42 @@ def train() -> None:
 
 
 @app.command("rag-index")
-def rag_index() -> None:
-    """F5 - RAG-02: build the hybrid retrieval index."""
-    _todo("RAG-02")
+def rag_index(source_mode: str = "sample", retrieval_mode: str = "hybrid", allow_download: bool = typer.Option(False, "--allow-download", "--allow-model-download")) -> None:
+    """Build an immutable RAG snapshot; downloads require an explicit flag."""
+    from flamesafe.rag.index import build
+    from flamesafe.rag.settings import settings
+    typer.echo(build(settings(), source_mode, retrieval_mode, allow_download).model_dump_json(indent=2))
+
+
+@app.command("rag-validate")
+def rag_validate() -> None:
+    """Validate hashes, citations and row counts of CURRENT."""
+    from flamesafe.rag.index import current, validate
+    from flamesafe.rag.settings import settings
+    typer.echo(validate(current(settings().artifact_root)).model_dump_json(indent=2))
+
+
+@app.command("rag-ask")
+def rag_ask(question: str = typer.Option(..., "--question", "-q"), language: str = "en", evidence_only: bool = typer.Option(True, "--evidence-only/--generate")) -> None:
+    """Ask locally. Evidence-only unless --generate is explicitly selected."""
+    from flamesafe.rag.schemas import ChatRequest
+    from flamesafe.rag.service import RagService
+    from flamesafe.rag.settings import settings
+    request = ChatRequest(question=question, language=language, evidence_only=evidence_only)
+    typer.echo(RagService(settings()).ask(request).model_dump_json(indent=2))
+
+
+@app.command("rag-eval")
+def rag_eval(offline: bool = True) -> None:
+    """Run the versioned bilingual offline definition/retrieval baseline."""
+    from flamesafe import config
+    from flamesafe.rag.evaluation import evaluate
+    from flamesafe.rag.service import RagService
+    from flamesafe.rag.settings import settings
+    if not offline:
+        raise typer.BadParameter("Live provider evaluation requires a separate reviewed budget and rubric.")
+    report = evaluate(RagService(settings()), config.ROOT / "artifacts/rag_eval/report.json")
+    typer.echo({key: value for key, value in report.items() if key != "cases"})
 
 
 if __name__ == "__main__":

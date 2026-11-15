@@ -1,6 +1,6 @@
 # ADR-0004 — RAG bilingüe y dashboard Node.js con backend Python
 
-- **Estado:** Aceptado para planificación por instrucción del responsable del proyecto; implementación pendiente.
+- **Estado:** Arquitectura aceptada; piloto local implementado. Aceptación y publicación pendientes; ver [runbook](../../03_data_science/RAG_RUNBOOK.md) y [ADR-0008](ADR-0008-rag-extractive-baseline.md).
 - **Fecha:** 2026-11-15.
 - **Decisor:** Responsable del proyecto, mediante decisiones explícitas en la conversación de planificación.
 - **Tareas relacionadas:** RAG-01 a RAG-05 y APP-01 a APP-08.

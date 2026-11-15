@@ -8,10 +8,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v6
         with:
-          python-version: "3.11"
-          cache: pip
-      - run: pip install -e ".[pipeline,analysis,dev]"
-      - run: ruff check src tests app
-      - run: pytest -m "not integration"
+          version: "0.9.8"
+          python-version: "3.12"
+      - run: uv sync --locked --extra pipeline --extra analysis --extra api --extra dev
+      - run: uv run --no-sync ruff check src tests app
+      - run: uv run --no-sync pytest -m "not integration"
+      - run: uv run --no-sync python scripts/export_openapi.py
+      - run: git diff --exit-code contracts/openapi.json
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run generate
+      - run: git diff --exit-code src/generated/api.d.ts
+      - run: npm run lint && npm run typecheck && npm test && npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
