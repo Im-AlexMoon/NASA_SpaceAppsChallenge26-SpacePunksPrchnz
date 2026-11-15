@@ -6,6 +6,7 @@ combustión de NASA PSI para seguridad contra incendios en exploración espacial
 ## Antes de trabajar
 - Plan y tareas con ID: `docs/00_executive/EXECUTIVE_PLAN.md`. Avance: `docs/01_management/PROGRESS.md` y `MILESTONES.md`.
 - Índice de docs: `docs/README.md`. Decisiones: `docs/01_management/decisions/`.
+- **RAG y dashboard: seguir el plan vigente `docs/03_data_science/RAG_IMPLEMENTATION_PLAN.md` y ADR-0004 (2026-11-15).** Prevalecen sobre instrucciones incompatibles del diseño RAG anterior, la especificación Streamlit y ADR-0001. No volver a la arquitectura anterior sin documentar y actualizar la decisión. El objetivo es Node.js/Next.js con backend Python; implementación pendiente, predicciones diferidas.
 
 ## Convenciones
 - Paquete Python en `src/flamesafe/`; CLI `flamesafe <verify-api|catalog|bronze|silver|gold|train|rag-index>`; configs en `configs/*.yaml`.

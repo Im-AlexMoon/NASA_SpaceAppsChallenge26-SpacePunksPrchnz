@@ -1,7 +1,9 @@
 # ADR-0001 — Stack tecnológico
 
-- **Estado:** Propuesto (ratificar en G0)
+- **Estado:** Propuesto originalmente; sustituido parcialmente desde el 2026-11-15 por [ADR-0004](ADR-0004-rag-web-architecture.md) respecto a UI, despliegue, proveedor LLM y embeddings del nuevo RAG.
 - **Tarea relacionada:** PM-03
+
+> Para trabajo nuevo de RAG/dashboard, seguir el [plan vigente](../../03_data_science/RAG_IMPLEMENTATION_PLAN.md). La tabla siguiente conserva el stack propuesto originalmente; no usar sus elecciones sustituidas como instrucciones actuales. Las decisiones no afectadas de datos/calidad siguen aplicando.
 
 ## Contexto
 24 h, equipo mixto (datos, ciencia, física), datos tabulares pequeños (tablas experimentales PSI ≈ cientos de KB) más algunos

@@ -9,6 +9,8 @@ pressurized rovers and Mars.
 > **Status:** 🚧 in development. Plan: [docs/00_executive/EXECUTIVE_PLAN.md](docs/00_executive/EXECUTIVE_PLAN.md) ·
 > Progress: [docs/01_management/PROGRESS.md](docs/01_management/PROGRESS.md)
 
+> **Current RAG and dashboard plan (2026-11-15):** follow [RAG_IMPLEMENTATION_PLAN.md](docs/03_data_science/RAG_IMPLEMENTATION_PLAN.md) and [ADR-0004](docs/01_management/decisions/ADR-0004-rag-web-architecture.md). They supersede conflicting earlier plans: migrate the dashboard to Next.js/Node.js with a separate Python backend; release bilingual document and exact-data answers first, with predictions deferred. Implementation is pending; the Streamlit layout and quickstart below describe the existing scaffold. Document architecture/scope changes before departing from the current plan.
+
 ## What it does
 
 | | Capability |
