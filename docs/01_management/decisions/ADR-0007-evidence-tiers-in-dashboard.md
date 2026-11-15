@@ -1,6 +1,6 @@
 # ADR-0007 — Lecturas del modelo en el dashboard, con niveles de evidencia
 
-- **Estado:** **Aceptado por el responsable del proyecto (2026-11-16)** como dirección de producto. Pendiente de incorporarse
+- **Estado:** **Aceptado por el responsable del proyecto (2026-11-15)** como dirección de producto. Pendiente de incorporarse
   al [RAG_IMPLEMENTATION_PLAN.md](../../03_data_science/RAG_IMPLEMENTATION_PLAN.md) por el equipo que lo mantiene.
 - **Tarea relacionada:** APP-01 / APP-05 · visión en [PRODUCT_VISION.md](../../05_dashboard/PRODUCT_VISION.md)
 - **Modifica:** el punto "Predicciones: versión posterior; no habilitarlas en la primera entrega" de ADR-0004 y del plan RAG.

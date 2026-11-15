@@ -60,7 +60,7 @@ def iter_frames(path: str | Path, sample_fps: float = SAMPLE_FPS):
     """Yield (t_seconds, BGR frame) sampled at `sample_fps`, decoded by the FFmpeg binary shipped with imageio-ffmpeg.
 
     OpenCV's own FFmpeg backend returned all-black frames for these H.264 downlink streams on Linux (Cloud Run,
-    opencv-python-headless 5.0.0, 2026-11-16) while working on Windows; one decoder everywhere avoids that split.
+    opencv-python-headless 5.0.0, 2026-11-15) while working on Windows; one decoder everywhere avoids that split.
     """
     import imageio_ffmpeg
 

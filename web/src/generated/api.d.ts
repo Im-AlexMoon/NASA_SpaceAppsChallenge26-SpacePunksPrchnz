@@ -89,6 +89,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/findings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Findings */
+    get: operations["findings_v1_findings_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/investigations": {
     parameters: {
       query?: never;
@@ -115,6 +132,74 @@ export interface paths {
     };
     /** Investigation */
     get: operations["investigation_v1_investigations__psi_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/ranking": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Ranking */
+    post: operations["ranking_v1_ranking_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/ranking/profiles": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Ranking Profiles */
+    get: operations["ranking_profiles_v1_ranking_profiles_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/readings/atmosphere": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Reading */
+    post: operations["reading_v1_readings_atmosphere_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/readings/atmospheres": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Reference Readings */
+    get: operations["reference_readings_v1_readings_atmospheres_get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -207,6 +292,41 @@ export interface components {
        * @default 0
        */
       usage_tokens: number;
+    };
+    /** AtmosphereRequest */
+    AtmosphereRequest: {
+      /**
+       * Fuel
+       * @default propane
+       */
+      fuel: string;
+      /**
+       * Gravity
+       * @default microgravity
+       */
+      gravity: string;
+      /**
+       * M Fuel Mg S
+       * @description Fuel mass flow, mg/s
+       * @default 1
+       */
+      m_fuel_mg_s: number;
+      /**
+       * P Kpa
+       * @description Total pressure, kPa
+       */
+      p_kpa: number;
+      /**
+       * X Fuel
+       * @description Fuel mole fraction of the burner stream (rest N2)
+       * @default 0.3
+       */
+      x_fuel: number;
+      /**
+       * Xo2
+       * @description O2 mole fraction of the cabin atmosphere
+       */
+      xo2: number;
     };
     /** ChatRequest */
     ChatRequest: {
@@ -307,6 +427,17 @@ export interface components {
       text?: string | null;
       /** Variable */
       variable?: string | null;
+    };
+    /** RankingRequest */
+    RankingRequest: {
+      /** Environment */
+      environment?: string | null;
+      /** Profile */
+      profile?: string | null;
+      /** Weights */
+      weights?: {
+        [key: string]: number;
+      } | null;
     };
     /** SourceRecord */
     SourceRecord: {
@@ -581,6 +712,37 @@ export interface operations {
       };
     };
   };
+  findings_v1_findings_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        authorization?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   investigations_v1_investigations_get: {
     parameters: {
       query?: never;
@@ -621,6 +783,138 @@ export interface operations {
       path: {
         psi_id: string;
       };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ranking_v1_ranking_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        authorization?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RankingRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ranking_profiles_v1_ranking_profiles_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        authorization?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  reading_v1_readings_atmosphere_post: {
+    parameters: {
+      query?: never;
+      header?: {
+        authorization?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AtmosphereRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  reference_readings_v1_readings_atmospheres_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        authorization?: string;
+      };
+      path?: never;
       cookie?: never;
     };
     requestBody?: never;

@@ -176,7 +176,7 @@ Proporción de llamas con oscilación ininterrumpida de la señal óptica durant
 - ✘ No demuestra: transferencia calibrada en inversas; la causa de los cortes en Flame Design; que la oscilación sirva como alarma
   (falta tasa de falsos positivos durante la vida de la llama, no solo al final).
 
-## Iteración 3 (2026-11-16) — M1 v2, primera lectura para la base lunar y pruebas de rampa
+## Iteración 3 (2026-11-15) — M1 v2, primera lectura para la base lunar y pruebas de rampa
 
 **Reproducible:** `python scripts/research/r03_m1v2_lunar_ramps.py` (~4 min; requiere Cantera, extra `analysis`).
 Código nuevo: `src/flamesafe/physics/thermochem.py` (3 tests).
@@ -243,7 +243,7 @@ estacionarias: dispersión 0.1 % en combustible y 0.3 % en N₂).
 - ✘ No demuestra: el efecto de la gravedad parcial, la validez para otros combustibles o sólidos, ni una ley de caudal crítico.
 - **Experimento que más reduciría la incertidumbre:** llamas normales a 30 % O₂ y 70 kPa (hoy 0 pruebas) y, en general, O₂ entre 0.24 y 0.33.
 
-## Iteración 4 (2026-11-16) — ¿el video de la ISS permite medir la llama? (ADR-0009, fase 1)
+## Iteración 4 (2026-11-15) — ¿el video de la ISS permite medir la llama? (ADR-0009, fase 1)
 
 **Reproducible:** `flamesafe video-samples` (4 archivos, 494 MB, 0 diferencias de tamaño) →
 `python scripts/research/r04_video_feasibility.py --burner-px 30`. Requiere `opencv-python-headless`.
@@ -272,7 +272,7 @@ La cámara científica de alta definición (1024×1024, 30 cps) está en los `.z
 **Decisión:** la fase 1 es positiva. La fase 2 (336 videos de CFI-G en Google Cloud) queda justificada para medir radio y
 desaparición del hollín en todas las pruebas y contrastar la ley `r ∝ ṁ/L` y el precursor óptico.
 
-## Iteración 5 (2026-11-16) — el video de todas las pruebas de CFI-G, procesado en Google Cloud (ADR-0009, fase 2)
+## Iteración 5 (2026-11-15) — el video de todas las pruebas de CFI-G, procesado en Google Cloud (ADR-0009, fase 2)
 
 **Reproducible:** Cloud Run Job `flamesafe-video` (335 tareas, ~11 min; ver `deploy/VIDEO_JOB.md`) →
 `flamesafe video-collect --source gs://flamesafe-psi-video/cfig-v2` → `python scripts/research/r05_video_all_cfig.py`.

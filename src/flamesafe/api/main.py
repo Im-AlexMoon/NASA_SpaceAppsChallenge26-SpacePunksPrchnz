@@ -9,6 +9,7 @@ from time import monotonic
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 
+from flamesafe.api.content import AtmosphereRequest, ContentService, RankingRequest, publication
 from flamesafe.rag.schemas import AnswerResult, ChatRequest, ToolRequest
 from flamesafe.rag.service import RagService
 from flamesafe.rag.settings import settings as load_settings
@@ -68,7 +69,8 @@ def create_app(settings=None, service=None, token=None):
             "retrieval_mode": s.manifest.retrieval_mode,
             "row_counts": s.manifest.row_counts,
             "generation_enabled": settings.generation_enabled,
-            "model_readings_enabled": False,
+            "model_readings_enabled": bool(publication()["model_readings"]["enabled"]),
+            "publication": {k: {"enabled": v["enabled"], "status": v["status"]} for k, v in publication().items()},
         }
 
     @app.get("/v1/investigations", dependencies=private)
@@ -112,6 +114,54 @@ def create_app(settings=None, service=None, token=None):
             return s.ask(request)
         finally:
             slots.release()
+
+    def content():
+        s = ready()
+        cached = getattr(app.state, "content", None)
+        if cached is None or cached.bundle != s.bundle:
+            cached = ContentService(s.bundle)
+            app.state.content = cached
+        return cached
+
+    def published(block: str):
+        if not publication().get(block, {}).get("enabled"):
+            raise HTTPException(403, f"Block '{block}' is not published (configs/publication.yaml)")
+
+    @app.get("/v1/ranking/profiles", dependencies=private)
+    def ranking_profiles():
+        published("ranking")
+        return content().ranking_profiles()
+
+    @app.post("/v1/ranking", dependencies=private)
+    def ranking(request: RankingRequest):
+        published("ranking")
+        try:
+            return content().ranking(request)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from None
+
+    @app.get("/v1/readings/atmospheres", dependencies=private)
+    def reference_readings():
+        published("model_readings")
+        try:
+            return content().reference_readings()
+        except (OSError, ImportError) as exc:
+            raise HTTPException(503, f"Model readings unavailable: {exc}") from None
+
+    @app.post("/v1/readings/atmosphere", dependencies=private)
+    def reading(request: AtmosphereRequest):
+        published("model_readings")
+        try:
+            return content().reading(request)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from None
+        except (OSError, ImportError) as exc:
+            raise HTTPException(503, f"Model readings unavailable: {exc}") from None
+
+    @app.get("/v1/findings", dependencies=private)
+    def findings():
+        published("findings")
+        return ContentService.findings()
 
     @app.get("/v1/sources/{source_id}", dependencies=private)
     def source(source_id: str):

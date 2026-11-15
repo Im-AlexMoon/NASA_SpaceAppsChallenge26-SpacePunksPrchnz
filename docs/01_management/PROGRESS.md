@@ -25,13 +25,13 @@ Ejecución y límites: [RAG_RUNBOOK.md](../03_data_science/RAG_RUNBOOK.md).
 | Fase | Gate | Objetivo | Estado | % | Responsable | Nota |
 |---|---|---|---|---|---|---|
 | F0 Setup y alineación | G0 | H+2 | 🟦 | 20 | | Repo + plan listos |
-| F1 Descubrimiento y triage | G1 | H+5 | 🟨 | 90 | DE | DE-01…05 ✔; **G1 espera a PHY-02** (ratificar pilar, entorno y R1) |
+| F1 Descubrimiento y triage | G1 | H+5 | 🟦 | 95 | DE | DE-01…05 ✔; PHY-02 ✔ (2026-11-15); falta confirmar la lectura del primer (PHY-01) |
 | F2 Pipeline medallion | G2 | H+9 | ✅ | 100 | DE | **G2 cerrado**: gate de datos PASSED, rebuild determinista |
-| F3 EDA y estadística | G3 | H+14 | 🟦 | 55 | DS | discovery ✔ · EDA RQ1 v1 ✔ · auditoría + segmentación + categóricas de gas ✔ (PR #3) · pendiente PHY-03, EDA RQ2 (gotas) |
-| F4 Modelado | G4 | H+17 | 🟦 | 55 | DS | M1 v1 ✔ (ignición + duración, model card M-01, pendiente PHY) · M2 (gotas) espera EDA RQ2 + ADR-0006 |
-| F5 RAG | G5 | H+16 | ⬜ | 0 | | |
-| F6 Dashboard | G6 | H+20 | ⬜ | 0 | | |
-| F7 Física | G7 | H+20 | 🟦 | 5 | | Primer en borrador |
+| F3 EDA y estadística | G3 | H+14 | 🟦 | 85 | DS | F-01..F-05 revisados PHY ✔ · ranking MCDA ✔ · pendiente DS-03 y EDA RQ2 (gotas) |
+| F4 Modelado | G4 | H+17 | ✅ | 100 | DS | **G4 cerrado**: M-01 v2 firmada por PHY y servida por la API · M2 (gotas) queda como extensión (EDA RQ2 + ADR-0006) |
+| F5 RAG | G5 | H+16 | 🟦 | 70 | J0SETS | piloto local ✔ · corpus con 11 documentos revisados ✔ · falta índice híbrido desplegado y evaluación en vivo |
+| F6 Dashboard | G6 | H+20 | 🟦 | 25 | equipo web | API de contenido lista (ranking, lecturas, hallazgos) · luz verde para el frontend (FRONTEND_HANDOFF.md) · despliegue: ADR-0010 |
+| F7 Física | G7 | H+20 | ✅ | 100 | PHY (AM) | primer, literatura, atmósferas, marco, PHY-04/05, recomendaciones firmados |
 | F8 Entrega | G8 | H+24 | ⬜ | 0 | | |
 
 ## Bitácora de syncs
@@ -268,7 +268,7 @@ Ejecución y límites: [RAG_RUNBOOK.md](../03_data_science/RAG_RUNBOOK.md).
 - ▶ Siguiente: caudal crítico en las 66 pruebas de rampa, M1 v2 con riesgos competitivos (autoextinción / límite térmico / temporizador)
   y predicción para la base lunar, validación de la oscilación como precursor, y llevar `acme__timeseries_features` a gold.
 
-### Investigación · iteración 3 y visión del producto — 2026-11-16
+### Investigación · iteración 3 y visión del producto — 2026-11-15
 - ✔ `main` al día: PR #7 integrado y el modelo de Cox de Hugo-Edel (`notebooks/03_modeling/03_m2_cox_survival.ipynb`).
 - ✔ `src/flamesafe/physics/thermochem.py` (Zst y Tad con Cantera, validados contra 587 pruebas), 3 tests, Cantera en el extra `analysis`.
 - ✔ `scripts/research/r03_m1v2_lunar_ramps.py` y RESEARCH_LOG R12–R15.
@@ -283,7 +283,7 @@ Ejecución y límites: [RAG_RUNBOOK.md](../03_data_science/RAG_RUNBOOK.md).
 - ▶ Siguiente: piloto de video en la nube (requiere ADR y acceso confirmado), unificar el Cox de Hugo con la censura por límite
   térmico, llevar `acme__timeseries_features` a gold, revisión PHY, gotas y sólidos.
 
-### Investigación · iteración 4: factibilidad del video (ADR-0009, fase 1) — 2026-11-16
+### Investigación · iteración 4: factibilidad del video (ADR-0009, fase 1) — 2026-11-15
 - ✔ Google Cloud listo: proyecto `flamesafe-psi`, región `us-west1`, Cloud Run, Artifact Registry, Cloud Build y Cloud Storage
   habilitados; facturación activa. Sin máquinas virtuales ni recursos con costo creados.
 - ✔ **ADR-0009** (fase 1 aceptada) y `flamesafe video-samples`: 4 archivos exactos, 494 MB.
@@ -294,7 +294,7 @@ Ejecución y límites: [RAG_RUNBOOK.md](../03_data_science/RAG_RUNBOOK.md).
 - ⏸ Antes de la fase 2: alerta de presupuesto en la consola (usuario) y medición precisa de la escala del quemador.
 - ▶ Siguiente: fase 2 en Cloud Run Jobs (336 videos de CFI-G, ~82 GB) → tabla silver `acme__video_features`.
 
-### Infraestructura · Cloud Run Job de video (ADR-0009, fase 2) — 2026-11-16
+### Infraestructura · Cloud Run Job de video (ADR-0009, fase 2) — 2026-11-15
 - ✔ PR #9 (fase 1) abierto.
 - ✔ `src/flamesafe/pipeline/video.py` (radio, redondez, centro, brillo y miniaturas por prueba; salida local o `gs://`),
   comandos `flamesafe video-manifest`, `video-task` y `video-collect`, 5 tests con video sintético, extra `video`.
@@ -304,7 +304,7 @@ Ejecución y límites: [RAG_RUNBOOK.md](../03_data_science/RAG_RUNBOOK.md).
 - ✔ Prueba local del punto de entrada del job en las 3 muestras: mismos resultados que el prototipo.
 - ⏸ **Pendiente (usuario):** alerta de presupuesto. Luego prueba de humo con 3 tareas y ejecución completa.
 
-### Investigación · iteración 5: video de todas las pruebas de CFI-G en Google Cloud — 2026-11-16
+### Investigación · iteración 5: video de todas las pruebas de CFI-G en Google Cloud — 2026-11-15
 - ✔ Cloud Run Job: **335/335 videos** (~81.6 GB leídos desde PSI, nada descargado a la laptop) en ~11 min; los fallos fueron
   intentos que se resolvieron al reintentar. Silver `acme__video_features` (334 videos, llama vista en 331).
 - ✔ Correcciones: decodificación con FFmpeg (`imageio-ffmpeg`; OpenCV daba cuadros negros en Linux), regla de persistencia,
@@ -317,4 +317,21 @@ Ejecución y límites: [RAG_RUNBOOK.md](../03_data_science/RAG_RUNBOOK.md).
     cortadas); AUC 0.76 (IC 0.67–0.86).
 - ▶ Siguiente: alarma en tiempo real con el radio (falsas alarmas), escala del quemador para radio en mm, Flame Design en video,
   llamas largas que el video pierde (¿llama fría?).
+
+### Luz verde para el frontend: puntos 1, 3 y 4 de la propuesta de valor — 2026-11-15
+- 🖊️ **Firma PHY: Alexander Moon** (decisión del responsable). Despliegue: backend en Cloud Run y web en GoDaddy (**ADR-0010**).
+- ✔ **Punto 1 · Encontrar (ranking):** `src/flamesafe/ranking/mcda.py`, `configs/ranking.yaml` (5 perfiles, 7 dimensiones), `flamesafe rank`
+  → `RANKING_RESULTS.md`; API `GET /v1/ranking/profiles` y `POST /v1/ranking` (perfil o pesos propios, contribuciones y sensibilidad).
+  Estable: con ±20 % en un peso, el top-5 cambia como máximo en una investigación.
+- ✔ **Punto 3 · Entender (hallazgos):** F-01..F-05 con interpretación física (`docs/03_data_science/findings/`), índice para la UI
+  `findings/index.yaml`, API `GET /v1/findings`.
+- ✔ **Punto 4 · Predecir (atmósferas):** artefacto M-01 v2 firmado (`src/flamesafe/models/artifacts/m1v2_burn_time.json`), lecturas con
+  niveles A/B/C (`src/flamesafe/models/readings.py`), API `GET /v1/readings/atmospheres` y `POST /v1/readings/atmosphere`; interruptor de
+  publicación por bloque (`configs/publication.yaml`, ADR-0007). Model card M-01 v2.
+- ✔ **Física (F7):** primer actualizado (§9), revisión de literatura con 20 referencias verificadas contra PSI/NTRS, atmósferas con citas,
+  marco de interpretación aplicado, PHY-04 (signos), PHY-05 (`PARTIAL_GRAVITY_BOUNDING.md`), REC-01..REC-07.
+- ✔ **RAG:** 11 documentos revisados en el corpus (76 fragmentos); snapshot léxico completo validado.
+- ✔ Verificación: 186 pruebas Python, ruff, contrato OpenAPI regenerado; web: lint, tipos, pruebas y build.
+- ▶ Siguiente: diseño del frontend con [FRONTEND_HANDOFF.md](../05_dashboard/FRONTEND_HANDOFF.md); checklist final en
+  [SUBMISSION_CHECKLIST.md](../06_submission/SUBMISSION_CHECKLIST.md).
 

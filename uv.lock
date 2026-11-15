@@ -1488,6 +1488,7 @@ analysis = [
     { name = "statsmodels" },
 ]
 api = [
+    { name = "cantera" },
     { name = "duckdb" },
     { name = "fastapi" },
     { name = "httpx" },
@@ -1542,6 +1543,7 @@ video = [
 [package.metadata]
 requires-dist = [
     { name = "cantera", marker = "extra == 'analysis'", specifier = ">=3.0" },
+    { name = "cantera", marker = "extra == 'api'", specifier = ">=3.0" },
     { name = "duckdb", marker = "extra == 'api'", specifier = ">=1.0" },
     { name = "duckdb", marker = "extra == 'pipeline'", specifier = ">=1.0" },
     { name = "duckdb", marker = "extra == 'rag'", specifier = ">=1.0" },

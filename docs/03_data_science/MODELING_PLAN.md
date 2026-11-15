@@ -1,6 +1,7 @@
 # Plan de modelado predictivo
 
-> Tareas DS-08 → DS-13, PHY-04/05. Cierra en **G4**. Esta es la "parte dorada": modelos que un ingeniero de misión pueda usar
+> Tareas DS-08 → DS-13, PHY-04/05. Cierra en **G4** · **G4 cerrado el 2026-11-15:** M-01 v2 (duración con niveles de evidencia),
+> model card [M-01](model_cards/M-01.md) firmada por PHY. M2 (gotas) y M4 quedan como extensiones. Esta es la "parte dorada": modelos que un ingeniero de misión pueda usar
 > para fijar **umbrales de peligrosidad** dadas las condiciones de un hábitat o vehículo — con su incertidumbre y sus límites.
 
 ## 1. Realidad de los datos (y cómo la respetamos)

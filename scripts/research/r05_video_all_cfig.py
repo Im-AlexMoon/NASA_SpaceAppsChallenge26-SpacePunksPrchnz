@@ -1,4 +1,4 @@
-"""Research iteration 5 (2026-11-16): what the video of every CFI-G test adds (ADR-0009, phase 2).
+"""Research iteration 5 (2026-11-15): what the video of every CFI-G test adds (ADR-0009, phase 2).
 
 1. Validation: flame duration from video vs the investigator's table and the time-series detector.
 2. Flame-radius law: does the steady flame radius scale with m_tot / L (spherical-flame theory, slope 1 in log-log)?

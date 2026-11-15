@@ -1,0 +1,17 @@
+# ADR-0007 · Publication switch per dashboard block. A disabled block returns 403 from the API and the dashboard hides it.
+# `status` is shown to users: "reviewed" (PHY signed) or "candidate" (not yet signed; the UI must show a Candidate badge).
+# PHY reviewer for the 2026-11-15 content: Alexander Moon (findings F-01..F-05, model card M-01 v2, ranking tags).
+blocks:
+  ranking:
+    enabled: true
+    status: reviewed
+    source: configs/ranking.yaml
+  findings:
+    enabled: true
+    status: reviewed
+    source: docs/03_data_science/findings/index.yaml
+  model_readings:
+    enabled: true
+    status: reviewed
+    source: src/flamesafe/models/artifacts/m1v2_burn_time.json
+    model_card: docs/03_data_science/model_cards/M-01.md

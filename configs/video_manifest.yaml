@@ -3,7 +3,7 @@
 # it and deletes it. Lock (task index = row number): docs/02_data_engineering/video_manifest.csv
 # `unlock_extensions` lifts the global deny list only for this manifest (ADR-0009). .zip science images stay denied.
 budget:
-  max_total_mb: 85000   # 337 files, ~81.7 GB resolved on 2026-11-16
+  max_total_mb: 85000   # 337 files, ~81.7 GB resolved on 2026-11-15
   max_file_mb: 1000     # largest .ts is ~996 MB
   max_files: 340
 include_experimental_tables: false
