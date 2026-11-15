@@ -13,7 +13,7 @@
 | F1 Descubrimiento y triage | G1 | H+5 | 🟨 | 90 | DE | DE-01…05 ✔; **G1 espera a PHY-02** (ratificar pilar, entorno y R1) |
 | F2 Pipeline medallion | G2 | H+9 | ✅ | 100 | DE | **G2 cerrado**: gate de datos PASSED, rebuild determinista |
 | F3 EDA y estadística | G3 | H+14 | 🟦 | 55 | DS | discovery ✔ · EDA RQ1 v1 ✔ · auditoría + segmentación + categóricas de gas ✔ (PR #3) · pendiente PHY-03, EDA RQ2 (gotas) |
-| F4 Modelado | G4 | H+17 | ⬜ | 0 | DS | desbloqueado (M1 con CFI-G; M2 con FLEX + CFI) |
+| F4 Modelado | G4 | H+17 | 🟦 | 35 | DS | M1 v1 ✔ (ignición + duración, model card M-01, pendiente PHY) · M2 (gotas) espera EDA RQ2 + ADR-0004 |
 | F5 RAG | G5 | H+16 | ⬜ | 0 | | |
 | F6 Dashboard | G6 | H+20 | ⬜ | 0 | | |
 | F7 Física | G7 | H+20 | 🟦 | 5 | | Primer en borrador |
@@ -199,3 +199,22 @@
   - Las salidas de los notebooks imprimen rutas locales absolutas (incluido un usuario de Windows); preferir rutas relativas.
 - ▶ Siguiente: PHY-03 (F-01…F-04 + preguntas abiertas: `flash`, equivalencia de `Ignite`, `HC burnrate`, `po2_kpa` en inversas,
   tolerancia de réplica), ADR-0004 (FLEX → `k_hot_mm2_s`), EDA RQ2 (gotas) y empezar M1 con validación agrupada por operación.
+
+### DS-08…DS-13 · M1 v1: ignición y duración de llamas de gas — 2026-11-15
+- ✔ Objetivos acordados con el equipo: **probabilidad de ignición** y **cuánto tiempo sigue ardiendo una llama encendida**.
+  Duración modelada como **supervivencia**: autoextinción = evento, corte de flujo = censura por la derecha.
+- ✔ `src/flamesafe/models/m1.py` (cohortes, validación dejando fuera días, logística penalizada con spline y CV anidada, Weibull AFT,
+  Cox con errores por día, bootstrap de días, dominio de aplicabilidad) + `tests/unit/test_models_m1.py` (9 tests). `lifelines` en el extra `analysis`.
+- ✔ `notebooks/03_modeling/03_m1_ignition_survival_am.ipynb` y `docs/03_data_science/model_cards/M-01.md`.
+- 📌 Resultados (candidatos, pendientes de PHY-03/04):
+  - **Duración, llama normal:** índice C fuera de muestra 0.81 (IC 0.75–0.84), +0.13 sobre solo O₂. +0.05 O₂ → duración ×2.3;
+    Cox HR 0.19 (0.13–0.29). Más presión acorta la llama (duplicar: HR 2.2). Tad/Zst como variables rinden igual que las crudas.
+  - **Duración, llama inversa:** C 0.82; manda la fracción de combustible del ambiente.
+  - **Ignición, llama normal:** cumple G4 (log-loss 0.485 vs 0.609 trivial, Δ −0.12, IC −0.19 a −0.06; AUC 0.81). La señal viene de la
+    fuente de combustible, no de O₂ + presión. **Inversa:** nada supera la tasa base (90 %).
+  - **Hábitats (normal, µg):** cerca de la cabina ISS la llama dura ~9 s (mediana observada); cerca de la atmósfera de exploración
+    (34 %, 56.5 kPa) ~88 s. **~10× más**, coherente entre datos y modelo. Base lunar: 0 pruebas (cae en el hueco de O₂ 0.24–0.33).
+- ⚠️ Para PHY: censura posiblemente informativa en llamas normales (cortes de 13 a 276 s; en inversas 26/58 a los 66 s), meseta de
+  llamas estables en O₂ bajo (modelo de fracción curada), signos de presión y combustible, y la decisión `flash` en inversas.
+- ▶ Siguiente: revisión PHY de M-01, indicador físico con Cantera (margen de extinción) como experimento, EDA RQ2 → M2, y la tarjeta
+  "consulta de atmósfera" del dashboard con M1.
