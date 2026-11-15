@@ -24,3 +24,6 @@ download_budget:
 
 # Per-investigation tiers live in configs/triage.yaml (DE-05) and the L3 file selection in
 # configs/acquisition_manifest.yaml (ADR-0002). Not duplicated here.
+#
+# Opt-in extension with its own budget (ADR-0005): configs/timeseries_manifest.yaml, 3,325 files / 2.7 GB of per-test
+# ACME time series, downloaded only with `flamesafe timeseries`. The core budget above is unchanged.

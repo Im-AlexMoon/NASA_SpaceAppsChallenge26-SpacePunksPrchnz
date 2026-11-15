@@ -13,7 +13,7 @@
 | F1 Descubrimiento y triage | G1 | H+5 | 🟨 | 90 | DE | DE-01…05 ✔; **G1 espera a PHY-02** (ratificar pilar, entorno y R1) |
 | F2 Pipeline medallion | G2 | H+9 | ✅ | 100 | DE | **G2 cerrado**: gate de datos PASSED, rebuild determinista |
 | F3 EDA y estadística | G3 | H+14 | 🟦 | 55 | DS | discovery ✔ · EDA RQ1 v1 ✔ · auditoría + segmentación + categóricas de gas ✔ (PR #3) · pendiente PHY-03, EDA RQ2 (gotas) |
-| F4 Modelado | G4 | H+17 | 🟦 | 35 | DS | M1 v1 ✔ (ignición + duración, model card M-01, pendiente PHY) · M2 (gotas) espera EDA RQ2 + ADR-0004 |
+| F4 Modelado | G4 | H+17 | 🟦 | 35 | DS | M1 v1 ✔ (ignición + duración, model card M-01, pendiente PHY) · M2 (gotas) espera EDA RQ2 + ADR-0006 |
 | F5 RAG | G5 | H+16 | ⬜ | 0 | | |
 | F6 Dashboard | G6 | H+20 | ⬜ | 0 | | |
 | F7 Física | G7 | H+20 | 🟦 | 5 | | Primer en borrador |
@@ -135,7 +135,7 @@
 - ✔ **Decisiones PHY recibidas:**
   - `flash` (8 casos de CFI-G): categoría propia, fuera del ajuste binario principal de M1, con análisis de sensibilidad (flash = sí / flash = no).
   - Tasa de quemado de FLEX: **mm²/s**. Evidencia interna en el notebook: frente a K̂ = (d₀² − d_ext²)/t_quemado, cociente mediano 1.05
-    (IQR 1.03–1.09) y Spearman 0.96 en 196 pruebas (control CFI: 1.21 y 0.74). Falta formalizarlo en ADR-0004 y pasar la columna a `k_hot_mm2_s`.
+    (IQR 1.03–1.09) y Spearman 0.96 en 196 pruebas (control CFI: 1.21 y 0.74). Falta formalizarlo en ADR-0006 y pasar la columna a `k_hot_mm2_s`.
 - ✔ `notebooks/01_discovery/01_discovery_gold_coverage_am.ipynb`: inventario, diseño experimental, confusores, faltantes, cobertura cerca
   de los hábitats y material de validación. Lee solo DuckDB gold y corre completo ("Restart & Run All").
 - 📌 Hallazgos que condicionan el EDA:
@@ -146,7 +146,7 @@
     espacial queda fuera del dominio de gold.
   - 9 pruebas de gotas con d_ext ≥ d₀ (1 FLEX, 8 CFI) para revisar en el EDA.
   - Corrección: CFI-G tiene 62 "no" (no 60); MODELING_PLAN actualizado.
-- ▶ Siguiente: ADR-0004 (decisiones PHY + R-DE-05b en el pipeline), DS-03 (ratificar RQs) y `02_eda` empezando por RQ1.
+- ▶ Siguiente: ADR-0006 (decisiones PHY + R-DE-05b en el pipeline), DS-03 (ratificar RQs) y `02_eda` empezando por RQ1.
 
 ### DS-04/DS-05 · EDA RQ1 v1 — 2026-11-14
 - ✔ `notebooks/02_eda/02_eda_rq1_ignition_boundary_am.ipynb` sobre CFI-G (normales e inversas por separado), con pruebas pre-registradas
@@ -164,7 +164,7 @@
 - ⚠️ El modelo logístico lineal está mal especificado en llamas normales (efecto no monótono del combustible: tres regímenes).
   **M1 debe tratar el combustible de forma no lineal.** Preguntas PHY: significado de `Xfuel` en CFI-G normal, dirección de la presión
   en inversas, 2 pruebas con `x_fuel = 0` (21125A4, 21125H3).
-- ▶ Siguiente: PHY-03 sobre F-01…F-04, ADR-0004 (FLEX → `k_hot_mm2_s`) y EDA RQ2 (diluyentes en gotas).
+- ▶ Siguiente: PHY-03 sobre F-01…F-04, ADR-0006 (FLEX → `k_hot_mm2_s`) y EDA RQ2 (diluyentes en gotas).
 
 ### DS-04 · EDA del equipo: auditoría, segmentación y categóricas (PR #3) — 2026-11-15
 - ✔ Integrado en `main` (`f10c8b0`):
@@ -198,7 +198,7 @@
     repo, lo que no aplica debe ir como NULL + flag).
   - Las salidas de los notebooks imprimen rutas locales absolutas (incluido un usuario de Windows); preferir rutas relativas.
 - ▶ Siguiente: PHY-03 (F-01…F-04 + preguntas abiertas: `flash`, equivalencia de `Ignite`, `HC burnrate`, `po2_kpa` en inversas,
-  tolerancia de réplica), ADR-0004 (FLEX → `k_hot_mm2_s`), EDA RQ2 (gotas) y empezar M1 con validación agrupada por operación.
+  tolerancia de réplica), ADR-0006 (FLEX → `k_hot_mm2_s`), EDA RQ2 (gotas) y empezar M1 con validación agrupada por operación.
 
 ### DS-08…DS-13 · M1 v1: ignición y duración de llamas de gas — 2026-11-15
 - ✔ Objetivos acordados con el equipo: **probabilidad de ignición** y **cuánto tiempo sigue ardiendo una llama encendida**.
@@ -218,3 +218,38 @@
   llamas estables en O₂ bajo (modelo de fracción curada), signos de presión y combustible, y la decisión `flash` en inversas.
 - ▶ Siguiente: revisión PHY de M-01, indicador físico con Cantera (margen de extinción) como experimento, EDA RQ2 → M2, y la tarjeta
   "consulta de atmósfera" del dashboard con M1.
+
+### Investigación · iteración 1: ecuación física de duración e inventario de información sin usar — 2026-11-15
+- 🎯 Cambio de prioridad acordado: conocimiento antes que entregables; agotar la información disponible con modelos físicos y rigor.
+- ✔ `docs/03_data_science/RESEARCH_LOG.md` (bitácora), `src/flamesafe/models/aft.py` (AFT con censura y familias de error),
+  `src/flamesafe/physics/spherical_flame.py` (grupos de llama esférica), 6 tests y `scripts/research/r01_physics_burn_time.py`.
+- 📌 Hallazgos (candidatos):
+  - **Corrección:** CFI-G y Flame Design son llamas de difusión **esféricas** (quemador poroso), no de chorro. M-01 corregida.
+  - **Weibull de M1 v1 es sobreconfiado** fuera de muestra; log-logística lo corrige. M1 v2 debe cambiar de familia.
+  - **Ecuación física** (llama normal): ln t = 16.6 − 19.5·(1000/Tad) − 0.49 ln p − 0.57 ln ṁ + 1.30 ln L. Iguala al modelo
+    empírico con menos parámetros y sin conocer el combustible (mejora fuera de muestra +0.14, IC −0.09 a +0.41: no concluyente).
+    La dependencia con Tad y con la presión coincide entre llamas normales e inversas.
+  - **Negativo:** la temperatura crítica de extinción no se identifica desde la tabla resumen.
+  - **Censura informativa:** parte de los cortes de flujo son por límite de temperatura del quemador (comentarios en silver).
+  - "Autoextinguida" puede ser transición a **llama fría** (invisible, sigue reaccionando).
+- 📦 Información sin usar: 656 series temporales por prueba (radiómetros, PMT, termopares; ≈ 2.7 GB), comentarios por prueba,
+  EventData (energía del ignitor), BASS-II, Saffire-2, SPICE y gotas.
+- ✔ Decisión tomada: ADR-0005 aceptado (ver la entrada siguiente).
+- ▶ Siguiente sin descargas: llevar `comments`/`color`/EventData a gold, M1 v2 (log-logística + riesgos competitivos) y gotas (RQ2).
+
+### Investigación · iteración 2: series temporales por prueba (ADR-0005) — 2026-11-15
+- ✔ **ADR-0005** aceptado: extensión opcional con manifiesto propio (`configs/timeseries_manifest.yaml`, 3,000 MB). El manifiesto
+  núcleo y su presupuesto (150 archivos, 500 MB) no cambian. El ADR de decisiones PHY y de la tasa de FLEX pasa a ser **ADR-0006**.
+- ✔ `flamesafe timeseries`: 3,325 archivos, 2,716.5 MB, 0 diferencias de tamaño. `flamesafe ts-features`: 655 pruebas, 0 errores.
+- ✔ `src/flamesafe/pipeline/timeseries.py` (10 tests), descarga en paralelo en `ingestion/download.py`,
+  `scripts/research/r02_timeseries_transfer.py`.
+- 📌 Hallazgos (candidatos; detalle en RESEARCH_LOG R7–R11):
+  - Detector validado: 99.6 % de acuerdo con el modo de extinción del investigador en CFI-G y Spearman 0.995 en duración.
+  - Flame Design gana duración y modo de extinción en 244 llamas (antes no tenía).
+  - **La ecuación física ajustada solo con CFI-G predice Flame Design (etileno, otra campaña) sin reajuste:** índice C 0.93
+    (IC 0.80–0.96), pendiente de calibración 1.16 (IC 0.72–1.48). En llamas inversas ordena (C 0.82) pero no calibra.
+  - Censura informativa confirmada: en CFI-G normal, 22 de 30 cortes de flujo son por límite térmico del quemador (~728 K).
+  - Las llamas autoextinguidas oscilan antes de apagarse (16–90 % con ≥ 5 s, frente a 2–17 % de las cortadas); mediana 8.9 s de anticipo. Preliminar.
+- ▶ Siguiente: caudal crítico en las 66 pruebas de rampa, M1 v2 con riesgos competitivos (autoextinción / límite térmico / temporizador)
+  y predicción para la base lunar, validación de la oscilación como precursor, y llevar `acme__timeseries_features` a gold.
+

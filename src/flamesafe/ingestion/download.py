@@ -12,7 +12,9 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import threading
 from collections.abc import Callable, Iterable
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -135,45 +137,69 @@ def write_manifest_lock(reqs: list[FileRequest], path: Path) -> Path:
 
 
 # ----------------------------------------------------------------------------- fetch
+def _fetch_one(req: FileRequest, client: PSIClient, root: Path | None) -> dict[str, Any]:
+    path = local_path(req, root)
+    side = _sidecar(path)
+    if path.exists() and side.exists():
+        meta = json.loads(side.read_text(encoding="utf-8"))
+        if meta.get("http_status") == 200 and meta.get("sha256") == _sha256_file(path):
+            size_ok = req.expected_bytes is None or meta.get("bytes") == req.expected_bytes
+            return {**meta, **asdict(req), "size_matches": size_ok,
+                    "action": "reused" if size_ok else "reused_size_mismatch"}
+    meta: dict[str, Any] = {
+        **asdict(req),
+        "source_url": client.url("download", psi_id=req.psi_id, filename=req.file_name),
+        "retrieved_at_utc": datetime.now(UTC).isoformat(timespec="seconds"),
+    }
+    try:
+        res = client.download(req.psi_id, req.file_name, path)
+        meta.update(http_status=200, bytes=res.bytes, sha256=res.sha256, content_type=res.content_type,
+                    size_matches=(req.expected_bytes is None or res.bytes == req.expected_bytes))
+        action = "fetched" if meta["size_matches"] else "fetched_size_mismatch"
+    except PSIError as exc:
+        meta.update(http_status=exc.status)
+        action = f"http_{exc.status}"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(side, "w", encoding="utf-8", newline="\n") as fh:
+        json.dump(meta, fh, indent=2, ensure_ascii=False)
+        fh.write("\n")
+    return {**meta, "action": action}
+
+
 def fetch(
     reqs: Iterable[FileRequest],
     client: PSIClient | None = None,
     root: Path | None = None,
     progress: Callable[[FileRequest, str], None] | None = None,
+    workers: int = 1,
 ) -> list[dict[str, Any]]:
-    client = client or PSIClient()
+    """Download (or reuse) every request; results keep the request order.
+
+    workers > 1 downloads in parallel with one PSIClient (HTTP session) per thread. Keep it small: PSI is a public
+    NASA service, not a CDN. An explicit `client` is only used when workers == 1 (tests, single session).
+    """
+    reqs = list(reqs)
     say = progress or (lambda *_: None)
+    if workers <= 1:
+        client = client or PSIClient()
+        results = []
+        for req in reqs:
+            results.append(_fetch_one(req, client, root))
+            say(req, results[-1]["action"])
+        return results
+
+    local = threading.local()
+
+    def work(req: FileRequest) -> dict[str, Any]:
+        if not hasattr(local, "client"):
+            local.client = PSIClient()
+        return _fetch_one(req, local.client, root)
+
     results = []
-    for req in reqs:
-        path = local_path(req, root)
-        side = _sidecar(path)
-        if path.exists() and side.exists():
-            meta = json.loads(side.read_text(encoding="utf-8"))
-            if meta.get("http_status") == 200 and meta.get("sha256") == _sha256_file(path):
-                size_ok = req.expected_bytes is None or meta.get("bytes") == req.expected_bytes
-                results.append({**meta, **asdict(req), "size_matches": size_ok,
-                                "action": "reused" if size_ok else "reused_size_mismatch"})
-                say(req, "reused" if size_ok else "reused_size_mismatch")
-                continue
-        meta: dict[str, Any] = {
-            **asdict(req),
-            "source_url": client.url("download", psi_id=req.psi_id, filename=req.file_name),
-            "retrieved_at_utc": datetime.now(UTC).isoformat(timespec="seconds"),
-        }
-        try:
-            res = client.download(req.psi_id, req.file_name, path)
-            meta.update(http_status=200, bytes=res.bytes, sha256=res.sha256, content_type=res.content_type,
-                        size_matches=(req.expected_bytes is None or res.bytes == req.expected_bytes))
-            action = "fetched" if meta["size_matches"] else "fetched_size_mismatch"
-        except PSIError as exc:
-            meta.update(http_status=exc.status)
-            action = f"http_{exc.status}"
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with open(side, "w", encoding="utf-8", newline="\n") as fh:
-            json.dump(meta, fh, indent=2, ensure_ascii=False)
-            fh.write("\n")
-        results.append({**meta, "action": action})
-        say(req, action)
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for req, res in zip(reqs, pool.map(work, reqs), strict=True):
+            results.append(res)
+            say(req, res["action"])
     return results
 
 

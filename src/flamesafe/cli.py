@@ -161,6 +161,64 @@ def bronze(
 
 
 @app.command()
+def timeseries(
+    dry_run: bool = typer.Option(False, help="Only resolve the selection, write the lock and check the budget"),
+    workers: int = typer.Option(6, help="Parallel downloads (keep small: PSI is a public NASA service)"),
+) -> None:
+    """ADR-0005: download the opt-in per-test time series (ACME CFI-G / Flame Design) into data/bronze/files."""
+    import pandas as pd
+
+    from flamesafe import config
+    from flamesafe.ingestion import download as dl
+    from flamesafe.pipeline.silver_catalog import silver_catalog_dir
+
+    man = config.load("timeseries_manifest")
+    reqs = dl.requests_from_selection(man, silver_catalog_dir())
+    b = man["budget"]
+    total = dl.check_budget(reqs, b["max_total_mb"], b["max_file_mb"],
+                            config.load("sources")["download_budget"]["deny_extensions"], b.get("max_files"))
+    lock = dl.write_manifest_lock(reqs, config.ROOT / "docs" / "02_data_engineering" / "timeseries_manifest.csv")
+    typer.echo(f"Time-series manifest: {len(reqs)} files, {total / 1e6:.1f} MB "
+               f"(budget {b['max_total_mb']} MB / {b['max_files']} files) -> {lock.name}")
+    by = pd.DataFrame([{"group": r.reason, "bytes": r.expected_bytes} for r in reqs]).groupby("group")["bytes"]
+    for g, r in by.agg(["size", "sum"]).iterrows():
+        typer.echo(f"  {g:<22} {int(r['size']):>5} files {r['sum'] / 1e6:>8.1f} MB")
+    if dry_run:
+        return
+
+    done = {"n": 0}
+
+    def show(r, action):
+        done["n"] += 1
+        if action not in ("fetched", "reused"):
+            typer.secho(f"  {r.psi_id} {r.file_name}: {action}", fg=typer.colors.YELLOW)
+        if done["n"] % 250 == 0:
+            typer.echo(f"  ... {done['n']}/{len(reqs)}")
+
+    results = dl.fetch(reqs, progress=show, workers=workers)
+    report = dl.write_report(results, "timeseries", extra={"lock": lock.name})
+    ok = sum(r.get("http_status") == 200 for r in results)
+    mism = [r for r in results if r.get("size_matches") is False]
+    typer.echo(f"Acquired {ok}/{len(results)} ({sum(r.get('bytes', 0) for r in results) / 1e6:.1f} MB) - "
+               f"size mismatches {len(mism)} - report {report.name}")
+    if mism or ok < len(results):
+        raise typer.Exit(code=1)
+
+
+@app.command("ts-features")
+def ts_features() -> None:
+    """ADR-0005: reduce every downloaded ACME time series to one row (silver `acme__timeseries_features`)."""
+    from flamesafe.pipeline import timeseries as ts
+
+    table = ts.build_features()
+    errors = int(table["parse_error"].notna().sum())
+    typer.echo(f"Time-series features: {len(table)} tests ({table['psi_id'].value_counts().to_dict()}), "
+               f"flame seen in {int(table['flame_seen'].fillna(False).sum())}, parse errors {errors}")
+    if errors:
+        raise typer.Exit(code=1)
+
+
+@app.command()
 def silver(
     only: list[str] = typer.Option(None, help="Run only these table parsers (see silver_parsers REGISTRY)"),
     skip_catalog: bool = typer.Option(False, help="Skip the catalog flattening step (DE-03)"),
