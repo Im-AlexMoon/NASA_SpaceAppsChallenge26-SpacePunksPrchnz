@@ -73,7 +73,8 @@ findings:
     title_es: "Brecha: no hay pruebas cerca de la atmósfera de base lunar ni en gravedad parcial"
     claim: >-
       PSI has zero normal-flame tests within ±0.05 O2 and ±25 % pressure of the lunar-base bound (30 % O2, 70 kPa), no
-      normal-flame tests between 24 % and 33 % O2, and no combustion data at lunar or Martian gravity.
+      CFI-G normal-flame tests between 24 % and 33 % O2 (Flame Design has only 6 ethylene flames near 30 % O2 at 1 atm,
+      with no burn time recorded), and no combustion data at lunar or Martian gravity.
     pillar: prevention
     rq: RQ1
     confidence: high

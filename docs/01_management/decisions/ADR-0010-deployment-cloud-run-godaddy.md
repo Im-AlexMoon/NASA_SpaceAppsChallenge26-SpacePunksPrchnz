@@ -1,7 +1,7 @@
 # ADR-0010 — Despliegue: backend Python en Cloud Run y web Next.js en GoDaddy
 
-- **Estado:** **Aceptado (2026-11-15)** por el responsable del proyecto (Alexander Moon). Implementación pendiente; requiere verificar el
-  plan de GoDaddy antes del corte.
+- **Estado:** **Aceptado (2026-11-15)**; **la parte web (GoDaddy) queda reemplazada por [ADR-0011](ADR-0011-web-on-vercel-static-content.md)**
+  (Vercel). El backend en Cloud Run sigue vigente.
 - **Tarea relacionada:** APP-08 · arquitectura en [ADR-0004](ADR-0004-rag-web-architecture.md) · infraestructura existente en
   [deploy/VIDEO_JOB.md](../../../deploy/VIDEO_JOB.md)
 - **Nota de numeración:** ADR-0006 sigue reservado para las decisiones PHY y la unidad de la tasa de FLEX.

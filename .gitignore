@@ -49,3 +49,7 @@ desktop.ini
 
 # --- Streamlit ---
 .streamlit/secrets.toml
+
+# Frontend design checks (taste-skill) and screenshots
+web/.taste-skill/
+web/shots/

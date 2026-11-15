@@ -46,7 +46,7 @@ documents:
       - Implicación para seguridad
   - path: docs/03_data_science/findings/F-04.md
     title: "F-04 Lunar-base and partial-gravity data gap"
-    sha256: f011d4befe1fae641612db84edaaa0ac4d91d5e0ea391ab16c138f9fc403d7db
+    sha256: a3df7154841e86dbc41f4aca0ff078dd126b55d468d201eb6c19412b3b545417
     reviewed_by: "Alexander Moon (PHY), 2026-11-15"
     license_or_terms: "Repository license (MIT)"
     allow_provider: true
@@ -111,7 +111,7 @@ documents:
       - 5. Confianza
   - path: docs/04_physics/PHYSICS_PRIMER.md
     title: "Physics primer: microgravity combustion"
-    sha256: 01c2449d2ee5e23d1b17f5dac6c9288b741676cd01828143f0a7bb2bd0adfb25
+    sha256: 7b537a055cc9454bf0743009074dcacad2d873e2ff5e186100c2e61e755307a7
     reviewed_by: "Alexander Moon (PHY), 2026-11-15"
     license_or_terms: "Repository license (MIT)"
     allow_provider: true
