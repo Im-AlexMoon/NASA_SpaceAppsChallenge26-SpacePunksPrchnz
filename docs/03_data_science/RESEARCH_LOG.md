@@ -272,6 +272,50 @@ La cámara científica de alta definición (1024×1024, 30 cps) está en los `.z
 **Decisión:** la fase 1 es positiva. La fase 2 (336 videos de CFI-G en Google Cloud) queda justificada para medir radio y
 desaparición del hollín en todas las pruebas y contrastar la ley `r ∝ ṁ/L` y el precursor óptico.
 
+## Iteración 5 (2026-11-16) — el video de todas las pruebas de CFI-G, procesado en Google Cloud (ADR-0009, fase 2)
+
+**Reproducible:** Cloud Run Job `flamesafe-video` (335 tareas, ~11 min; ver `deploy/VIDEO_JOB.md`) →
+`flamesafe video-collect --source gs://flamesafe-psi-video/cfig-v2` → `python scripts/research/r05_video_all_cfig.py`.
+Dos fallas encontradas y corregidas en la prueba de humo: OpenCV en Linux devolvía cuadros negros (se decodifica con
+FFmpeg de `imageio-ffmpeg`) y el quemador incandescente tras la extinción se contaba como llama (regla de persistencia).
+
+### R17. La duración medida en video concuerda con el investigador en 264 pruebas
+334 videos procesados, llama vista en 331; 321 se unen a pruebas de gold. Contra la tabla del investigador: Spearman 0.97,
+diferencia mediana 0.0 s, 70 % dentro de 2 s y 83 % dentro de 5 s. Contra el detector de las series: Spearman 0.975.
+- Las discrepancias grandes son llamas **muy largas** (160–300 s) en las que el video pierde la llama antes: probablemente se
+  vuelve demasiado tenue para la cámara (⚠️ posible llama tibia o fría; por verificar).
+- **21112A6:** el video da 146 s, igual que las series (147 s); la tabla dice 259 s. Confirma el error sospechado en R7.
+
+### R18. El radio de la llama no sigue la ley estacionaria, pero sí es independiente de la presión (llamas normales)
+Teoría cuasi-estacionaria: radio ∝ ṁ/L (pendiente 1 en escala log). 83 llamas normales con radio de buena calidad, 11 días:
+- **Pendiente 0.50** (IC 95 % 0.30–0.71), R² 0.42, Spearman 0.72. El radio crece con ṁ/L, pero como su raíz, no linealmente.
+- Exponente de presión −0.04 (IC −0.25 a 0.17): **sin efecto de la presión**, como predice la teoría (ρD no depende de p).
+- Lectura: estas llamas no alcanzan el estado estacionario durante la prueba (o el radio visible no es la hoja de llama).
+  La ecuación de duración usa ṁ y L por separado, así que sigue siendo válida; lo que cae es la interpretación "radio estacionario".
+- Llamas inversas: casi sin relación (pendiente 0.20, IC −0.13 a 0.52) y fuerte dependencia de la presión (−0.62). Son tenues:
+  solo 55 con radio de buena calidad.
+
+### R19 (negativo). El apagado del hollín NO anticipa la autoextinción
+En las tres muestras de R16 el núcleo amarillo se apagaba antes de la extinción. Con todas las pruebas no se sostiene:
+en llamas normales el brillo cae a la mitad ≥ 5 s antes del final en el 60 % de las autoextinguidas **y** en el 60 % de las
+cortadas por flujo (AUC 0.45, IC 0.24–0.63). En inversas va al revés. El brillo decae con el tiempo en casi todas las llamas
+(y la ganancia de la cámara variaba): no es un precursor. **La observación de R16 era un artefacto de muestra pequeña.**
+
+### R20. El encogimiento de la llama sí anticipa la autoextinción (llamas normales)
+Radio relativo a su mediana de media vida, en ventanas antes del final (67 llamas normales con radio de buena calidad):
+
+| Ventana antes del final | Autoextinguidas (45) | Cortadas por flujo (22) | AUC "se va a apagar sola" (IC 95 %, bootstrap de días) |
+|---|---|---|---|
+| 15 a 10 s | 0.74 | 1.02 | 0.73 (0.62–0.84) |
+| 10 a 5 s | 0.62 | 0.99 | 0.76 (0.67–0.86) |
+| 5 a 0 s | 0.50 | 0.92 | — |
+
+- El 71 % de las llamas que se autoextinguen ya mide menos del 80 % de su radio de media vida **5–10 s antes** de apagarse,
+  frente al 32 % de las que siguen vivas hasta el corte. Coherente con la extinción radiativa y con la oscilación de R11.
+- Es una señal medible con una cámara simple y sin calibración absoluta (radio relativo a sí mismo).
+- ⚠️ Retrospectivo: aquí se conoce el final. Para una alarma en tiempo real hay que usar la caída respecto al máximo móvil y
+  medir falsas alarmas durante toda la vida de la llama. En inversas no hay suficientes llamas con radio medible.
+
 ## Agenda (ordenada por información ganada por esfuerzo)
 
 1. ✔ **Series temporales ingeridas** (ADR-0005) y reducidas a una fila por prueba. Pendiente dentro de este frente:

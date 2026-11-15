@@ -1,0 +1,28 @@
+# ADR-0009 phase 2 · Every CFI-G ops-camera video, processed in Google Cloud (Cloud Run Job, one task per row).
+# Nothing here is downloaded to a laptop: each task streams one file from PSI into its own temporary disk, measures
+# it and deletes it. Lock (task index = row number): docs/02_data_engineering/video_manifest.csv
+# `unlock_extensions` lifts the global deny list only for this manifest (ADR-0009). .zip science images stay denied.
+budget:
+  max_total_mb: 85000   # 337 files, ~81.7 GB resolved on 2026-11-16
+  max_file_mb: 1000     # largest .ts is ~996 MB
+  max_files: 340
+include_experimental_tables: false
+unlock_extensions: [ts, mp4]
+
+cloud:
+  project: flamesafe-psi
+  region: us-west1
+  bucket: flamesafe-psi-video         # outputs only (parquet, json, jpg); videos are never stored
+  output_prefix: cfig-v2           # v1 = smoke tests with the OpenCV decoder (blank frames on Linux)
+  job: flamesafe-video
+  service_account: flamesafe-video-job
+  repository: flamesafe
+  image: video-job
+  task: {cpu: 2, memory: 4Gi, timeout: 1800s, max_retries: 2, parallelism: 20}
+
+groups:
+  - name: cfig_ops_video
+    purpose: "ACME ops-camera recordings (downlink) of every CFI-G test"
+    files:
+      PSI-159:
+        - {pattern: "^PSI-159_Raw Data_vlc-record-.*\\.(ts|mp4)$"}

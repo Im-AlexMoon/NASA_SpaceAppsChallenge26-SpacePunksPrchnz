@@ -294,3 +294,27 @@ Ejecución y límites: [RAG_RUNBOOK.md](../03_data_science/RAG_RUNBOOK.md).
 - ⏸ Antes de la fase 2: alerta de presupuesto en la consola (usuario) y medición precisa de la escala del quemador.
 - ▶ Siguiente: fase 2 en Cloud Run Jobs (336 videos de CFI-G, ~82 GB) → tabla silver `acme__video_features`.
 
+### Infraestructura · Cloud Run Job de video (ADR-0009, fase 2) — 2026-11-16
+- ✔ PR #9 (fase 1) abierto.
+- ✔ `src/flamesafe/pipeline/video.py` (radio, redondez, centro, brillo y miniaturas por prueba; salida local o `gs://`),
+  comandos `flamesafe video-manifest`, `video-task` y `video-collect`, 5 tests con video sintético, extra `video`.
+- ✔ `deploy/Dockerfile.video`, `deploy/cloudbuild.video.yaml`, `.gcloudignore` y `deploy/VIDEO_JOB.md`.
+- ✔ En Google Cloud: bucket `gs://flamesafe-psi-video` (privado), registro `flamesafe`, cuenta de servicio con permisos solo sobre el
+  bucket, imagen construida en Cloud Build y job `flamesafe-video` (335 tareas, 20 en paralelo) **creado sin ejecutar**.
+- ✔ Prueba local del punto de entrada del job en las 3 muestras: mismos resultados que el prototipo.
+- ⏸ **Pendiente (usuario):** alerta de presupuesto. Luego prueba de humo con 3 tareas y ejecución completa.
+
+### Investigación · iteración 5: video de todas las pruebas de CFI-G en Google Cloud — 2026-11-16
+- ✔ Cloud Run Job: **335/335 videos** (~81.6 GB leídos desde PSI, nada descargado a la laptop) en ~11 min; los fallos fueron
+  intentos que se resolvieron al reintentar. Silver `acme__video_features` (334 videos, llama vista en 331).
+- ✔ Correcciones: decodificación con FFmpeg (`imageio-ffmpeg`; OpenCV daba cuadros negros en Linux), regla de persistencia,
+  borde superior ignorado, bandera de calidad del radio, alarma de decodificación vacía. 8 tests de video.
+- 📌 Hallazgos (candidatos; RESEARCH_LOG R17–R20):
+  - Duración del video frente al investigador: Spearman 0.97, diferencia mediana 0 s (264 pruebas). Confirma el error de 21112A6.
+  - El radio crece como (ṁ/L)^0.5, no linealmente, y no depende de la presión (llamas normales).
+  - **Negativo:** el apagado del hollín no anticipa la autoextinción (era un artefacto de 3 muestras).
+  - **El encogimiento sí:** 5–10 s antes de apagarse, el 71 % de las autoextinguidas ya mide < 80 % de su radio (32 % de las
+    cortadas); AUC 0.76 (IC 0.67–0.86).
+- ▶ Siguiente: alarma en tiempo real con el radio (falsas alarmas), escala del quemador para radio en mm, Flame Design en video,
+  llamas largas que el video pierde (¿llama fría?).
+

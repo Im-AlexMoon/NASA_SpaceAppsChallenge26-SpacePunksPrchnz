@@ -1,0 +1,14 @@
+# Files NOT uploaded to Cloud Build (gcloud builds submit). Keep the context small: no data, no videos, no secrets.
+.git
+.gitignore
+.env
+**/.env.local
+.venv
+data/
+artifacts/
+notebooks/
+web/
+tests/
+reports/
+**/__pycache__/
+*.ipynb

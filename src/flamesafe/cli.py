@@ -189,6 +189,77 @@ def video_samples(dry_run: bool = typer.Option(False, help="Only resolve, lock a
         raise typer.Exit(code=1)
 
 
+VIDEO_LOCK = ("docs", "02_data_engineering", "video_manifest.csv")
+
+
+@app.command("video-manifest")
+def video_manifest() -> None:
+    """ADR-0009 phase 2: resolve every CFI-G video into the lock used by the Cloud Run Job (downloads nothing)."""
+    from flamesafe import config
+    from flamesafe.ingestion import download as dl
+    from flamesafe.pipeline.silver_catalog import silver_catalog_dir
+
+    man = config.load("video_manifest")
+    reqs = dl.requests_from_selection(man, silver_catalog_dir())
+    unlocked = {e.lower() for e in man.get("unlock_extensions", [])}
+    deny = [e for e in config.load("sources")["download_budget"]["deny_extensions"] if e.lower() not in unlocked]
+    b = man["budget"]
+    total = dl.check_budget(reqs, b["max_total_mb"], b["max_file_mb"], deny, b.get("max_files"))
+    lock = dl.write_manifest_lock(reqs, config.ROOT.joinpath(*VIDEO_LOCK))
+    typer.echo(f"Video manifest: {len(reqs)} files, {total / 1e9:.2f} GB -> {lock.name} (task index = row number)")
+
+
+@app.command("video-task")
+def video_task(
+    index: int = typer.Option(None, help="Row of the lock to process (default: $CLOUD_RUN_TASK_INDEX)"),
+    output: str = typer.Option(None, help="Local folder or gs://bucket/prefix (default: $FLAMESAFE_VIDEO_OUTPUT)"),
+    local_file: str = typer.Option(None, help="Measure this local video instead of downloading the row's file"),
+    overwrite: bool = typer.Option(False, help="Re-process even if the summary already exists"),
+) -> None:
+    """ADR-0009: measure one CFI-G video (one Cloud Run task). The video is deleted after measuring."""
+    import os
+    from pathlib import Path
+
+    import pandas as pd
+
+    from flamesafe import config
+    from flamesafe.pipeline import video
+
+    index = index if index is not None else int(os.environ.get("CLOUD_RUN_TASK_INDEX", "0"))
+    output = output or os.environ.get("FLAMESAFE_VIDEO_OUTPUT")
+    if not output:
+        raise typer.BadParameter("set --output or FLAMESAFE_VIDEO_OUTPUT")
+    lock = pd.read_csv(config.ROOT.joinpath(*VIDEO_LOCK), dtype={"expected_bytes": "Int64"})
+    if not 0 <= index < len(lock):
+        raise typer.BadParameter(f"index {index} outside 0..{len(lock) - 1}")
+    row = lock.iloc[index]
+    expected = None if pd.isna(row.expected_bytes) else int(row.expected_bytes)
+    res = video.process_file(row.psi_id, row.file_name, expected, video.Output(output),
+                             local_path=Path(local_file) if local_file else None, overwrite=overwrite)
+    typer.echo(f"task {index}: {row.file_name} -> {res}")
+
+
+@app.command("video-collect")
+def video_collect(
+    source: str = typer.Option(None, help="Local folder or gs://bucket/prefix (default: $FLAMESAFE_VIDEO_OUTPUT)"),
+) -> None:
+    """ADR-0009: gather the per-video summaries into silver `acme__video_features`."""
+    import os
+
+    from flamesafe import config
+    from flamesafe.pipeline import video
+
+    source = source or os.environ.get("FLAMESAFE_VIDEO_OUTPUT")
+    if not source:
+        raise typer.BadParameter("set --source or FLAMESAFE_VIDEO_OUTPUT")
+    table = video.collect(video.Output(source))
+    out = config.data_dir() / "silver" / "tables" / "acme__video_features.parquet"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    table.to_parquet(out, index=False)
+    seen = int(table["flame_seen"].sum()) if len(table) else 0
+    typer.echo(f"Video features: {len(table)} videos, flame seen in {seen} -> {out.name}")
+
+
 @app.command()
 def timeseries(
     dry_run: bool = typer.Option(False, help="Only resolve the selection, write the lock and check the budget"),
