@@ -5,6 +5,7 @@
 > **Estado: planificación acordada; implementación pendiente.** Publicar este documento no significa que sus módulos, comandos, dependencias, controles o despliegues ya existan. Tampoco habilita predicciones ni constituye aprobación científica, autorización de gasto o autorización de publicación.
 
 - **Decisión de arquitectura:** [ADR-0004](../01_management/decisions/ADR-0004-rag-web-architecture.md).
+- **Visión de producto y alcance de las lecturas del modelo (2026-11-16):** [PRODUCT_VISION.md](../05_dashboard/PRODUCT_VISION.md) y [ADR-0007](../01_management/decisions/ADR-0007-evidence-tiers-in-dashboard.md). ADR-0007 modifica la fila «Predicciones» de la sección 1 y la ruta `/habitat` de la sección 13; **pendiente de incorporar en este plan por sus responsables**.
 - **Base inspeccionada:** commit `b1efca2`. Volver a comprobar el repositorio antes de implementar.
 - **Alcance:** tareas RAG-01 a RAG-05 y migración de las páginas APP; las fases de ejecución se detallan en la sección 17.
 - **Documentos anteriores:** [RAG_DESIGN.md](RAG_DESIGN.md), [DASHBOARD_SPEC.md](../05_dashboard/DASHBOARD_SPEC.md) y [ADR-0001](../01_management/decisions/ADR-0001-tech-stack.md) se conservan como antecedentes. Sus instrucciones incompatibles no deben guiar trabajo nuevo.
