@@ -18,6 +18,13 @@ dependencies = [
     "tenacity>=8.3",
     "typer>=0.12",
     "rich>=13.7",
+    "pandas>=3.1.1",
+    "seaborn>=0.13.2",
+    "scypy>=0.0.8",
+    "scikit-learn>=1.9.1",
+    "pyarrow>=26.0.1",
+    "fastparquet>=2026.9.0",
+    "ipykernel>=7.4.0",
 ]
 
 [project.optional-dependencies]
