@@ -1,0 +1,6 @@
+# Build the FlameSafe API image (ADR-0010/0011): gcloud builds submit --config deploy/cloudbuild.api.yaml .
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: ["build", "-f", "deploy/Dockerfile.api", "-t", "us-west1-docker.pkg.dev/$PROJECT_ID/flamesafe/api:latest", "."]
+images: ["us-west1-docker.pkg.dev/$PROJECT_ID/flamesafe/api:latest"]
+timeout: 1800s

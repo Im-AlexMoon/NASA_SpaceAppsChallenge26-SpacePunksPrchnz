@@ -44,6 +44,16 @@ documents:
       - Interpretación física (PHY)
       - Limitaciones
       - Implicación para seguridad
+  - path: docs/03_data_science/findings/STUDY_SUMMARY.md
+    title: "Study summary: key findings ranked by relevance"
+    sha256: d798ce8bfc87f459048b19236f4cdefddf538eed985f1c534ac6e63274695e4c
+    reviewed_by: "Alexander Moon (PHY), 2026-11-15"
+    license_or_terms: "Repository license (MIT)"
+    allow_provider: true
+    approved_sections:
+      - Key findings of the study, ranked by relevance
+      - Hallazgos clave del estudio, ordenados por relevancia
+      - What the study did — Qué hizo el estudio
   - path: docs/03_data_science/findings/F-04.md
     title: "F-04 Lunar-base and partial-gravity data gap"
     sha256: a3df7154841e86dbc41f4aca0ff078dd126b55d468d201eb6c19412b3b545417
