@@ -12,6 +12,6 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-      - run: pip install -e ".[pipeline,dev]"
+      - run: pip install -e ".[pipeline,analysis,dev]"
       - run: ruff check src tests app
       - run: pytest -m "not integration"
