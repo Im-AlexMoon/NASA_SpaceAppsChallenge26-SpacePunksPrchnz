@@ -1,5 +1,7 @@
 # Diseño del asistente RAG ("Ask the Data")
 
+> **ANTECEDENTE — NO ES EL PLAN VIGENTE.** Desde el 2026-11-15, seguir [RAG_IMPLEMENTATION_PLAN.md](RAG_IMPLEMENTATION_PLAN.md) y [ADR-0004](../01_management/decisions/ADR-0004-rag-web-architecture.md). Este diseño se conserva como contexto; sus propuestas incompatibles (Anthropic como elección fija, embeddings en inglés y predicciones en la primera versión) quedan sustituidas. Los cambios posteriores deben actualizar el plan vigente y documentar la decisión correspondiente.
+
 > Tareas RAG-01 → RAG-05. Cierra en **G5**. Config: `configs/rag.yaml`. Código: `src/flamesafe/rag/`.
 
 ## 1. Objetivo
