@@ -24,10 +24,11 @@ tengan subtítulos en inglés. No hay ediciones después del cierre.
 - [x] Corpus del RAG con 11 documentos revisados (76 fragmentos)
 
 ## B. Producto (pendiente tras el frontend)
-- [ ] Páginas nuevas según PRODUCT_VISION: Atmosphere Explorer, Burn-Time Law, Knowledge Gaps, Insights con F-01..F-05, ranking interactivo
-- [ ] Dashboard desplegado: API en Cloud Run y web en GoDaddy (ADR-0010); verificar Node.js ≥ 22 en el plan de GoDaddy
+- [x] Páginas: inicio con llama en microgravedad (WebGL), Atmosphere Explorer, Findings (F-01..F-05, ley de duración en F-02), Gaps,
+  Investigations (ranking con pesos y reordenamiento animado), Ask the data, Methods — `web/` (2026-11-15); e2e 5/5
+- [ ] Dashboard desplegado: web en **Vercel** (ADR-0011, `deploy/VERCEL.md`; requiere la cuenta del responsable) y API en Cloud Run solo para el chat (ADR-0010)
 - [ ] Probado en navegador limpio (incógnito) y en móvil; sin errores en consola
-- [ ] Cada figura con fuente y unidades; niveles de evidencia y banner de gravedad visibles
+- [x] Cada figura con unidades y leyenda; niveles de evidencia y banner de gravedad visibles (e2e los verifica)
 - [ ] Índice del RAG **híbrido** en el despliegue (pesos E5 en el bucket de evidencia); hoy validado en modo léxico
 - [ ] Chat: preguntas de la demo con respuesta verificada (modo evidencia; generación desactivada por defecto)
 - [ ] Revisión final de la app completa (presentación, textos, accesibilidad)

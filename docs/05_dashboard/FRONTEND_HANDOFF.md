@@ -1,5 +1,9 @@
 # Entrega al frontend — luz verde (2026-11-15)
 
+> **Actualización 2026-11-15 (ADR-0011):** el frontend ya está construido en `web/` y se aloja en Vercel. Las páginas leen el
+> contenido de `web/src/content/*.json` (generado con `flamesafe web-content`) en lugar de llamar a la API; solo *Ask the data*
+> usa el gateway `/api/backend/*`. Las reglas de presentación de abajo siguen vigentes y la UI las cumple.
+
 > Qué contenido ya existe, de dónde sale y cómo se consume. Visión y reglas de producto: [PRODUCT_VISION.md](PRODUCT_VISION.md) ·
 > lecturas del modelo: [ADR-0007](../01_management/decisions/ADR-0007-evidence-tiers-in-dashboard.md) · despliegue:
 > [ADR-0010](../01_management/decisions/ADR-0010-deployment-cloud-run-godaddy.md). UI en inglés. Todo el contenido científico está

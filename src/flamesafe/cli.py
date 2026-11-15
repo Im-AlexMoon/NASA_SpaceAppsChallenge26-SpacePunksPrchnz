@@ -259,6 +259,19 @@ def rank_cmd() -> None:
     typer.echo(f"Ranking: {len(cfg['profiles'])} profiles x {len(inv)} investigations -> {doc.name}, {csv.name}")
 
 
+@app.command("web-content")
+def web_content(out: str = typer.Option("web/src/content", help="Output folder (bundled by the Next.js app)")) -> None:
+    """ADR-0011: write the reviewed content snapshot (findings, ranking, readings, tests) for the static web app."""
+    from flamesafe import config
+    from flamesafe.rag.index import current
+    from flamesafe.rag.settings import settings
+    from flamesafe.web_content import export
+
+    bundle = current(settings().artifact_root)
+    sizes = export(config.ROOT / out, bundle)
+    typer.echo(f"web content from {bundle.name}: " + ", ".join(f"{k} {v / 1024:.0f} KB" for k, v in sizes.items()))
+
+
 VIDEO_LOCK = ("docs", "02_data_engineering", "video_manifest.csv")
 
 

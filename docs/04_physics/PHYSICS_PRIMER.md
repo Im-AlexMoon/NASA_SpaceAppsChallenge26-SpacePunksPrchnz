@@ -108,5 +108,5 @@ F-01..F-05 ([findings](../03_data_science/findings/)):
 6. **"Apagada" no siempre es apagada.** Hay transiciones a llama fría (R6), casi invisible: relevante para detección.
 7. **El final de una prueba no siempre es físico.** Muchos cortes de flujo ocurren por el límite térmico del quemador (~728 K), no
    por temporizador: es censura informativa que hay que modelar aparte (R10).
-8. **Lo que no sabemos.** No hay pruebas entre 24 % y 33 % de O₂ en llama normal, ni cerca de la base lunar, ni en gravedad parcial (F-04).
+8. **Lo que no sabemos.** No hay pruebas de CFI-G entre 24 % y 33 % de O₂ en llama normal (Flame Design: 6 de etileno a 1 atm, sin duración), ni cerca de la base lunar, ni en gravedad parcial (F-04).
 
