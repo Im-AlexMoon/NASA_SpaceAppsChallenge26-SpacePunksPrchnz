@@ -1,4 +1,4 @@
-"""M1 · Ignition probability and burn duration of CFI-G gas jet flames.
+"""M1 · Ignition probability and burn duration of CFI-G spherical gas diffusion flames.
 
 Two targets, both from `gas_flame_tests` restricted to CFI-G (Flame Design labels are ~always "yes" and come from an
 operational decision, so they cannot teach the model when a flame does *not* ignite):

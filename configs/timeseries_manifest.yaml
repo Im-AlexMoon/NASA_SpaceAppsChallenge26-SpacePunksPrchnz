@@ -1,0 +1,29 @@
+# ADR-0005 · Extension manifest: per-test raw time series of the ACME spherical-flame campaigns.
+# Separate from configs/acquisition_manifest.yaml on purpose: the core manifest (147 files, 263 MB) stays the
+# minimum needed to rebuild gold; this extension is opt-in (`flamesafe timeseries`) and only needed for the
+# research on flame duration / radiative extinction (docs/03_data_science/RESEARCH_LOG.md).
+# Resolved, byte-exact lock: docs/02_data_engineering/timeseries_manifest.csv
+#
+# Still never downloaded: video (.ts, .mp4), image archives (.zip) and .mdipsug.
+budget:
+  max_total_mb: 3000
+  max_file_mb: 50
+  max_files: 3400
+include_experimental_tables: false
+
+groups:
+  - name: ts_acme_data
+    purpose: "~125 Hz per-test stream: radiometers, PMTs, thermocouples, pressures, MFC flows (+ MFC setpoints)"
+    files:
+      PSI-159:
+        - {pattern: "^PSI-159_Raw Data_.*_(data|mfcSetpoints)\\.csv$"}
+      PSI-10:
+        - {pattern: "^PSI-10_Raw Data_.*_(data|mfcSetpoints)\\.csv$"}
+
+  - name: ts_acme_test_notes
+    purpose: "Per-test operator comments, test-point parameters (TP) and as-run scripts (~1 KB each)"
+    files:
+      PSI-159:
+        - {pattern: "^PSI-159_Raw Data_.*\\.txt$"}
+      PSI-10:
+        - {pattern: "^PSI-10_Raw Data_.*\\.txt$"}
