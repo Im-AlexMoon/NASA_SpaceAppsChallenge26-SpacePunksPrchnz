@@ -1,4 +1,4 @@
-"""Research iteration 4 (2026-11-16): can the ISS ops-camera video measure the spherical flame? (ADR-0009, phase 1)
+"""Research iteration 4 (2026-11-15): can the ISS ops-camera video measure the spherical flame? (ADR-0009, phase 1)
 
 For each sample video: frame size and rate, when the chamber lights go off, the flame's equivalent radius per frame
 (largest bright region on the dark background), the mean brightness of the flame pixels (soot glow) and how long the

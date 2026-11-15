@@ -1,6 +1,6 @@
 # Visión del producto — qué nos distingue
 
-> **Documento vigente de visión (2026-11-16).** Define *qué* debe comunicar la aplicación y *por qué*. No cambia la arquitectura:
+> **Documento vigente de visión (2026-11-15).** Define *qué* debe comunicar la aplicación y *por qué*. No cambia la arquitectura:
 > el *cómo* (Next.js/Node.js, backend Python, RAG, hosting) sigue en [RAG_IMPLEMENTATION_PLAN.md](../03_data_science/RAG_IMPLEMENTATION_PLAN.md)
 > y [ADR-0004](../01_management/decisions/ADR-0004-rag-web-architecture.md). La decisión de alcance que introduce esta visión está en
 > [ADR-0007](../01_management/decisions/ADR-0007-evidence-tiers-in-dashboard.md). Idioma de la UI: inglés.

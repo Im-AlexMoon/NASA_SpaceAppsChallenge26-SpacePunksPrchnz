@@ -1,4 +1,4 @@
-"""Research iteration 3 (2026-11-16): M1 v2, first lunar-base reading and the flow-ramp tests.
+"""Research iteration 3 (2026-11-15): M1 v2, first lunar-base reading and the flow-ramp tests.
 
 1. Thermochemistry check: calculated Zst / Tad vs the investigators' columns.
 2. M1 v2 for normal flames: physical log-logistic equation on CFI-G + Flame Design (same time-series definition),

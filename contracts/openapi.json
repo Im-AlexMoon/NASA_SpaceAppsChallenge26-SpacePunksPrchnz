@@ -63,6 +63,59 @@
         "title": "AnswerResult",
         "type": "object"
       },
+      "AtmosphereRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "fuel": {
+            "default": "propane",
+            "maxLength": 20,
+            "title": "Fuel",
+            "type": "string"
+          },
+          "gravity": {
+            "default": "microgravity",
+            "maxLength": 20,
+            "title": "Gravity",
+            "type": "string"
+          },
+          "m_fuel_mg_s": {
+            "default": 1.0,
+            "description": "Fuel mass flow, mg/s",
+            "exclusiveMinimum": 0.0,
+            "maximum": 20.0,
+            "title": "M Fuel Mg S",
+            "type": "number"
+          },
+          "p_kpa": {
+            "description": "Total pressure, kPa",
+            "exclusiveMinimum": 0.0,
+            "maximum": 1000.0,
+            "title": "P Kpa",
+            "type": "number"
+          },
+          "x_fuel": {
+            "default": 0.3,
+            "description": "Fuel mole fraction of the burner stream (rest N2)",
+            "exclusiveMinimum": 0.0,
+            "maximum": 1.0,
+            "title": "X Fuel",
+            "type": "number"
+          },
+          "xo2": {
+            "description": "O2 mole fraction of the cabin atmosphere",
+            "exclusiveMinimum": 0.0,
+            "maximum": 1.0,
+            "title": "Xo2",
+            "type": "number"
+          }
+        },
+        "required": [
+          "xo2",
+          "p_kpa"
+        ],
+        "title": "AtmosphereRequest",
+        "type": "object"
+      },
       "ChatRequest": {
         "additionalProperties": false,
         "properties": {
@@ -367,6 +420,51 @@
           }
         },
         "title": "QueryArgs",
+        "type": "object"
+      },
+      "RankingRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "environment": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Environment"
+          },
+          "profile": {
+            "anyOf": [
+              {
+                "maxLength": 60,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile"
+          },
+          "weights": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weights"
+          }
+        },
+        "title": "RankingRequest",
         "type": "object"
       },
       "SourceRecord": {
@@ -850,6 +948,44 @@
         "summary": "Evidence"
       }
     },
+    "/v1/findings": {
+      "get": {
+        "operationId": "findings_v1_findings_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Findings"
+      }
+    },
     "/v1/investigations": {
       "get": {
         "operationId": "investigations_v1_investigations_get",
@@ -933,6 +1069,178 @@
           }
         },
         "summary": "Investigation"
+      }
+    },
+    "/v1/ranking": {
+      "post": {
+        "operationId": "ranking_v1_ranking_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RankingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ranking"
+      }
+    },
+    "/v1/ranking/profiles": {
+      "get": {
+        "operationId": "ranking_profiles_v1_ranking_profiles_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ranking Profiles"
+      }
+    },
+    "/v1/readings/atmosphere": {
+      "post": {
+        "operationId": "reading_v1_readings_atmosphere_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AtmosphereRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reading"
+      }
+    },
+    "/v1/readings/atmospheres": {
+      "get": {
+        "operationId": "reference_readings_v1_readings_atmospheres_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reference Readings"
       }
     },
     "/v1/sources/{source_id}": {

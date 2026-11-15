@@ -1,0 +1,45 @@
+# DS-07 · MCDA ranking of the 24 PSI combustion investigations (method: docs/03_data_science/RANKING_METHODOLOGY.md).
+# Every dimension score lies in [0, 1] and is computed from versioned inputs (configs/triage.yaml, gold `investigations`).
+# score(inv, profile) = sum_d w_d(profile) * s_d(inv) / sum_d w_d(profile). Users may send their own weights (API/dashboard).
+# Pillar/environment tags and R1-R6 were proposed by DE and validated by PHY (Alexander Moon, 2026-11-15).
+
+dimensions:
+  pillar_prevencion: "Relevance to fire prevention (ignition, flammability, atmosphere selection)"
+  pillar_deteccion: "Relevance to fire detection (smoke, particles, early warning)"
+  pillar_supresion: "Relevance to fire suppression (diluents, extinction)"
+  environment: "Relevance to the profile's target environment (base_lunar, rover, marte, nave, estacion)"
+  evidence: "Quality of the data: measured vs logged, tabular, sample size (triage R2, R3, R5) and access"
+  modeling: "Usefulness for predictive modeling: measured outcome under varied conditions (triage R4)"
+  maturity: "Scientific maturity: peer-reviewed publications with DOI listed by PSI (log-scaled)"
+
+scoring:
+  primary_pillar_factor: 1.0     # first pillar listed in triage
+  secondary_pillar_factor: 0.7   # any further pillar
+  access_penalty: {available: 1.0, experimental_table_only: 0.85, restricted: 0.6}
+  ground_investigation_environment_factor: 0.6   # ground labs inform, but are not crewed-environment tests
+
+profiles:
+  lunar_habitat_engineer:
+    label: "Lunar habitat engineer"
+    environment: base_lunar
+    weights: {pillar_prevencion: 0.30, pillar_deteccion: 0.10, pillar_supresion: 0.10, environment: 0.20, evidence: 0.15, modeling: 0.10, maturity: 0.05}
+  suppression_designer:
+    label: "Suppression system designer"
+    environment: nave
+    weights: {pillar_prevencion: 0.10, pillar_deteccion: 0.05, pillar_supresion: 0.40, environment: 0.10, evidence: 0.15, modeling: 0.15, maturity: 0.05}
+  detection_researcher:
+    label: "Detection researcher"
+    environment: nave
+    weights: {pillar_prevencion: 0.05, pillar_deteccion: 0.40, pillar_supresion: 0.05, environment: 0.10, evidence: 0.20, modeling: 0.10, maturity: 0.10}
+  mars_mission_planner:
+    label: "Mars mission planner"
+    environment: marte
+    weights: {pillar_prevencion: 0.25, pillar_deteccion: 0.15, pillar_supresion: 0.15, environment: 0.20, evidence: 0.10, modeling: 0.10, maturity: 0.05}
+  student:
+    label: "Student (balanced)"
+    environment: estacion
+    weights: {pillar_prevencion: 0.15, pillar_deteccion: 0.15, pillar_supresion: 0.15, environment: 0.15, evidence: 0.15, modeling: 0.10, maturity: 0.15}
+
+sensitivity:
+  perturbation: 0.20   # +/-20 % on one weight at a time (RANKING_METHODOLOGY §4)
+  top_k: 5

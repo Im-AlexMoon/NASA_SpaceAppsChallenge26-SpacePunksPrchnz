@@ -3,7 +3,7 @@
 Mide cada video de operaciones de CFI-G (335 archivos, ~81.6 GB en PSI) sin descargarlo a ninguna laptop. Cada tarea baja
 **un** video a su disco temporal, lo mide (`flamesafe video-task`), escribe resultados pequeños en el bucket y borra el video.
 
-## Recursos creados (2026-11-16, proyecto `flamesafe-psi`, región `us-west1`)
+## Recursos creados (2026-11-15, proyecto `flamesafe-psi`, región `us-west1`)
 
 | Recurso | Nombre | Notas |
 |---|---|---|
