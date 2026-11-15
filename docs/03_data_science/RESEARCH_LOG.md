@@ -176,6 +176,73 @@ Proporción de llamas con oscilación ininterrumpida de la señal óptica durant
 - ✘ No demuestra: transferencia calibrada en inversas; la causa de los cortes en Flame Design; que la oscilación sirva como alarma
   (falta tasa de falsos positivos durante la vida de la llama, no solo al final).
 
+## Iteración 3 (2026-11-16) — M1 v2, primera lectura para la base lunar y pruebas de rampa
+
+**Reproducible:** `python scripts/research/r03_m1v2_lunar_ramps.py` (~4 min; requiere Cantera, extra `analysis`).
+Código nuevo: `src/flamesafe/physics/thermochem.py` (3 tests).
+
+### R12. Termoquímica propia validada: ya podemos situar cualquier atmósfera en los ejes físicos
+`thermochem.zst` y `thermochem.tad_k` (equilibrio a presión y entalpía constantes) reproducen las columnas de los investigadores en
+587 pruebas: Zst con diferencia máxima 0.008; Tad con diferencia mediana +3 K, el 90 % entre −41 y +50 K, correlación 0.998.
+Son cantidades **calculadas**, igual que las publicadas.
+
+### R13. M1 v2 (llamas normales, las dos campañas, ecuación física log-logística)
+255 llamas sostenidas de 24 días (120 de CFI-G, 135 de Flame Design), con la misma definición de duración.
+
+    ln t = 15.8 − 13.4·(1000/Tad) − 0.41·ln p − 1.20·ln ṁ + 2.12·ln L + 0.56·[Flame Design]
+
+| Término | Coef. | IC 95 % (bootstrap de días) |
+|---|---|---|
+| 1000/Tad | −13.4 | −17.4 a −10.4 |
+| ln p | −0.41 | −0.84 a −0.12 |
+| ln ṁ | −1.20 | −1.54 a −0.82 |
+| ln L | +2.12 | +1.66 a +2.50 |
+| Flame Design (frente a CFI-G) | +0.56 | +0.25 a +0.90 |
+
+- **Validación dejando fuera un día:** log-verosimilitud −0.72 por prueba e índice C 0.89, frente a −0.82 y 0.83 de O₂ + presión
+  y −1.30 sin covariables.
+- **Calibración fuera de muestra** de P(sigue ardiendo a 60 s) por terciles: predicho 0.03 / 0.38 / 0.84, observado 0.03 / 0.26 / 0.81.
+  A 30 s: 0.27 / 0.90 / 0.99 frente a 0.20 / 0.91 / 1.00.
+- **Sensibilidad a la censura por límite térmico** (21 cortes en CFI-G): los coeficientes cambian menos del 12 % entre
+  (A) tratarlos como censura, (B) excluirlos y (C) suponer que habrían llegado al temporizador. La conclusión no depende de ese supuesto.
+- ⚠️ Las llamas de Flame Design duran ~1.75 veces más que las de CFI-G a igualdad de grupos físicos (término +0.56). Puede ser el
+  combustible (etileno, hollín) o el montaje; con un solo combustible por campaña no se pueden separar.
+- En Flame Design 73 de 81 cortes ocurren antes del temporizador y su causa sigue sin identificar.
+
+### R14. Primera lectura para la base lunar (30 % O₂, 70 kPa) — nivel B: interpolación del modelo
+Fuente supuesta: corriente con 30 % de combustible en N₂ a 1 mg/s (el caso típico de CFI-G). Microgravedad.
+
+| Atmósfera | Tad calculada | Duración mediana del modelo (IC 90 %) | P(sigue a 60 s) | Observado cerca |
+|---|---|---|---|---|
+| Cabina ISS (21 %, 101 kPa) | 2,125–2,196 K | 13 s (10–17) | 0.01 | 9 s (21 pruebas, todas autoextinguidas) |
+| Exploración (34 %, 56.5 kPa) | 2,467–2,536 K | 91–97 s (73–125) | 0.77–0.80 | 63 s entre las autoextinguidas (15 pruebas, 3 siguieron hasta el corte) |
+| **Base lunar (30 %, 70 kPa)** | 2,400–2,470 K | **58–61 s (47–75)** | **0.47–0.51 (0.32–0.66)** | **ninguna prueba** |
+
+- En cada eje físico por separado la base lunar cae **dentro** de lo ensayado (temperatura en el percentil 64, caudal 31–49,
+  posición de llama 37–58; la presión en el percentil 7, extremo bajo). Pero **no hay ninguna prueba cercana en la combinación**:
+  la distancia a la quinta prueba más próxima es 2.1 veces la típica entre pruebas. Es interpolación del modelo, no medición.
+- El resultado es estable entre los tres supuestos de censura (55–65 s).
+- Lectura: en la base lunar una llama de este tipo duraría unas **4–5 veces más que en la ISS**, y algo menos que en la
+  atmósfera de exploración. ⚠️ No incluye el efecto de la gravedad lunar (nivel C).
+- El modelo sobreestima un poco donde hay datos (13 s frente a 9 s; ~95 s frente a 63 s entre autoextinguidas, que excluye las
+  que seguían vivas). Debe mostrarse junto a lo observado.
+
+### R15 (exploratorio). Pruebas de rampa: no aparece un único caudal crítico
+34 pruebas de Flame Design con extinción registrada y caudales utilizables (calibración de los controladores con 90 pruebas
+estacionarias: dispersión 0.1 % en combustible y 0.3 % en N₂).
+
+- **19 con rampa de caudal** (se reduce hasta el 58 % en mediana): caudal total en la extinción 0.32–3.9 mg/s, mediana 0.91.
+- **15 con rampa de composición:** Tad en la extinción entre 1,671 y 2,784 K.
+- En ambos grupos, las llamas con mayor Tad se apagan con menor caudal (Spearman −0.54 y −0.66): coherente con un caudal crítico
+  que baja al subir la temperatura, pero con 15–19 pruebas y condiciones mezcladas **no se puede ajustar una ley**. Sin intervalos.
+- Cuatro pruebas se extinguen cerca de 1,700 K, pero no basta para fijar una temperatura crítica.
+
+### Qué demuestra y qué no la iteración 3
+- ✔ La ecuación física es estable frente al supuesto de censura y está razonablemente calibrada fuera de muestra.
+- ✔ Hay una primera lectura cuantitativa para la base lunar con su nivel de evidencia.
+- ✘ No demuestra: el efecto de la gravedad parcial, la validez para otros combustibles o sólidos, ni una ley de caudal crítico.
+- **Experimento que más reduciría la incertidumbre:** llamas normales a 30 % O₂ y 70 kPa (hoy 0 pruebas) y, en general, O₂ entre 0.24 y 0.33.
+
 ## Agenda (ordenada por información ganada por esfuerzo)
 
 1. ✔ **Series temporales ingeridas** (ADR-0005) y reducidas a una fila por prueba. Pendiente dentro de este frente:

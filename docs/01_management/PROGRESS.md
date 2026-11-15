@@ -13,7 +13,7 @@
 | F1 Descubrimiento y triage | G1 | H+5 | 🟨 | 90 | DE | DE-01…05 ✔; **G1 espera a PHY-02** (ratificar pilar, entorno y R1) |
 | F2 Pipeline medallion | G2 | H+9 | ✅ | 100 | DE | **G2 cerrado**: gate de datos PASSED, rebuild determinista |
 | F3 EDA y estadística | G3 | H+14 | 🟦 | 55 | DS | discovery ✔ · EDA RQ1 v1 ✔ · auditoría + segmentación + categóricas de gas ✔ (PR #3) · pendiente PHY-03, EDA RQ2 (gotas) |
-| F4 Modelado | G4 | H+17 | 🟦 | 35 | DS | M1 v1 ✔ (ignición + duración, model card M-01, pendiente PHY) · M2 (gotas) espera EDA RQ2 + ADR-0006 |
+| F4 Modelado | G4 | H+17 | 🟦 | 55 | DS | M1 v1 ✔ (ignición + duración, model card M-01, pendiente PHY) · M2 (gotas) espera EDA RQ2 + ADR-0006 |
 | F5 RAG | G5 | H+16 | ⬜ | 0 | | |
 | F6 Dashboard | G6 | H+20 | ⬜ | 0 | | |
 | F7 Física | G7 | H+20 | 🟦 | 5 | | Primer en borrador |
@@ -252,4 +252,19 @@
   - Las llamas autoextinguidas oscilan antes de apagarse (16–90 % con ≥ 5 s, frente a 2–17 % de las cortadas); mediana 8.9 s de anticipo. Preliminar.
 - ▶ Siguiente: caudal crítico en las 66 pruebas de rampa, M1 v2 con riesgos competitivos (autoextinción / límite térmico / temporizador)
   y predicción para la base lunar, validación de la oscilación como precursor, y llevar `acme__timeseries_features` a gold.
+
+### Investigación · iteración 3 y visión del producto — 2026-11-16
+- ✔ `main` al día: PR #7 integrado y el modelo de Cox de Hugo-Edel (`notebooks/03_modeling/03_m2_cox_survival.ipynb`).
+- ✔ `src/flamesafe/physics/thermochem.py` (Zst y Tad con Cantera, validados contra 587 pruebas), 3 tests, Cantera en el extra `analysis`.
+- ✔ `scripts/research/r03_m1v2_lunar_ramps.py` y RESEARCH_LOG R12–R15.
+- 📌 Hallazgos (candidatos):
+  - **M1 v2**: ecuación física log-logística sobre 255 llamas normales de las dos campañas; índice C 0.89 dejando fuera un día,
+    calibración razonable y estable frente al supuesto de censura por límite térmico.
+  - **Primera lectura para la base lunar** (30 % O₂, 70 kPa, µg): duración mediana ~60 s (IC 90 % 47–75), unas 4–5 veces la de la
+    cabina ISS. Nivel de evidencia B: interpolación del modelo, sin pruebas cercanas.
+  - Pruebas de rampa: tendencia coherente con un caudal crítico, sin ley ajustable (exploratorio).
+- ✔ **Visión del producto**: `docs/05_dashboard/PRODUCT_VISION.md` y **ADR-0007** (lecturas del modelo con niveles de evidencia en
+  la primera versión). Modifica la fila «Predicciones» del plan RAG; pendiente de que sus responsables lo incorporen.
+- ▶ Siguiente: piloto de video en la nube (requiere ADR y acceso confirmado), unificar el Cox de Hugo con la censura por límite
+  térmico, llevar `acme__timeseries_features` a gold, revisión PHY, gotas y sólidos.
 
