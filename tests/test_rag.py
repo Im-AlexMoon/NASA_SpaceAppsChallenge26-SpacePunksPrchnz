@@ -1,6 +1,7 @@
 """Offline contracts: no credentials, network, or production medallion writes."""
 
 import json
+import re
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest
@@ -237,3 +238,20 @@ def test_retained_evidence(service):
     result = service.tools.execute(ToolRequest(tool="summarize_ignition_outcomes"))
     assert service.tools.retained(result.evidence_id) == result
     assert service.tools.retained("unknown") is None
+
+
+def test_synthesized_claims_keep_numbers_grounded(service):
+    evidence = service.ask(ChatRequest(question="burn_time_s")).evidence
+    chunk = next(c for c in evidence.chunks if re.search(r"\d", c.text))
+    number = re.search(r"\d+(?:[.,]\d+)?", chunk.text).group()
+    ok = Claim(kind="interpretation", text=f"In short, the source reports {number}.", evidence_ids=[chunk.chunk_id])
+    validate_claims(GeneratedAnswer(claims=[ok]), evidence)
+    bad = Claim(kind="interpretation", text="In short, the source reports 987654.", evidence_ids=[chunk.chunk_id])
+    with pytest.raises(ValueError):
+        validate_claims(GeneratedAnswer(claims=[bad]), evidence)
+
+
+def test_counts_of_findings_are_not_numeric_filters(service):
+    for question in ("¿Cuáles son los 3 descubrimientos más relevantes?", "What are the 3 main findings?"):
+        assert service.ask(ChatRequest(question=question)).status != "clarification_required"
+    assert service.ask(ChatRequest(question="oxígeno 34", language="es")).status == "clarification_required"

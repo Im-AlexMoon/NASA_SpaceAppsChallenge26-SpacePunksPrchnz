@@ -57,6 +57,7 @@ test("evidence mode renders quotations without executing markup", async ({ page 
     });
   });
   await page.goto("/ask");
+  await page.getByRole("checkbox", { name: /Gemini/ }).uncheck();
   await page.getByRole("button", { name: "Ask", exact: true }).click();
   await expect(page.getByText("SAMPLE", { exact: true })).toBeVisible();
   await page.getByText("Evidence 1: Burn duration").click();

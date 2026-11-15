@@ -37,13 +37,17 @@ function ToolPanel({ result }: { result: Tool }) {
   );
 }
 
-const EXAMPLES = ["Where does burn_time_s come from?", "Which fuels were tested in CFI-G?", "What is an inverse flame?"];
+const EXAMPLES = [
+  "What are the 3 most relevant findings of the study?",
+  "How does oxygen change how long a flame burns?",
+  "Where does burn_time_s come from?",
+];
 
 export default function AskData() {
   const [token, setToken] = useState("");
   const [question, setQuestion] = useState(EXAMPLES[0]);
   const [language, setLanguage] = useState<"en" | "es">("en");
-  const [generate, setGenerate] = useState(false);
+  const [generate, setGenerate] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [answer, setAnswer] = useState<Answer>();
@@ -99,7 +103,7 @@ export default function AskData() {
         </label>
         <label className="checkbox">
           <input type="checkbox" checked={generate} onChange={(e) => setGenerate(e.target.checked)} />
-          Use the generation provider (sends the question and retrieved text to it)
+          Write the answer with Gemini (sends the question and the retrieved passages to Google)
         </label>
         <button className="btn btn-primary" disabled={busy || !question.trim()} onClick={ask}>
           {busy ? "Retrieving…" : "Ask"}
@@ -110,10 +114,10 @@ export default function AskData() {
         {error && <p role="alert" className="error panel">{error}</p>}
         {!answer && !error && (
           <div className="panel stack">
-            <span className="label">Evidence mode</span>
+            <span className="label">Grounded answers</span>
             <p className="muted">
-              Answers quote reviewed sources and exact database queries. Without generation, nothing leaves the
-              evidence service.
+              Every sentence cites the reviewed passages it comes from, and every number must appear in them. Untick
+              Gemini to get the passages alone.
             </p>
           </div>
         )}
@@ -123,16 +127,19 @@ export default function AskData() {
               <span className="label">{answer.status.replaceAll("_", " ")}</span>
               <p>{answer.message}</p>
               <p className="small"><strong>{answer.evidence.source_mode.toUpperCase()}</strong> · {answer.evidence.build_id}</p>
-              {answer.claims?.map((claim, i) => (
-                <blockquote key={i}>
-                  {claim.text}
-                  <p className="small">
-                    {claim.evidence_ids.map((id) => (
-                      <a key={id} href={`#${id}`}>[Evidence {answer.evidence.chunks?.findIndex((c) => c.chunk_id === id)! + 1}] </a>
-                    ))}
+              {answer.claims?.map((claim, i) => {
+                const cites = claim.evidence_ids.map((id) => (
+                  <a key={id} className="link" href={`#${id}`}>[{answer.evidence.chunks?.findIndex((c) => c.chunk_id === id)! + 1}]</a>
+                ));
+                return claim.kind === "data" ? (
+                  <blockquote key={i}>{claim.text} <span className="small">{cites}</span></blockquote>
+                ) : (
+                  <p key={i} style={{ fontSize: 17 }}>
+                    {claim.kind === "limitation" && <span className="label">Limit · </span>}
+                    {claim.text} <span className="small">{cites}</span>
                   </p>
-                </blockquote>
-              ))}
+                );
+              })}
             </div>
             {answer.evidence.tools?.map((t) => <ToolPanel key={t.evidence_id} result={t} />)}
             <div className="panel">

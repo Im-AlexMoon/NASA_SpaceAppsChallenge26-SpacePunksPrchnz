@@ -28,7 +28,8 @@ class Provider:
                     config=types.GenerateContentConfig(
                         system_instruction=instructions,
                         response_mime_type="application/json",
-                        response_schema=schema,
+                        # Full JSON Schema: `response_schema` rejects the additionalProperties of our strict contracts.
+                        response_json_schema=schema.model_json_schema(),
                         max_output_tokens=s.max_output_tokens,
                         temperature=0,
                     ),
