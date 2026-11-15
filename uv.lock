@@ -1272,7 +1272,8 @@ dependencies = [
     { name = "requests" },
     { name = "rich" },
     { name = "scikit-learn" },
-    { name = "scypy" },
+    { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "scipy", version = "1.18.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "seaborn" },
     { name = "tenacity" },
     { name = "typer" },
@@ -1392,8 +1393,8 @@ requires-dist = [
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.5" },
     { name = "scikit-learn", specifier = ">=1.9.1" },
     { name = "scikit-learn", marker = "extra == 'ml'", specifier = ">=1.5" },
+    { name = "scipy", specifier = ">=1.13" },
     { name = "scipy", marker = "extra == 'analysis'", specifier = ">=1.13" },
-    { name = "scypy", specifier = ">=0.0.8" },
     { name = "seaborn", specifier = ">=0.13.2" },
     { name = "seaborn", marker = "extra == 'analysis'", specifier = ">=0.13" },
     { name = "sentence-transformers", marker = "extra == 'rag'", specifier = ">=3.0" },
@@ -4691,15 +4692,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/cf/d9/135be205d9de8783193aff9cc3bf483a03a38e4b29432c954e8cb66ac14e/scipy-1.18.1-cp315-cp315t-musllinux_1_2_x86_64.whl", hash = "sha256:179ce34a8d0fe273d8883ba59e17e052247d08973dfcb743ca52bb1cce2d60b0", size = 37521946, upload-time = "2026-08-21T23:28:35.245Z" },
     { url = "https://files.pythonhosted.org/packages/5c/a2/5b7d5270621ab7cfa3f7766067bf95dc360b5efb6394694e8143b4156e2b/scipy-1.18.1-cp315-cp315t-win_amd64.whl", hash = "sha256:5632e3ae3d09197c446310cd5187de63e28448ce22f0f67b2b93d97503c0c230", size = 37408295, upload-time = "2026-08-21T23:28:40.724Z" },
     { url = "https://files.pythonhosted.org/packages/63/ad/741c19fcb66755ff953daf9243af8480e4bf3d7fbe57583c178c7d2b6b51/scipy-1.18.1-cp315-cp315t-win_arm64.whl", hash = "sha256:eda632a7981f69730d6281f451db9c1c370993a2c0d7ddb43e2a809a2862b83a", size = 25319710, upload-time = "2026-08-21T23:28:45.713Z" },
-]
-
-[[package]]
-name = "scypy"
-version = "0.0.8"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/6f/c5/72ef939228f5680095709c6c9bfdb4f6153c9629e90dc04ddc4c44c3035f/scypy-0.0.8.tar.gz", hash = "sha256:14cdba706f5b5e864a0c13f92000e986fd6051b9725472af636fba0a8319b492", size = 43299, upload-time = "2025-06-11T10:03:11.47Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/79/0e/97709770f09b57c0c8da538ecc3c65301956a3474f5567b46e3446f0096e/scypy-0.0.8-py3-none-any.whl", hash = "sha256:61248138f0032961ba8a915cbd48184b0296e6161651a62f7096548d8d4c8b65", size = 62145, upload-time = "2025-06-11T10:03:10.024Z" },
 ]
 
 [[package]]

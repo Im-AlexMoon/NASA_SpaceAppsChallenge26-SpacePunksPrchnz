@@ -12,7 +12,7 @@
 | F0 Setup y alineación | G0 | H+2 | 🟦 | 20 | | Repo + plan listos |
 | F1 Descubrimiento y triage | G1 | H+5 | 🟨 | 90 | DE | DE-01…05 ✔; **G1 espera a PHY-02** (ratificar pilar, entorno y R1) |
 | F2 Pipeline medallion | G2 | H+9 | ✅ | 100 | DE | **G2 cerrado**: gate de datos PASSED, rebuild determinista |
-| F3 EDA y estadística | G3 | H+14 | 🟦 | 40 | DS | discovery ✔ · EDA RQ1 v1 ✔ (4 candidatos a finding, pendiente PHY-03) · siguiente EDA RQ2 |
+| F3 EDA y estadística | G3 | H+14 | 🟦 | 55 | DS | discovery ✔ · EDA RQ1 v1 ✔ · auditoría + segmentación + categóricas de gas ✔ (PR #3) · pendiente PHY-03, EDA RQ2 (gotas) |
 | F4 Modelado | G4 | H+17 | ⬜ | 0 | DS | desbloqueado (M1 con CFI-G; M2 con FLEX + CFI) |
 | F5 RAG | G5 | H+16 | ⬜ | 0 | | |
 | F6 Dashboard | G6 | H+20 | ⬜ | 0 | | |
@@ -165,3 +165,37 @@
   **M1 debe tratar el combustible de forma no lineal.** Preguntas PHY: significado de `Xfuel` en CFI-G normal, dirección de la presión
   en inversas, 2 pruebas con `x_fuel = 0` (21125A4, 21125H3).
 - ▶ Siguiente: PHY-03 sobre F-01…F-04, ADR-0004 (FLEX → `k_hot_mm2_s`) y EDA RQ2 (diluyentes en gotas).
+
+### DS-04 · EDA del equipo: auditoría, segmentación y categóricas (PR #3) — 2026-11-15
+- ✔ Integrado en `main` (`f10c8b0`):
+  - `notebooks/02_eda/02_eda_legit.ipynb` (J0SETS): auditoría de identidad y cronología, familias experimentales, candidatos a réplica,
+    faltantes estructurales, correlaciones y PCA por familia, y asociaciones categórica × numérica dentro de bloques. Solo descriptivo
+    (sin p-valores ni modelos). Se versiona **sin salidas**; corre completo sin errores y escribe tablas en `artifacts/` (ignorado por git).
+  - `src/flamesafe/analysis/segmentation.py`, `categorical.py`, `notebook_sections.py` + 2 archivos de tests; scripts generadores en `scripts/append_eda_*.py`.
+  - `notebooks/01_discovery/01_eda_nochateado.ipynb` (Hugo-Edel): exploración inicial de `burn_time_s` y `extinction_mode`.
+  - `uv.lock` versionado y dependencias nuevas en `pyproject.toml`.
+- ✔ Verificación local: `pytest -m "not integration"` 113 pasan; `ruff check src tests app` sin errores.
+- 📌 Hallazgos de esta ronda:
+  - 660 filas, 660 identidades únicas, **0 copias** retiradas. **1 prueba con cronología imposible** (21265H1: el fin es ~1 día anterior
+    al inicio) y **4 sin timestamp** (21209A2, 21242P2, 22042M1, 22035D3). Se conservan marcadas, sin corregir ni imputar.
+  - **23 familias** (campaña × llama × combustible × dilución × periodo) y **46 bloques de operación**: 10 familias tienen < 20 pruebas
+    y 11 vienen de una sola operación. Familia no equivale a independencia.
+  - **47 pruebas en 19 grupos con condiciones idénticas** (candidatos a réplica); en 8 grupos el resultado difiere con las mismas
+    condiciones registradas. Esto es variabilidad real o condiciones no registradas: no se eliminan.
+  - Los **8 `flash` son todos etano en CFI-G inversa**, con O₂ bajo (mediana 0.15 frente a 0.85 en los "yes" del mismo bloque).
+    No basta para atribuirlo solo al combustible.
+  - **Confusión de diseño:** etileno solo en Flame Design; etano y butano solo en CFI-G. En 44 contrastes de categoría no hay
+    operaciones compartidas, así que categoría y jornada no se pueden separar.
+  - Cohorte binaria CFI-G = 322 (177 normales y 145 inversas tras quitar anomalías y controles): coincide con las n de RQ1.
+    Tasa de ignición 74.6 % (normales) y 89.7 % (inversas); robusta a incluir o excluir anomalías y controles de flujo cero.
+  - `burn_time_s` con `flow_terminated` se acumula en ~66 s (26 de 89): es el **corte del experimento (dato censurado)**, no un tiempo
+    de extinción. Cualquier análisis de duración debe tratarlo como censurado.
+- ⚠️ Para revisar:
+  - ✔ **Corregido:** `pyproject.toml` declaraba `scypy>=0.0.8` (otro paquete de PyPI, no SciPy) y `01_eda_nochateado` hacía
+    `import scypy`. Ahora es `scipy>=1.13`; `uv.lock` regenerado (solo cambia scypy → scipy). Sigue pendiente decidir si seaborn,
+    scikit-learn, ipykernel y fastparquet pasan de dependencias núcleo a extras (`analysis`/`dev`).
+  - 57 pruebas sin ignición tienen `burn_time_s = 0` (⚠️ por verificar en la fuente si es un 0 real o "no aplica"; según la regla del
+    repo, lo que no aplica debe ir como NULL + flag).
+  - Las salidas de los notebooks imprimen rutas locales absolutas (incluido un usuario de Windows); preferir rutas relativas.
+- ▶ Siguiente: PHY-03 (F-01…F-04 + preguntas abiertas: `flash`, equivalencia de `Ignite`, `HC burnrate`, `po2_kpa` en inversas,
+  tolerancia de réplica), ADR-0004 (FLEX → `k_hot_mm2_s`), EDA RQ2 (gotas) y empezar M1 con validación agrupada por operación.
