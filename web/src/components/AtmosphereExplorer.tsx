@@ -13,7 +13,7 @@ const SHORT: Record<string, string> = {
   mars_surface_habitat: "Mars habitat", spacesuit: "Spacesuit", earth_sea_level: "Earth",
 };
 const nearest = (arr: number[], v: number) => arr.reduce((b, a, i) => (Math.abs(a - v) < Math.abs(arr[b] - v) ? i : b), 0);
-const fmt = (v: number) => (v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(0) : v.toFixed(1));
+const fmt = (v: number) => (v >= 10 || Number.isInteger(v) ? v.toFixed(0) : v.toFixed(1));
 const pct = (v: number | null | undefined) => (v == null ? "—" : `${Math.round(v * 100)}%`);
 const gravityName = (g: number) => (g === 0 ? "Microgravity" : g === 1 ? "Earth gravity" : g < 0.2 ? "Lunar gravity" : "Martian gravity");
 
@@ -92,7 +92,7 @@ export default function AtmosphereExplorer() {
               aria-valuetext={`${GP[pi]} kilopascals`}
               onChange={(e) => { setPreset(null); setPi(+e.target.value); }} />
           </div>
-          <div className="stats" style={{ gridTemplateColumns: "1fr 1fr" }}>
+          <div className="stats" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
             <div><span className="label">O₂ partial pressure</span><strong className="num">{(xo2 * p).toFixed(1)} kPa</strong></div>
             <div><span className="label">Flame temp. (calc.)</span><strong className="num">{view.tad ? `${Math.round(view.tad)} K` : "—"}</strong></div>
           </div>
