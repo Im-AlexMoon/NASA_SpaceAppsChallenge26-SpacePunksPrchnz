@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { gasTests } from "../lib/content";
+import { useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
+import { gasTests, type GasTest } from "../lib/content";
+import css from "./AtmosphereExplorer.module.css";
 
 // Where NASA has flame data: every normal spherical flame tested on the ISS, by O2 mole fraction and total pressure.
 const M = { l: 52, r: 16, t: 16, b: 40 };
@@ -14,7 +15,26 @@ const TARGETS = [
   { key: "lunar", label: "Lunar base", xo2: 0.3, p: 70.3 },
 ];
 
-export default function CoverageMap({ focus, compact = false, wide = false }: { focus?: { xo2: number; p: number }; compact?: boolean; wide?: boolean }) {
+const outcome = (t: GasTest) => {
+  if (t.ignition_outcome === "no") return "Did not ignite";
+  if (t.ignition_outcome === "flash") return "Flash, no sustained flame";
+  if (t.extinction_mode === "self_extinguished") return "Went out on its own";
+  if (t.extinction_mode === "flow_terminated") return "Burning at fuel cutoff";
+  return t.ignition_outcome === "yes" ? "Ignited" : "Outcome not recorded";
+};
+const describe = (t: GasTest) =>
+  `${t.campaign} test ${t.test_id}, ${t.fuel}, ${(t.xo2! * 100).toFixed(1)}% oxygen, ${t.p_kpa!.toFixed(0)} kPa, ${outcome(t)}` +
+  (t.burn_time_s != null ? `, burned ${t.burn_time_s} s` : "");
+
+type Props = {
+  focus?: { xo2: number; p: number };
+  compact?: boolean;
+  wide?: boolean;
+  /** Opt-in interactivity: tooltips, legend highlight, keyboard focus, and click-to-pick (oxygen fraction, kPa). */
+  onPick?: (xo2: number, p: number) => void;
+};
+
+export default function CoverageMap({ focus, compact = false, wide = false, onPick }: Props) {
   const W = wide ? 1000 : 640, H = wide ? 420 : 400;
   const x = (v: number) => r2(M.l + ((v - X0) / (X1 - X0)) * (W - M.l - M.r));
   const y = (p: number) => r2(H - M.b - (Math.log(p / P0) / Math.log(P1 / P0)) * (H - M.t - M.b));
@@ -29,6 +49,35 @@ export default function CoverageMap({ focus, compact = false, wide = false }: { 
     test.p_kpa != null && test.p_kpa >= P0 && test.p_kpa <= P1,
   );
   const lunar = TARGETS[2];
+  const interactive = !!onPick;
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [hover, setHover] = useState<number | null>(null);
+  const [active, setActive] = useState<number | null>(null);
+  const [highlight, setHighlight] = useState<string | null>(null);
+  // keyboard order: left to right by oxygen, then bottom to top by pressure
+  const order = useMemo(() => pts.map((_, i) => i).sort((a, b) => pts[a].xo2! - pts[b].xo2! || pts[a].p_kpa! - pts[b].p_kpa!), [pts]);
+  const pick = (t: GasTest) => onPick?.(t.xo2!, t.p_kpa!);
+  const pickArea = (event: MouseEvent<SVGSVGElement>) => {
+    const box = svgRef.current?.getBoundingClientRect();
+    if (!box || !onPick) return;
+    const vx = ((event.clientX - box.left) / box.width) * W, vy = ((event.clientY - box.top) / box.height) * H;
+    if (vx < M.l || vx > W - M.r || vy < M.t || vy > H - M.b) return;
+    onPick(X0 + ((vx - M.l) / (W - M.l - M.r)) * (X1 - X0), P0 * Math.exp(((H - M.b - vy) / (H - M.t - M.b)) * Math.log(P1 / P0)));
+  };
+  const onKey = (event: KeyboardEvent<SVGCircleElement>, i: number) => {
+    const at = order.indexOf(i);
+    const step: Record<string, number> = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, Home: -order.length, End: order.length };
+    if (event.key === "Enter" || event.key === " ") { event.preventDefault(); pick(pts[i]); return; }
+    if (!(event.key in step)) return;
+    event.preventDefault();
+    const next = order[Math.max(0, Math.min(order.length - 1, at + step[event.key]))];
+    setActive(next);
+    setHover(next);
+    (svgRef.current?.querySelector(`[data-i="${next}"]`) as SVGCircleElement | null)?.focus();
+  };
+  const tip = interactive && hover != null ? pts[hover] : undefined;
+  const tabStop = active != null && active < pts.length ? active : order[0];
+  const inPlot = (f: { xo2: number; p: number }) => f.xo2 >= X0 && f.xo2 <= X1 && f.p >= P0 && f.p <= P1;
   return (
     <figure className={wide ? "coverage coverage-wide" : "coverage"} style={{ margin: 0 }}>
       {wide && <div className="actions" aria-label="Map filters">
@@ -44,7 +93,12 @@ export default function CoverageMap({ focus, compact = false, wide = false }: { 
         </select></label>
         <label><input type="checkbox" checked={hasDuration} onChange={(event) => setHasDuration(event.target.checked)} /> Recorded duration only</label>
       </div>}
-      <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Gas-flame tests by oxygen fraction and pressure, with the lunar reference window marked">
+      <div className={css.plot}>
+      <svg ref={svgRef} className="chart" viewBox={`0 0 ${W} ${H}`} role={interactive ? "group" : "img"}
+        aria-label={interactive
+          ? "Gas-flame tests by oxygen fraction and pressure. Use arrow keys to move between tests and Enter to set the sliders to a test."
+          : "Gas-flame tests by oxygen fraction and pressure, with the lunar reference window marked"}
+        onClick={interactive ? pickArea : undefined} onMouseLeave={interactive ? () => setHover(null) : undefined}>
         <g className="grid">
           {[50, 70, 100, 200, 300].map((p) => (
             <g key={p}>
@@ -65,7 +119,13 @@ export default function CoverageMap({ focus, compact = false, wide = false }: { 
           x={x(lunar.xo2 - 0.05)} y={y(lunar.p * 1.25)} width={x(lunar.xo2 + 0.05) - x(lunar.xo2 - 0.05)} height={y(lunar.p * 0.75) - y(lunar.p * 1.25)}
           fill="rgba(255,176,74,0.06)" stroke="var(--soot)" strokeDasharray="4 4" rx="6"
         />
-        {pts.map((t) => (
+        {pts.map((t, i) => interactive ? (
+          <circle key={t.psi_id + t.test_id + i} data-i={i} className={`${css.point} ${highlight && t.campaign !== highlight ? css.dim : ""}`}
+            cx={x(t.xo2!)} cy={y(t.p_kpa!)} r={hover === i ? 6 : 4.5} fill={t.campaign === "CFI-G" ? "var(--c1)" : "var(--c2)"} stroke="var(--bg)" strokeWidth={1.5}
+            tabIndex={i === tabStop ? 0 : -1} role="button" aria-label={describe(t)}
+            onMouseEnter={() => setHover(i)} onFocus={() => { setActive(i); setHover(i); }} onBlur={() => setHover(null)}
+            onClick={(event) => { event.stopPropagation(); pick(t); }} onKeyDown={(event) => onKey(event, i)} />
+        ) : (
           <circle key={t.test_id + t.campaign} cx={x(t.xo2!)} cy={y(t.p_kpa!)} r={4} fill={t.campaign === "CFI-G" ? "var(--c1)" : "var(--c2)"} stroke="var(--bg)" strokeWidth={1.5} opacity={0.9}>
             <title>{`${t.test_id}, ${t.campaign}, ${t.fuel}, ${(t.xo2! * 100).toFixed(1)}% O₂, ${t.p_kpa!.toFixed(0)} kPa`}</title>
           </circle>
@@ -80,17 +140,40 @@ export default function CoverageMap({ focus, compact = false, wide = false }: { 
             )}
           </g>
         ))}
-        {focus && focus.xo2 >= X0 && focus.xo2 <= X1 && (
+        {focus && (interactive ? inPlot(focus) : focus.xo2 >= X0 && focus.xo2 <= X1) && (
           <g>
             <line className="cursor" x1={x(focus.xo2)} x2={x(focus.xo2)} y1={M.t} y2={H - M.b} />
             <line className="cursor" x1={M.l} x2={W - M.r} y1={y(focus.p)} y2={y(focus.p)} />
             <circle cx={x(focus.xo2)} cy={y(focus.p)} r={6} fill="var(--ink)" />
           </g>
         )}
+        {interactive && focus && !inPlot(focus) && (
+          <text x={W - M.r} y={M.t + 12} textAnchor="end">Current atmosphere is outside this map</text>
+        )}
       </svg>
+      {tip && (() => {
+        const fx = x(tip.xo2!) / W;
+        const shift = fx < 0.2 ? "0%" : fx > 0.8 ? "-100%" : "-50%";
+        return (
+          <div className={css.tip} role="status" style={{ left: `${fx * 100}%`, top: `${(y(tip.p_kpa!) / H) * 100}%`, transform: `translate(${shift}, calc(-100% - 12px))` }}>
+            <b>{tip.campaign} · {tip.fuel}</b>
+            <span>{(tip.xo2! * 100).toFixed(1)}% O₂ · {tip.p_kpa!.toFixed(1)} kPa</span><br />
+            {outcome(tip)}{tip.burn_time_s != null ? `, ${tip.burn_time_s} s` : ", no recorded duration"}
+          </div>
+        );
+      })()}
+      </div>
       <figcaption className="legend" style={{ marginTop: 12 }}>
-        <span><i style={{ background: "var(--c1)" }} />CFI-G</span>
-        <span><i style={{ background: "var(--c2)" }} />Flame Design</span>
+        {interactive ? ["CFI-G", "Flame Design"].map((name, k) => (
+          <button key={name} type="button" className={css.legendBtn} aria-pressed={highlight === name}
+            onMouseEnter={() => setHighlight(name)} onMouseLeave={() => setHighlight(null)}
+            onFocus={() => setHighlight(name)} onBlur={() => setHighlight(null)}>
+            <i style={{ background: k ? "var(--c2)" : "var(--c1)" }} />{name}
+          </button>
+        )) : <>
+          <span><i style={{ background: "var(--c1)" }} />CFI-G</span>
+          <span><i style={{ background: "var(--c2)" }} />Flame Design</span>
+        </>}
         <span><i style={{ border: "2px solid var(--soot)", background: "transparent" }} />Lunar-base window</span>
       </figcaption>
       {wide && <details className="more">

@@ -106,13 +106,13 @@ export default function RankingBoard() {
               <option value={item.psi_id} key={item.psi_id}>{item.psi_id}: {item.acronym ?? item.title}</option>)}
           </select>
         </label>
-        {comparison.map((key) => {
+        {comparison.length > 0 && <div className="compare-grid">{comparison.map((key) => {
           const item = ranking.investigations.find((row) => row.psi_id === key)!;
           const gas = gasTests.filter((test) => test.psi_id === key);
           const fuels = [...new Set(gas.map((test) => test.fuel).filter(Boolean))].sort();
           const pressure = gas.flatMap((test) => test.p_kpa == null ? [] : [test.p_kpa]);
           const oxygen = gas.flatMap((test) => test.xo2 == null ? [] : [test.xo2]);
-          return <article key={key}>
+          return <article key={key} className="model-card">
             <h3>{item.acronym ?? item.title}</h3>
             <p>{key}. Hardware: {item.hardware_family ?? "Unspecified"}. Platform: {item.flight_platform ?? "Unspecified"}.</p>
             <p>Data access: {item.access_status.replaceAll("_", " ")}. Curated tests: {item.n_gold_tests ?? "Unavailable"}.</p>
@@ -122,7 +122,7 @@ export default function RankingBoard() {
             {item.doi && <p><a className="link" href={"https://doi.org/" + encodeURI(item.doi)}>Open the source DOI</a></p>}
             <button type="button" className="btn btn-ghost" onClick={() => setComparison(comparison.filter((id) => id !== key))}>Remove {key}</button>
           </article>;
-        })}
+        })}</div>}
       </section>
 
       {rows.length === 0 && <p role="status">Set at least one weight above zero to rank investigations.</p>}

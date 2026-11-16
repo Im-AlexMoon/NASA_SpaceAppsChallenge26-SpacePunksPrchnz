@@ -4,12 +4,13 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const links = [
-  ["/atmosphere", "Atmospheres"],
+  ["/dashboard", "Dashboard"],
   ["/findings", "Findings"],
+  ["/atmosphere", "Atmospheres"],
   ["/gaps", "Gaps"],
   ["/investigations", "Investigations"],
-  ["/ask", "Ask"],
   ["/methods", "Methods"],
+  ["/ask", "Ask"],
 ] as const;
 
 export default function Nav() {

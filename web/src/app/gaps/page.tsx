@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import CoverageMap from "../../components/CoverageMap";
+import GravityLadder from "../../components/GravityLadder";
 import { meta, reference } from "../../lib/content";
 
 export const metadata: Metadata = { title: "Knowledge gaps" };
@@ -13,7 +13,7 @@ export default function Page() {
     <div className="page">
       <div className="wrap stack" style={{ gap: 40 }}>
         <header className="page-head" data-enter style={{ marginBottom: 0 }}>
-          <p className="eyebrow">Evidence gap in Finding F-04</p>
+          <p className="eyebrow">What nobody has measured yet</p>
           <h1>Gaps in the analyzed combustion data</h1>
           <p className="lede">The reference atmospheres help identify where the analyzed flame records are sparse and what measurements would be useful.</p>
         </header>
@@ -36,18 +36,18 @@ export default function Page() {
           </div>
         </div>
 
-        <section className="grid-gap panel" aria-label="Coverage map">
+        <section className="panel stack" aria-labelledby="gravity-title" style={{ gap: 18 }}>
           <div className="section-head">
-            <h2 style={{ fontSize: "clamp(26px,3vw,36px)" }}>A model estimate for the lunar reference</h2>
-            {lunar?.prediction && <p className="muted">
-              Inside the empty window M-01 v2 reads {lunar?.prediction?.median_burn_s.toFixed(0)} s
-              {ci ? ` (90% interval ${ci[0].toFixed(0)}–${ci[1].toFixed(0)} s)` : ""}, an interpolation at{" "}
-              {lunar?.support.distance_ratio_to_training?.toFixed(2)}× the typical distance between tests. Tier B, not a
-              measurement.
-            </p>}
-            <Link className="link" href="/atmosphere">Open the lunar-base reading</Link>
+            <h2 id="gravity-title" style={{ fontSize: "clamp(26px,3vw,36px)" }}>Every flame was burned in orbit</h2>
+            <p className="muted">Lunar and Martian habitats sit between orbit and Earth, where no flame data exist. Buoyancy returns there, so any value for the Moon or Mars is a bound, not a measurement.</p>
           </div>
-          <CoverageMap wide />
+          <GravityLadder />
+          {lunar?.prediction && <p className="small">
+            For the lunar-base air, M-01 v2 reads {lunar.prediction.median_burn_s.toFixed(0)} s in microgravity
+            {ci ? ` (90% interval ${ci[0].toFixed(0)}–${ci[1].toFixed(0)} s)` : ""}, an interpolation at{" "}
+            {lunar.support.distance_ratio_to_training?.toFixed(2)}× the typical distance between tests. Tier B, not a measurement.{" "}
+            <Link className="link" href="/atmosphere#lunar_base_upper">Oxygen–pressure coverage in the explorer</Link>
+          </p>}
         </section>
 
         <section className="stack" aria-labelledby="exp-title">

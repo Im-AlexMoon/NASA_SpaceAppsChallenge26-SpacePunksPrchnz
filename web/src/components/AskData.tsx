@@ -38,6 +38,8 @@ function ToolPanel({ result }: { result: Tool }) {
   );
 }
 
+const PUBLIC_ASK = process.env.NEXT_PUBLIC_PUBLIC_ASK === "true";
+
 const EXAMPLES = [
   "What are the 3 most relevant findings of the study?",
   "How does oxygen change how long a flame burns?",
@@ -68,10 +70,14 @@ export default function AskData() {
     try {
       const response = await fetch("/api/backend/chat", {
         method: "POST",
-        headers: { "x-dashboard-token": token, "Content-Type": "application/json" },
+        headers: PUBLIC_ASK
+          ? { "Content-Type": "application/json" }
+          : { "x-dashboard-token": token, "Content-Type": "application/json" },
         body: JSON.stringify({ question: query ? "Gas flame evidence" : question, language, evidence_only: !!query || !generate, query }),
       });
       if (response.status === 409) throw new Error("This dashboard and the evidence service use different releases. Public findings remain available.");
+      if (response.status === 429) throw new Error("Too many questions right now. Try again in a few minutes.");
+      if (response.status === 503) throw new Error("The evidence service is unavailable or starting (503). Try again in a moment; public findings remain available.");
       if (!response.ok)
         throw new Error(
           response.status === 401
@@ -116,10 +122,10 @@ export default function AskData() {
             <option value="es">Español</option>
           </select>
         </label>
-        <label>
+        {!PUBLIC_ASK && <label>
           Dashboard access token
           <input type="password" autoComplete="off" value={token} onChange={(e) => setToken(e.target.value)} />
-        </label>
+        </label>}
         <label className="checkbox">
           <input type="checkbox" checked={generate && mode === "question"} disabled={mode !== "question"} onChange={(e) => setGenerate(e.target.checked)} />
           Let Gemini select and organize source excerpts. This sends the question and excerpts to Google.

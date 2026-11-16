@@ -54,11 +54,11 @@ export default function Home() {
             graded by how much evidence stands behind the number.
           </p>
           <div className="actions">
-            <Link className="btn btn-primary" href="/atmosphere">
-              Explore an atmosphere
+            <Link className="btn btn-primary" href="/dashboard">
+              Open the dashboard
             </Link>
-            <Link className="btn btn-ghost" href="/findings">
-              Read the findings
+            <Link className="btn btn-ghost" href="/atmosphere">
+              Explore an atmosphere
             </Link>
           </div>
           <div className="hero-facts">
@@ -74,6 +74,45 @@ export default function Home() {
               <strong className="num">0</strong>
               <span className="label">Partial-gravity tests</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="screen" aria-labelledby="why-title">
+        <div className="wrap stack" style={{ gap: 36 }}>
+          <div className="section-head">
+            <p className="eyebrow">Why it matters</p>
+            <h2 id="why-title">A fire in space has nowhere to go</h2>
+            <p className="lede">
+              Crews cannot step outside, and the air of future habitats is planned with more oxygen at lower pressure
+              than the ISS cabin. How flames behave in that air has barely been measured.
+            </p>
+          </div>
+          <ol className="story">
+            <li>
+              <span className="num">01</span>
+              <h3>What we did</h3>
+              <p>Read {meta.counts.investigations} NASA combustion investigations and {meta.counts.gas_flame_tests} flame tests flown on the ISS, and turned them into one consistent, versioned dataset.</p>
+            </li>
+            <li>
+              <span className="num">02</span>
+              <h3>What we measure</h3>
+              <p>How long a flame keeps burning in a given air, and the chance it is still burning after 30 or 60 seconds, each with an evidence level.</p>
+            </li>
+            <li>
+              <span className="num">03</span>
+              <h3>Why that helps</h3>
+              <p>It lets designers compare candidate habitat atmospheres, decide where detection and suppression matter most, and see which experiment is still missing.</p>
+            </li>
+            <li>
+              <span className="num">04</span>
+              <h3>How it scales</h3>
+              <p>Every number traces back to a NASA file through the same open pipeline, so a new PSI campaign can be added and checked the same way.</p>
+            </li>
+          </ol>
+          <div className="actions">
+            <Link className="btn btn-primary" href="/dashboard">See the evidence</Link>
+            <Link className="link" href="/methods">How every number is made</Link>
           </div>
         </div>
       </section>
@@ -106,8 +145,8 @@ export default function Home() {
       <section className="screen" aria-labelledby="ways-title">
         <div className="wrap">
           <div className="section-head">
-            <p className="eyebrow">Four ways in</p>
-            <h2 id="ways-title">Find evidence, compare conditions and identify what is missing</h2>
+            <p className="eyebrow">Go deeper</p>
+            <h2 id="ways-title">Compare conditions, rank studies and find what is missing</h2>
           </div>
           <div className="cards">
             <Link className="card" href="/atmosphere">

@@ -32,3 +32,11 @@ Regla: cualquier cambio de un hallazgo, del artefacto M-01, de `configs/ranking.
 - Las páginas públicas no requieren token. *Ask the data* sigue protegido por el token del dashboard (ADR-0004).
 - Los endpoints de contenido de la API (`/v1/ranking*`, `/v1/readings/*`, `/v1/findings`) siguen existiendo para terceros y pruebas.
 - Despliegue: `deploy/VERCEL.md`. El primer despliegue lo hace el responsable con su cuenta de Vercel.
+
+## Nota (2026-11-15): Ask público con límites
+Los evaluadores no pueden recibir el token del dashboard, así que *Ask the data* puede abrirse al público con
+`FLAMESAFE_PUBLIC_ASK=true` (servidor) y `NEXT_PUBLIC_PUBLIC_ASK=true` (cliente, oculta el campo de token). Solo `POST /api/backend/chat`
+queda sin token; se mantienen la comprobación de Origin, el límite de 16 KB, la lista de rutas y métodos permitidos y el Bearer
+`FLAMESAFE_API_TOKEN` del lado servidor. Límites contra abuso: 10 preguntas cada 10 minutos por IP (primer valor de `x-forwarded-for`,
+memoria por instancia, no compartida entre instancias) y el tope del backend de 300 llamadas diarias a Gemini con respaldo a pasajes.
+Las demás rutas del gateway siguen exigiendo el token. Esto matiza la consecuencia "Ask sigue protegido por el token" de este ADR.
