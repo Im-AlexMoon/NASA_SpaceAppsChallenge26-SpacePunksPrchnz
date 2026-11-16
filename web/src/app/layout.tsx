@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { DM_Mono, Inter } from "next/font/google";
 import Link from "next/link";
 import Nav from "../components/Nav";
+import "katex/dist/katex.min.css";
 import "./style.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://127.0.0.1:3000"),
   title: { default: "FlameSafe: Space fire evidence", template: "%s | FlameSafe" },
   description:
-    "How long a flame lasts in the air of a space habitat, read from 660 NASA flame tests on the ISS, with the evidence level of every number.",
+    "How long a flame lasts in the air of future space habitats, read from 660 NASA flame tests on the ISS, so crews and designers can compare atmospheres, prioritize fire detection and know which experiment is still missing.",
   openGraph: {
     title: "FlameSafe: Space fire evidence",
     description: "24 NASA combustion investigations, ranked, read and tested against the atmospheres of future habitats.",

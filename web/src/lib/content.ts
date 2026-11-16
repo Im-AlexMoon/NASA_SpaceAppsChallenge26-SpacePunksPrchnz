@@ -1,4 +1,5 @@
 // Reviewed content snapshot written by `flamesafe web-content` (ADR-0011). Regenerate, never edit by hand.
+import dashboardJson from "../content/dashboard.json";
 import findingsJson from "../content/findings.json";
 import metaJson from "../content/meta.json";
 import rankingJson from "../content/ranking.json";
@@ -154,3 +155,16 @@ export const gasTests: GasTest[] = (testsJson.rows as unknown[][]).map((row) =>
 
 export const finding = (id: string) => findings.find((f) => f.id === id)!;
 export const reference = (key: string) => readings.references.find((r) => r.key === key);
+
+type Interval = [number, number];
+export const dashboard = dashboardJson as unknown as {
+  calibration: { source: string; note: string; horizons: { t_s: number; predicted: number[]; observed: number[] }[] };
+  transfer: { source: string; train: string; test: string; c_index: number; c_index_ci95: Interval; slope: number; slope_ci95: Interval; inverse_c_index: number; inverse_note: string };
+  baselines: { source: string; note: string; rows: { model: string; loglik: number; c_index: number | null }[] };
+  effects: { source: string; rows: { name: string; value: number; ci95: Interval; reference: number; scale: string; n: number; ref: string }[] };
+  research: { source: string; rows: { ref: string; question: string; result: string; metric: string; outcome: "adopted" | "negative" }[] };
+  quality: { source: string; rows: { label: string; value: number; unit: string; n: number; ref: string }[] };
+  model: { model_id: string; metrics: { oof_c_index: number; oof_loglik_per_obs: number; oof_loglik_campaign_only: number; validation: string };
+    coef_table: { term: string; coef: number; ci_low: number; ci_high: number }[];
+    cohort: { n: number; days: number; events: number; by_campaign: Record<string, number> } } | null;
+};

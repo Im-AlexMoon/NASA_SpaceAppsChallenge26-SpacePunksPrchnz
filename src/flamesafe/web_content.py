@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+import yaml
 
 from flamesafe import config
 from flamesafe.api.content import ContentService, _clean, publication
@@ -99,6 +100,11 @@ def _export(out: Path, bundle: Path) -> dict[str, int]:
     sizes["tests"] = _write(out, "tests", {
         "columns": TEST_COLUMNS, "n": len(tests),
         "rows": tests.replace({np.nan: None}).round(4).values.tolist()})
+
+    curated = yaml.safe_load((config.ROOT / "configs" / "dashboard_evidence.yaml").read_text(encoding="utf-8"))
+    sizes["dashboard"] = _write(out, "dashboard", {
+        **curated,
+        "model": {key: art[key] for key in ("model_id", "metrics", "coef_table", "cohort")} if art else None})
 
     sizes["meta"] = _write(out, "meta", {
         "schema_version": 2, "build_id": bundle.name, "model_id": art["model_id"] if art else None,

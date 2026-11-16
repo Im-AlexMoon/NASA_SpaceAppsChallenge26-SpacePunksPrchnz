@@ -32,6 +32,9 @@ test("ranking reorders when the profile changes", async ({ page }) => {
 test("ask keeps unavailable states explicit", async ({ page }) => {
   await page.goto("/ask");
   await page.route("**/api/backend/**", (route) => route.fulfill({ status: 503, body: "Unavailable" }));
+  // Public Ask: no token field and no token needed to ask.
+  if (process.env.NEXT_PUBLIC_PUBLIC_ASK === "true")
+    await expect(page.getByLabel("Dashboard access token")).toHaveCount(0);
   await page.getByRole("button", { name: "Ask", exact: true }).click();
   await expect(page.locator('main [role="alert"]')).toContainText("503");
 });

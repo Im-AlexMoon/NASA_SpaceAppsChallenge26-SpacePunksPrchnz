@@ -9,7 +9,7 @@ export default function Page() {
     <div className="page">
       <div className="wrap">
         <header className="page-head" data-enter>
-          <p className="eyebrow">NASA PSI combustion investigations</p>
+          <p className="eyebrow">Which studies to read first</p>
           <h1>Which studies matter for your mission?</h1>
           <p className="lede">Seven transparent criteria, weighted for your role. Open any row to see why it ranks there.</p>
         </header>

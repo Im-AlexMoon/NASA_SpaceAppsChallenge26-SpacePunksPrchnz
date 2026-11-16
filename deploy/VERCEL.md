@@ -8,6 +8,10 @@
    - `FLAMESAFE_API_TOKEN` = token del backend (Secret Manager)
    - `FLAMESAFE_WEB_ACCESS_TOKEN` = token que se reparte a quien use el chat
    - `NEXT_PUBLIC_SITE_URL` = URL pública (para metadatos y tarjetas de redes)
+   - `FLAMESAFE_PUBLIC_ASK=true` y `NEXT_PUBLIC_PUBLIC_ASK=true` (ambas en Production) = *Ask* público sin token del dashboard.
+     El gateway exime solo `POST chat` del token y aplica un límite en memoria de 10 preguntas cada 10 minutos por IP
+     (por instancia; responde 429). `NEXT_PUBLIC_*` se incrusta en el build: tras crearlas o cambiarlas, hacer **Redeploy**.
+     El resto de rutas del gateway sigue exigiendo `FLAMESAFE_WEB_ACCESS_TOKEN`.
 4. *Deploy*. Cada push a `main` vuelve a desplegar; cada PR recibe una URL de vista previa.
 
 Desde la terminal (alternativa): `npm i -g vercel`, `cd web`, `vercel link`, `vercel --prod`.

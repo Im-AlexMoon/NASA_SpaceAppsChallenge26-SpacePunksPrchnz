@@ -1,0 +1,124 @@
+# Curated results shown on the web Dashboard (flamesafe web-content -> web/src/content/dashboard.json).
+# Every value is copied from a project document; `ref` names the iteration (docs/03_data_science/RESEARCH_LOG.md)
+# or the reviewed document it comes from. Do not add a number here that is not written in that source.
+calibration:
+  source: "docs/03_data_science/model_cards/M-01.md (R13)"
+  note: "Out of sample, leave one operations day out, by tercile of predicted probability."
+  horizons:
+    - t_s: 30
+      predicted: [0.27, 0.90, 0.99]
+      observed: [0.20, 0.91, 1.00]
+    - t_s: 60
+      predicted: [0.03, 0.38, 0.84]
+      observed: [0.03, 0.26, 0.81]
+transfer:
+  source: "docs/03_data_science/model_cards/M-01.md (R9)"
+  train: "CFI-G, 120 normal flames (ethane, propane, butane)"
+  test: "Flame Design, 135 normal flames (ethylene, propane)"
+  c_index: 0.93
+  c_index_ci95: [0.80, 0.96]
+  slope: 1.16
+  slope_ci95: [0.72, 1.48]
+  inverse_c_index: 0.82
+  inverse_note: "Inverse flames: ranks well but is not calibrated across campaigns; not used for readings."
+baselines:
+  source: "docs/03_data_science/RESEARCH_LOG.md (R13)"
+  note: "Leave-one-day-out log-likelihood per test (higher is better) and C-index."
+  rows:
+    - model: "No covariates"
+      loglik: -1.30
+      c_index: null
+    - model: "Oxygen + pressure"
+      loglik: -0.82
+      c_index: 0.83
+    - model: "M-01 v2 physical law"
+      loglik: -0.72
+      c_index: 0.89
+effects:
+  source: "docs/03_data_science/findings/F-01.md, F-03.md"
+  rows:
+    - name: "Hazard ratio of self-extinction per +0.05 O2"
+      value: 0.19
+      ci95: [0.13, 0.29]
+      reference: 1
+      scale: log
+      n: 132
+      ref: F-01
+    - name: "Time ratio of burn duration per +0.05 O2"
+      value: 2.29
+      ci95: [1.9, 2.55]
+      reference: 1
+      scale: log
+      n: 132
+      ref: F-01
+research:
+  source: "docs/03_data_science/RESEARCH_LOG.md"
+  rows:
+    - ref: R1
+      question: "Which error distribution fits burn times?"
+      result: "Log-logistic beats Weibull out of sample"
+      metric: "log-likelihood per test -1.34 vs -1.55"
+      outcome: adopted
+    - ref: R2
+      question: "Can four physical groups replace fuel identity?"
+      result: "Matches the empirical model with fewer parameters"
+      metric: "AIC 271.6 vs 278.4"
+      outcome: adopted
+    - ref: R4
+      question: "Can a critical extinction temperature be identified from summary tables?"
+      result: "No: the likelihood profile is flat"
+      metric: "changes < 1 unit between 700 and 1,500 K"
+      outcome: negative
+    - ref: R7
+      question: "Does our detector reproduce NASA's extinction labels?"
+      result: "Yes, on sensor time series"
+      metric: "99.6% agreement over 238 CFI-G flames"
+      outcome: adopted
+    - ref: R9
+      question: "Does the law transfer to an unseen fuel and campaign?"
+      result: "Ranks Flame Design flames it never saw"
+      metric: "C-index 0.93 (0.80-0.96)"
+      outcome: adopted
+    - ref: R12
+      question: "Does our thermochemistry reproduce the investigators' Tad?"
+      result: "Yes, within a few kelvin"
+      metric: "median +3 K over 587 tests"
+      outcome: adopted
+    - ref: R13
+      question: "Does the conclusion depend on how thermal-limit cuts are censored?"
+      result: "No"
+      metric: "coefficients change < 12%"
+      outcome: adopted
+    - ref: R17
+      question: "Can ISS video measure burn time?"
+      result: "Video agrees with the investigators' table"
+      metric: "Spearman 0.97 over 264 tests"
+      outcome: adopted
+    - ref: R19
+      question: "Does soot glow fading warn of self-extinction?"
+      result: "No: it fades in flames that keep burning too"
+      metric: "AUC 0.45 (0.24-0.63)"
+      outcome: negative
+    - ref: R20
+      question: "Does flame shrinking warn of self-extinction?"
+      result: "Yes, 5 to 10 s before it happens"
+      metric: "AUC 0.76 (0.67-0.86)"
+      outcome: adopted
+quality:
+  source: "docs/03_data_science/RESEARCH_LOG.md (R7, R12, R17)"
+  rows:
+    - label: "Extinction-mode agreement with NASA labels"
+      value: 99.6
+      unit: "%"
+      n: 238
+      ref: R7
+    - label: "Video vs table burn time, Spearman"
+      value: 0.97
+      unit: ""
+      n: 264
+      ref: R17
+    - label: "Calculated Tad vs investigators, median difference"
+      value: 3
+      unit: "K"
+      n: 587
+      ref: R12

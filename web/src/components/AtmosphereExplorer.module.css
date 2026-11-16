@@ -1,0 +1,70 @@
+/* Atmosphere Explorer: segmented presets, compact reading, interactive coverage map. */
+
+.presets {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+}
+.presets::-webkit-scrollbar { display: none; }
+.presets button { white-space: nowrap; flex: 0 0 auto; scroll-snap-align: start; }
+@media (max-width: 720px) {
+  .presets { border-radius: 999px; }
+  .presets button { flex: 0 0 auto; padding: 0 14px; }
+}
+
+.reading { display: grid; gap: 18px; align-content: start; }
+.context { margin: 0; color: var(--ink-2); font-size: 15px; }
+.context b { font-weight: 500; color: var(--ink); }
+
+/* still-burning double meter */
+.meter { display: grid; gap: 10px; }
+.meterRow { display: grid; grid-template-columns: 44px 1fr 48px; align-items: center; gap: 12px; }
+.meterRow > span { font: 500 12px var(--font-mono); color: var(--ink-3); }
+.meterRow > strong { font: 500 14px var(--font-mono); text-align: right; }
+.track { position: relative; height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.band { position: absolute; top: 0; bottom: 0; background: rgba(79, 141, 255, 0.28); }
+.fill {
+  position: absolute; inset: 0; border-radius: inherit; transform-origin: left;
+  background: linear-gradient(90deg, #2a62d8, var(--accent));
+}
+
+.details { border-top: 1px solid var(--line); padding-top: 4px; }
+.details summary { min-height: 40px; }
+.details ul { margin: 4px 0 8px; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 13px; color: var(--ink-2); }
+.details li::before { content: "— "; color: var(--ink-3); }
+.kv { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 4px 0 8px; }
+.kv strong { display: block; font-size: 20px; font-weight: 600; margin-top: 4px; }
+
+.hint { font-size: 13px; color: var(--ink-3); margin: 0; }
+
+/* interactive coverage map */
+.plot { position: relative; }
+.plot svg { cursor: crosshair; touch-action: manipulation; }
+.point { cursor: pointer; }
+.point:focus { outline: none; }
+.point:focus-visible { stroke: var(--accent); stroke-width: 3px; }
+.dim { opacity: 0.12; }
+.ring { fill: none; stroke: var(--ink); stroke-width: 2px; pointer-events: none; }
+
+.tip {
+  position: absolute; z-index: 2; pointer-events: none; min-width: 180px; max-width: 240px;
+  padding: 10px 12px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line-2);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45); font-size: 13px; line-height: 1.45; color: var(--ink-2);
+}
+.tip b { display: block; color: var(--ink); font-weight: 600; margin-bottom: 2px; }
+.tip span { font-family: var(--font-mono); font-size: 12px; }
+
+.legendBtn {
+  display: inline-flex; align-items: center; gap: 8px; border: 0; background: transparent; padding: 4px 6px;
+  margin: -4px -6px; border-radius: 8px; color: inherit; font: inherit; cursor: default;
+}
+.legendBtn[aria-pressed="true"] { color: var(--ink); background: var(--surface-2); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .fill { transition: transform 320ms var(--ease-out); }
+  .band { transition: left 320ms var(--ease-out), width 320ms var(--ease-out); }
+  .point { transition: opacity 160ms ease; }
+  .tip { animation: tipIn 140ms var(--ease-out); }
+}
+@keyframes tipIn { from { opacity: 0; } to { opacity: 1; } }
