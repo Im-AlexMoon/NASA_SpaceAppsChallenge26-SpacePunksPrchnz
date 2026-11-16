@@ -4,8 +4,8 @@
 .env
 **/.env.local
 .venv
-data/
-artifacts/
+/data/
+/artifacts/
 notebooks/
 web/
 tests/
