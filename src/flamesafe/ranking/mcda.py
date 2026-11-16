@@ -9,6 +9,7 @@ mean of the dimensions. Nothing is learned or hidden: every number can be traced
 from __future__ import annotations
 
 from dataclasses import dataclass
+from itertools import product
 
 import numpy as np
 import pandas as pd
@@ -70,7 +71,7 @@ def normalize_weights(weights: dict[str, float]) -> dict[str, float]:
     if unknown:
         raise ValueError(f"unknown dimensions: {sorted(unknown)}")
     w = {d: float(weights.get(d, 0.0)) for d in DIMENSIONS}
-    if any(v < 0 for v in w.values()) or sum(w.values()) <= 0:
+    if any(not np.isfinite(v) or v < 0 for v in w.values()) or sum(w.values()) <= 0:
         raise ValueError("weights must be non-negative and not all zero")
     total = sum(w.values())
     return {d: v / total for d, v in w.items()}
@@ -84,7 +85,7 @@ def rank(investigations: pd.DataFrame, profile: str | None = None, weights: dict
     if prof is None:
         raise ValueError(f"unknown profile {profile!r}; expected one of {sorted(cfg['profiles'])}")
     env = environment or prof["environment"]
-    w = normalize_weights(weights or prof["weights"])
+    w = normalize_weights(prof["weights"] if weights is None else weights)
     dims = dimension_scores(investigations, env, cfg)
     contrib = pd.DataFrame({f"contrib_{d}": dims[d] * w[d] for d in DIMENSIONS})
     table = pd.concat([investigations[["psi_id", "acronym", "title", "tier", "access_status", "n_gold_tests"]]
@@ -110,3 +111,17 @@ def sensitivity(investigations: pd.DataFrame, profile: str, cfg: dict | None = N
             rows.append({"dimension": d, "change": f"{'+' if sign > 0 else '-'}{int(p * 100)}%",
                          "top_k_changed": len(set(base_top) - set(top)), "same_order": top == base_top})
     return pd.DataFrame(rows)
+
+
+def joint_sensitivity(investigations: pd.DataFrame, profile: str, cfg: dict) -> dict:
+    """Compare the top-k under all joint corners of the weight perturbation range."""
+    base = rank(investigations, profile, cfg=cfg)
+    scores = dimension_scores(investigations, base.environment, cfg).sort_values("psi_id")
+    perturb, k = cfg["sensitivity"]["perturbation"], cfg["sensitivity"]["top_k"]
+    directions = np.array(list(product((-1, 1), repeat=len(DIMENSIONS))))
+    weights = np.array([base.weights[key] for key in DIMENSIONS]) * (1 + perturb * directions)
+    ranked = np.argsort(-(scores[list(DIMENSIONS)].to_numpy() @ weights.T), axis=0, kind="stable")
+    ids = scores.psi_id.to_numpy()
+    baseline = set(base.table.psi_id.head(k))
+    changes = [len(baseline - set(ids[indices])) for indices in ranked[:k, :].T]
+    return {"n_scenarios": len(changes), "max_changed": max(changes)}

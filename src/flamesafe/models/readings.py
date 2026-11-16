@@ -23,6 +23,7 @@ import hashlib
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from uuid import uuid4
 
 import numpy as np
 import pandas as pd
@@ -88,9 +89,12 @@ def train(gas: pd.DataFrame, ts: pd.DataFrame, n_boot: int = 400, seed: int = 26
     keys = d.day.unique()
     idx = {k: np.flatnonzero(d.day.to_numpy() == k) for k in keys}
     draws = []
+    converged = 0
     for _ in range(n_boot):
         rows = np.concatenate([idx[k] for k in rng.choice(keys, size=len(keys), replace=True)])
-        draws.append(aft.fit_aft(d.iloc[rows], FEATURES, FAMILY).theta.round(6).tolist())
+        draw = aft.fit_aft(d.iloc[rows], FEATURES, FAMILY)
+        converged += int(draw.converged)
+        draws.append(draw.theta.round(6).tolist())
     ll, loc = aft.grouped_oof_loglik(d, FEATURES, FAMILY, groups="day")
     base_ll, _ = aft.grouped_oof_loglik(d, ["is_fd"], FAMILY, groups="day")
     mu, sd = d[PHYSICAL].mean(), d[PHYSICAL].std()
@@ -109,6 +113,7 @@ def train(gas: pd.DataFrame, ts: pd.DataFrame, n_boot: int = 400, seed: int = 26
                     "oof_loglik_campaign_only": round(float(base_ll.mean()), 4),
                     "oof_c_index": round(m1.concordance(d.duration_s, loc, d.event), 4),
                     "validation": "leave-one-operations-day-out"},
+        "fit_diagnostics": {"converged": fit.converged, "bootstrap_finite": len(draws), "bootstrap_converged": converged},
         "reference_level": "CFI-G (is_fd = 0)",
         "created_utc": datetime.now(UTC).isoformat(timespec="seconds"),
         "provenance": provenance or {}, "review": review or {"status": "candidate"},
@@ -117,7 +122,13 @@ def train(gas: pd.DataFrame, ts: pd.DataFrame, n_boot: int = 400, seed: int = 26
 
 def save(artifact: dict, path: Path = ARTIFACT) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(artifact, indent=1, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
+    temporary = path.with_name(f".{path.name}.{uuid4().hex}.tmp")
+    try:
+        temporary.write_text(json.dumps(artifact, indent=1, sort_keys=True, allow_nan=False) + "\n",
+                             encoding="utf-8", newline="\n")
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
     return path
 
 
@@ -151,7 +162,8 @@ def nearby_evidence(gas: pd.DataFrame, xo2: float, p_kpa: float, fuel: str | Non
     g = gas[gas.campaign.eq("CFI-G") & gas.flame_type.eq("normal") & gas.x_fuel.gt(0)]
     near = g[g.xo2.sub(xo2).abs().le(NEAR_DXO2) & g.p_kpa.sub(p_kpa).abs().le(NEAR_REL_P * p_kpa)]
     known = near[near.ignition_outcome.isin(["yes", "no"])]
-    lit = near[near.ignition_outcome.eq("yes") & near.burn_time_s.gt(0) & near.extinction_mode.notna()]
+    lit = near[near.ignition_outcome.eq("yes") & near.burn_time_s.gt(0)
+               & near.extinction_mode.isin(["self_extinguished", "flow_terminated"])]
     se = lit[lit.extinction_mode.eq("self_extinguished")]
     tests = (near.sort_values("test_id")[["test_id", "test_day", "fuel", "xo2", "p_kpa", "ignition_outcome",
                                           "burn_time_s", "extinction_mode"]]
@@ -159,10 +171,14 @@ def nearby_evidence(gas: pd.DataFrame, xo2: float, p_kpa: float, fuel: str | Non
     return {
         "window": {"xo2_plus_minus": NEAR_DXO2, "pressure_relative": NEAR_REL_P},
         "n_tests": int(len(near)), "n_days": int(near.test_day.nunique()) if len(near) else 0,
+        "n_known_ignition": int(len(known)),
+        "n_ignited": int(known.ignition_outcome.eq("yes").sum()),
         "ignition_rate": round(float(known.ignition_outcome.eq("yes").mean()), 3) if len(known) else None,
         "n_burning": int(len(lit)), "n_flow_cut": int(lit.extinction_mode.eq("flow_terminated").sum()),
+        "n_self_extinguished": int(len(se)),
         "median_burn_s_self_extinguished": round(float(se.burn_time_s.median()), 1) if len(se) else None,
         "same_fuel_tests": int(near.fuel.eq(fuel).sum()) if fuel else None,
+        "fuel_counts": {str(name): int(count) for name, count in near.fuel.value_counts().items()},
         "tests": tests,
     }
 
@@ -175,7 +191,7 @@ def read(artifact: dict, xo2: float, p_kpa: float, gas: pd.DataFrame | None = No
         raise ValueError(f"gravity must be one of {GRAVITY}")
     if not (0 < xo2 <= 1 and 0 < x_fuel <= 1 and p_kpa > 0 and m_fuel_mg_s > 0):
         raise ValueError("xo2 and x_fuel are mole fractions in (0, 1]; pressure and fuel flow must be positive")
-    caveats = ["Microgravity only: PSI has no partial-gravity combustion data.",
+    caveats = ["The model describes microgravity. The analyzed tests do not validate a gravity effect.",
                "Burn duration of a laboratory spherical gas flame, not the time available to respond to a fire.",
                "Tad and Zst are calculated (chemical equilibrium), not measured."]
     out: dict[str, object] = {"label": label, "inputs": {"xo2": xo2, "p_kpa": p_kpa, "po2_kpa": round(xo2 * p_kpa, 3),
@@ -184,6 +200,12 @@ def read(artifact: dict, xo2: float, p_kpa: float, gas: pd.DataFrame | None = No
                               "regime": "microgravity"}
     near = nearby_evidence(gas, xo2, p_kpa, fuel) if gas is not None else None
     out["nearby"] = near
+    sufficient = near is not None and near["n_tests"] >= NEAR_MIN_TESTS and near["n_days"] >= NEAR_MIN_DAYS
+    out["coverage"] = "sufficient" if sufficient else "limited" if near and near["n_tests"] else "none"
+    if gravity != "microgravity":
+        out["gravity_effect"] = {"tier": "C", "note": (
+            "This atmosphere is evaluated in microgravity. The analyzed tests do not establish "
+            "how flame persistence changes at the selected gravity.")}
     if fuel not in FUELS:
         out |= {"tier": "C", "tier_label": "No evidence", "reason": f"fuel '{fuel}' not tested in CFI-G (ethane, propane, butane)",
                 "prediction": None, "caveats": caveats}
@@ -197,15 +219,15 @@ def read(artifact: dict, xo2: float, p_kpa: float, gas: pd.DataFrame | None = No
     ratio = d5 / dom["typical_5th_nn_distance"]
     out["physics"] = {"tad_k": round(f["tad_k"], 1), "zst": round(f["zst"], 4), "m_tot_mg_s": round(f["m_tot_mg_s"], 4)}
     out["support"] = {"inside_tested_range": in_range, "distance_ratio_to_training": round(ratio, 2)}
-    if near and near["n_tests"] >= NEAR_MIN_TESTS and near["n_days"] >= NEAR_MIN_DAYS:
-        tier, tier_label = "A", "Measured nearby"
-    elif all(in_range.values()) and ratio <= MAX_DISTANCE_RATIO:
-        tier, tier_label = "B", "Model interpolation"
-        caveats.insert(0, "No real test near this atmosphere: the value is an interpolation of the model.")
-    else:
-        out |= {"tier": "C", "tier_label": "No evidence", "prediction": None, "caveats": caveats,
+    if not all(in_range.values()) or ratio > MAX_DISTANCE_RATIO:
+        out |= {"tier": "A" if sufficient else "C", "tier_label": "Measured nearby" if sufficient else "No model reading",
+                "prediction": None, "caveats": caveats,
                 "reason": "outside the tested range of the physical inputs or too far from any tested flame"}
         return out
+    tier, tier_label = ("A", "Measured nearby") if sufficient else ("B", "Model interpolation")
+    if not sufficient:
+        caveats.insert(0, "Nearby tests do not meet the coverage threshold." if near and near["n_tests"] else
+                       "There are no tests in the selected atmosphere window.")
     x = np.array([f[k] for k in FEATURES])
     theta = np.asarray(artifact["theta"])
     draws = np.asarray(artifact["bootstrap_draws"])
@@ -217,11 +239,6 @@ def read(artifact: dict, xo2: float, p_kpa: float, gas: pd.DataFrame | None = No
         pred[f"p_still_burning_{int(t)}s"] = round(float(_predict(theta, x, t)), 3)
         pred[f"p_still_burning_{int(t)}s_90ci"] = [round(float(np.quantile(s, 0.05)), 3), round(float(np.quantile(s, 0.95)), 3)]
     out |= {"tier": tier, "tier_label": tier_label, "prediction": pred, "caveats": caveats}
-    if gravity != "microgravity":
-        out["gravity_effect"] = {"tier": "C", "note": (
-            "No combustion data exist in partial or normal gravity in PSI. Buoyancy carries products away and brings "
-            "fresh oxidizer; it is expected to weaken the radiative self-extinction seen in microgravity, so the "
-            "microgravity duration is likely a LOWER bound on persistence (docs/04_physics/PARTIAL_GRAVITY_BOUNDING.md).")}
     return out
 
 

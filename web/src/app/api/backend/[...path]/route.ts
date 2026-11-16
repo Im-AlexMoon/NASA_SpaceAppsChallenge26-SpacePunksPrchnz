@@ -1,3 +1,4 @@
+import { meta } from "../../../../lib/content";
 import { timingSafeEqual } from "node:crypto";
 import { allowedPath, allowedMethod } from "../../../../lib/gateway.mjs";
 
@@ -55,13 +56,17 @@ async function proxy(
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        ...(path === "chat" ? { "X-Evidence-Build": meta.build_id } : {}),
       },
       body,
       cache: "no-store",
       redirect: "error",
       signal: AbortSignal.timeout(110000),
     });
-    return new Response(await response.text(), {
+    const payload = await response.text();
+    if (response.ok && path === "chat" && JSON.parse(payload).evidence?.build_id !== meta.build_id)
+      return Response.json({ detail: "The dashboard and evidence service use different releases." }, { status: 409 });
+    return new Response(payload, {
       status: response.status,
       headers: {
         "Content-Type": "application/json",

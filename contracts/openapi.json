@@ -809,6 +809,22 @@
         "parameters": [
           {
             "in": "header",
+            "name": "x-evidence-build",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Evidence-Build"
+            }
+          },
+          {
+            "in": "header",
             "name": "authorization",
             "required": false,
             "schema": {

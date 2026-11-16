@@ -121,7 +121,7 @@ def check_budget(reqs: Iterable[FileRequest], max_total_mb: float, max_file_mb: 
                  if (r.expected_bytes or 0) > max_file_mb * 1e6]
     if max_files is not None and len(reqs) > max_files:
         problems.append(f"{len(reqs)} files > {max_files}")
-    total = sum(r.expected_bytes or 0 for r in reqs)
+    total = sum(r.expected_bytes if r.expected_bytes is not None else int(max_file_mb * 1e6) for r in reqs)
     if total > max_total_mb * 1e6:
         problems.append(f"total {total / 1e6:.1f} MB > {max_total_mb} MB")
     if problems:
@@ -137,7 +137,7 @@ def write_manifest_lock(reqs: list[FileRequest], path: Path) -> Path:
 
 
 # ----------------------------------------------------------------------------- fetch
-def _fetch_one(req: FileRequest, client: PSIClient, root: Path | None) -> dict[str, Any]:
+def _fetch_one(req: FileRequest, client: PSIClient, root: Path | None, max_bytes: int | None) -> dict[str, Any]:
     path = local_path(req, root)
     side = _sidecar(path)
     if path.exists() and side.exists():
@@ -152,13 +152,17 @@ def _fetch_one(req: FileRequest, client: PSIClient, root: Path | None) -> dict[s
         "retrieved_at_utc": datetime.now(UTC).isoformat(timespec="seconds"),
     }
     try:
-        res = client.download(req.psi_id, req.file_name, path)
+        res = client.download(req.psi_id, req.file_name, path,
+                              expected_bytes=req.expected_bytes, max_bytes=max_bytes)
         meta.update(http_status=200, bytes=res.bytes, sha256=res.sha256, content_type=res.content_type,
                     size_matches=(req.expected_bytes is None or res.bytes == req.expected_bytes))
         action = "fetched" if meta["size_matches"] else "fetched_size_mismatch"
     except PSIError as exc:
         meta.update(http_status=exc.status)
         action = f"http_{exc.status}"
+    except (OSError, ValueError) as exc:
+        meta.update(http_status=0, error=str(exc), size_matches=False)
+        action = "rejected"
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(side, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(meta, fh, indent=2, ensure_ascii=False)
@@ -172,6 +176,7 @@ def fetch(
     root: Path | None = None,
     progress: Callable[[FileRequest, str], None] | None = None,
     workers: int = 1,
+    max_file_mb: float | None = None,
 ) -> list[dict[str, Any]]:
     """Download (or reuse) every request; results keep the request order.
 
@@ -179,12 +184,13 @@ def fetch(
     NASA service, not a CDN. An explicit `client` is only used when workers == 1 (tests, single session).
     """
     reqs = list(reqs)
+    max_bytes = int(max_file_mb * 1e6) if max_file_mb is not None else None
     say = progress or (lambda *_: None)
     if workers <= 1:
         client = client or PSIClient()
         results = []
         for req in reqs:
-            results.append(_fetch_one(req, client, root))
+            results.append(_fetch_one(req, client, root, max_bytes))
             say(req, results[-1]["action"])
         return results
 
@@ -193,7 +199,7 @@ def fetch(
     def work(req: FileRequest) -> dict[str, Any]:
         if not hasattr(local, "client"):
             local.client = PSIClient()
-        return _fetch_one(req, local.client, root)
+        return _fetch_one(req, local.client, root, max_bytes)
 
     results = []
     with ThreadPoolExecutor(max_workers=workers) as pool:

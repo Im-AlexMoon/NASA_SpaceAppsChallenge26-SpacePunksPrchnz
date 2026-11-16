@@ -134,8 +134,25 @@ def run(
         _store(snapshot, manifest, "search.json", search_url, client.get_raw(search_url))
         result.fetched.append("search.json")
     search = json.loads((snapshot / "search.json").read_text(encoding="utf-8"))
+    def load_page(offset: int, url: str) -> dict:
+        name = f"search_{offset}.json"
+        if not refresh and _valid_cached(snapshot, manifest, name):
+            result.reused.append(name)
+        else:
+            _store(snapshot, manifest, name, url, client.get_raw(url))
+            result.fetched.append(name)
+        return json.loads((snapshot / name).read_text(encoding="utf-8"))
+
+    pages = [name for name in manifest.get("search_pages", []) if name != "search.json"]
+    offsets = [offset for offset, _ in client.search_pages(search, load_page)]
+    page_names = ["search.json", *(f"search_{offset}.json" for offset in offsets[1:])]
+    for name in set(pages) - set(page_names):
+        manifest["files"].pop(name, None)
+    manifest["search_pages"] = page_names
     combustion = sorted(
-        (s["Accession"] for s in client.iter_sources(search) if s.get("Research Area") == area),
+        {source["Accession"] for name in page_names
+         for source in client.iter_sources(json.loads((snapshot / name).read_text(encoding="utf-8")))
+         if source.get("Research Area") == area and source.get("Accession")},
         key=lambda a: int(a.split("-")[1]),
     )
     result.combustion_ids = combustion

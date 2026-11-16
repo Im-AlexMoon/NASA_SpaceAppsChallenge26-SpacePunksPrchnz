@@ -244,8 +244,19 @@ def process_file(psi_id: str, file_name: str, expected_bytes: int | None, output
     """Download (unless `local_path`), measure, write outputs and delete the temporary video. Idempotent."""
     test_id = test_id_from_name(file_name) or Path(file_name).stem
     key = Path(file_name).stem.split("____")[-1] if "____" in file_name else test_id  # keeps suffixes like _failed...
+    from flamesafe.rag.utils import file_hash
+
+    revision = file_hash(Path(__file__))
+    source_hash = file_hash(local_path) if local_path is not None else None
     if not overwrite and output.exists(f"summary/{key}.json"):
-        return {"key": key, "action": "skipped"}
+        previous = json.loads(output.read(f"summary/{key}.json"))
+        if (previous.get("extractor_sha256") == revision
+                and previous.get("psi_id") == psi_id and previous.get("source_file") == file_name
+                and (expected_bytes is None or previous.get("bytes") == expected_bytes)
+                and (source_hash is None or previous.get("sha256") == source_hash)
+                and output.exists(f"frames/{key}.parquet")
+                and all(output.exists(f"thumbs/{key}_{name}.jpg") for name in previous.get("thumbnails", []))):
+            return {"key": key, "action": "skipped"}
     tmp_dir = None
     try:
         if local_path is None:
@@ -254,14 +265,15 @@ def process_file(psi_id: str, file_name: str, expected_bytes: int | None, output
             client = client or PSIClient()
             tmp_dir = tempfile.mkdtemp(prefix="flamesafe-video-")
             local_path = Path(tmp_dir) / Path(file_name).name
-            res = client.download(psi_id, file_name, local_path)
+            size_limit = {"expected_bytes": expected_bytes} if expected_bytes is not None else {}
+            res = client.download(psi_id, file_name, local_path, **size_limit)
             size, sha = res.bytes, res.sha256
         else:
-            size, sha = local_path.stat().st_size, None
+            size, sha = local_path.stat().st_size, source_hash
         frames, thumbs = measure_video(local_path)
         summary = {"psi_id": psi_id, "test_id": test_id, "video_key": key, "source_file": file_name, "bytes": size,
                    "expected_bytes": expected_bytes, "size_matches": expected_bytes is None or size == expected_bytes,
-                   "sha256": sha, **summarize(frames)}
+                   "sha256": sha, "extractor_sha256": revision, "thumbnails": sorted(thumbs), **summarize(frames)}
         output.write(f"frames/{key}.parquet", _parquet_bytes(frames.assign(video_key=key)), "application/octet-stream")
         for name, data in thumbs.items():
             output.write(f"thumbs/{key}_{name}.jpg", data, "image/jpeg")

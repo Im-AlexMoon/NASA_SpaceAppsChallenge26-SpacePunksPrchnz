@@ -16,9 +16,9 @@ test("atmosphere explorer shows tiers and never invents a number at tier C", asy
   await page.getByRole("button", { name: /ISS cabin/ }).click();
   await expect(page.getByText("Measured nearby").first()).toBeVisible();
   await page.getByRole("button", { name: /Spacesuit/ }).click();
-  await expect(page.getByText("No reading")).toBeVisible();
+  await expect(page.getByText("No model reading")).toBeVisible();
   await page.getByRole("button", { name: /Lunar base/ }).click();
-  await expect(page.getByRole("note")).toContainText("lower bound");
+  await expect(page.getByRole("note")).toContainText("do not establish");
 });
 
 test("ranking reorders when the profile changes", async ({ page }) => {

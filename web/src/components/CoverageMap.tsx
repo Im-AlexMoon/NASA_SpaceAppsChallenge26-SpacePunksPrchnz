@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { gasTests } from "../lib/content";
 
 // Where NASA has flame data: every normal spherical flame tested on the ISS, by O2 mole fraction and total pressure.
@@ -15,11 +18,33 @@ export default function CoverageMap({ focus, compact = false, wide = false }: { 
   const W = wide ? 1000 : 640, H = wide ? 420 : 400;
   const x = (v: number) => r2(M.l + ((v - X0) / (X1 - X0)) * (W - M.l - M.r));
   const y = (p: number) => r2(H - M.b - (Math.log(p / P0) / Math.log(P1 / P0)) * (H - M.t - M.b));
-  const pts = gasTests.filter((t) => t.flame_type === "normal" && t.xo2 != null && t.p_kpa != null && t.p_kpa <= P1);
+  const [campaign, setCampaign] = useState("");
+  const [fuel, setFuel] = useState("");
+  const [geometry, setGeometry] = useState("normal");
+  const [hasDuration, setHasDuration] = useState(false);
+  const pts = gasTests.filter((test) =>
+    (geometry === "" || test.flame_type === geometry) && (!campaign || test.campaign === campaign) &&
+    (!fuel || test.fuel === fuel) && (!hasDuration || test.burn_time_s != null) &&
+    test.xo2 != null && test.xo2 >= X0 && test.xo2 <= X1 &&
+    test.p_kpa != null && test.p_kpa >= P0 && test.p_kpa <= P1,
+  );
   const lunar = TARGETS[2];
   return (
     <figure className={wide ? "coverage coverage-wide" : "coverage"} style={{ margin: 0 }}>
-      <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Map of normal-flame tests by oxygen fraction and pressure, with an empty region around the lunar-base atmosphere">
+      {wide && <div className="actions" aria-label="Map filters">
+        <label>Campaign <select value={campaign} onChange={(event) => setCampaign(event.target.value)}>
+          <option value="">All campaigns</option><option>CFI-G</option><option>Flame Design</option>
+        </select></label>
+        <label>Fuel <select value={fuel} onChange={(event) => setFuel(event.target.value)}>
+          <option value="">All fuels</option>
+          {[...new Set(gasTests.map((test) => test.fuel).filter(Boolean))].sort().map((name) => <option key={name}>{name}</option>)}
+        </select></label>
+        <label>Geometry <select value={geometry} onChange={(event) => setGeometry(event.target.value)}>
+          <option value="">All geometries</option><option value="normal">Normal</option><option value="inverse">Inverse</option>
+        </select></label>
+        <label><input type="checkbox" checked={hasDuration} onChange={(event) => setHasDuration(event.target.checked)} /> Recorded duration only</label>
+      </div>}
+      <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Gas-flame tests by oxygen fraction and pressure, with the lunar reference window marked">
         <g className="grid">
           {[50, 70, 100, 200, 300].map((p) => (
             <g key={p}>
@@ -31,7 +56,7 @@ export default function CoverageMap({ focus, compact = false, wide = false }: { 
             <text key={v} x={x(v)} y={H - M.b + 22} textAnchor="middle">{Math.round(v * 100)}%</text>
           ))}
         </g>
-        <text x={M.l} y={H - 4} style={{ fill: "var(--ink-3)" }}>O₂ mole fraction →</text>
+        <text x={M.l} y={H - 4} style={{ fill: "var(--ink-3)" }}>Oxygen mole fraction</text>
         <text x={12} y={M.t + 8} transform={`rotate(-90 12 ${M.t + 8})`} textAnchor="end">kPa</text>
         {/* CFI-G never tested normal flames between 24 % and 33 % O2 */}
         <rect x={x(0.24)} y={M.t} width={x(0.33) - x(0.24)} height={H - M.t - M.b} fill="rgba(255,255,255,0.025)" />
@@ -42,7 +67,7 @@ export default function CoverageMap({ focus, compact = false, wide = false }: { 
         />
         {pts.map((t) => (
           <circle key={t.test_id + t.campaign} cx={x(t.xo2!)} cy={y(t.p_kpa!)} r={4} fill={t.campaign === "CFI-G" ? "var(--c1)" : "var(--c2)"} stroke="var(--bg)" strokeWidth={1.5} opacity={0.9}>
-            <title>{`${t.test_id} · ${t.campaign} · ${t.fuel} · ${(t.xo2! * 100).toFixed(1)}% O₂ · ${t.p_kpa!.toFixed(0)} kPa`}</title>
+            <title>{`${t.test_id}, ${t.campaign}, ${t.fuel}, ${(t.xo2! * 100).toFixed(1)}% O₂, ${t.p_kpa!.toFixed(0)} kPa`}</title>
           </circle>
         ))}
         {TARGETS.map((a) => (
@@ -68,6 +93,22 @@ export default function CoverageMap({ focus, compact = false, wide = false }: { 
         <span><i style={{ background: "var(--c2)" }} />Flame Design</span>
         <span><i style={{ border: "2px solid var(--soot)", background: "transparent" }} />Lunar-base window</span>
       </figcaption>
+      {wide && <details className="more">
+        <summary>View test records for the visible window</summary>
+        <p>{pts.length} tests with these filters. {pts.filter((test) => test.burn_time_s == null).length} lack a recorded duration.</p>
+        <div className="table-wrap">
+          <table>
+            <caption>First {Math.min(20, pts.length)} visible records</caption>
+            <thead><tr><th>Test</th><th>Fuel</th><th>Oxygen</th><th>Pressure (kPa)</th><th>Duration (s)</th><th>Source</th></tr></thead>
+            <tbody>{pts.slice(0, 20).map((test, i) => <tr key={test.psi_id + test.test_id + i}>
+              <td>{test.psi_id} {test.test_id}</td><td>{test.fuel}</td>
+              <td>{((test.xo2 ?? 0) * 100).toFixed(1)}%</td><td>{test.p_kpa?.toFixed(1)}</td>
+              <td>{test.burn_time_s ?? "Unavailable"}</td>
+              <td>{test.source_file ?? "Unavailable"}{test.source_row != null && ", row " + test.source_row}</td>
+            </tr>)}</tbody>
+          </table>
+        </div>
+      </details>}
     </figure>
   );
 }

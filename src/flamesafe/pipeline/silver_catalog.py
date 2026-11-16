@@ -103,8 +103,13 @@ def _access_status(n_added: int, n_tables: int) -> str:
 # ----------------------------------------------------------------------------- builders
 def build_tables(snapshot: Path) -> tuple[dict[str, pd.DataFrame], dict[str, Any]]:
     manifest = json.loads((snapshot / bronze_catalog.MANIFEST).read_text(encoding="utf-8"))
-    search = json.loads((snapshot / "search.json").read_text(encoding="utf-8"))
-    search_by_id = {s.get("Accession"): s for s in (h.get("_source", {}) for h in search["hits"]["hits"])}
+    search_by_id = {}
+    for name in manifest.get("search_pages", ["search.json"]):
+        search = json.loads((snapshot / name).read_text(encoding="utf-8"))
+        for hit in search["hits"]["hits"]:
+            source = hit.get("_source", {})
+            if source.get("Accession"):
+                search_by_id[source["Accession"]] = source
     issues: list[dict[str, str]] = []
     rows: dict[str, list[dict[str, Any]]] = {k: [] for k in
                                              ("investigations", "files", "experimental_tables", "publications", "contacts")}

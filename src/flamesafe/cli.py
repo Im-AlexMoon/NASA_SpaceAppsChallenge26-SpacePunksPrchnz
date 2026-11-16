@@ -73,7 +73,7 @@ def profile(
     total = dl.check_budget(reqs, cfg["budget"]["max_total_mb"], cfg["budget"]["max_file_mb"],
                             config.load("sources")["download_budget"]["deny_extensions"])
     typer.echo(f"L2 selection: {len(reqs)} files, {total / 1e6:.1f} MB (budget {cfg['budget']['max_total_mb']} MB)")
-    results = dl.fetch(reqs, progress=lambda r, a: a in ("fetched", "reused") or typer.echo(f"  {r.psi_id} {r.file_name}: {a}"))
+    results = dl.fetch(reqs, max_file_mb=cfg["budget"]["max_file_mb"], progress=lambda r, a: a in ("fetched", "reused") or typer.echo(f"  {r.psi_id} {r.file_name}: {a}"))
     report = dl.write_report(results, "l2_samples")
     by_key = {f"{r['psi_id']}/{r['file_name']}": r for r in results}
     profiles = {k: profile_file(dl.files_root() / k) for k, r in by_key.items() if r.get("http_status") == 200}
@@ -149,7 +149,7 @@ def bronze(
         if action not in ("fetched", "reused"):
             typer.secho(f"  {r.psi_id} {r.file_name}: {action}", fg=typer.colors.YELLOW)
 
-    results = dl.fetch(reqs, progress=show)
+    results = dl.fetch(reqs, progress=show, max_file_mb=b["max_file_mb"])
     integ = dl.verify_integrity()
     report = dl.write_report(results, "l3_manifest", extra={"lock": lock.name, "lock_drift": drift, "integrity": integ})
     ok = sum(r.get("http_status") == 200 for r in results)
@@ -179,7 +179,7 @@ def video_samples(dry_run: bool = typer.Option(False, help="Only resolve, lock a
     typer.echo(f"Video sample: {len(reqs)} files, {total / 1e6:.1f} MB (budget {b['max_total_mb']} MB) -> {lock.name}")
     if dry_run:
         return
-    results = dl.fetch(reqs, workers=2)
+    results = dl.fetch(reqs, workers=2, max_file_mb=b["max_file_mb"])
     report = dl.write_report(results, "video_samples", extra={"lock": lock.name})
     ok = sum(r.get("http_status") == 200 for r in results)
     mism = [r for r in results if r.get("size_matches") is False]
@@ -192,10 +192,12 @@ def video_samples(dry_run: bool = typer.Option(False, help="Only resolve, lock a
 @app.command("m1-train")
 def m1_train(
     reviewer: str = typer.Option("", help="PHY reviewer who signs the artifact (empty = candidate)"),
-    n_boot: int = typer.Option(400, help="Day-bootstrap draws stored in the artifact"),
+    n_boot: int = typer.Option(400, min=1, help="Day-bootstrap draws stored in the artifact"),
+    out: str = typer.Option("", help="Artifact destination; defaults to the local candidate folder"),
 ) -> None:
-    """M-01 v2: fit the physical burn-time model and write its artifact (src/flamesafe/models/artifacts/)."""
+    """Fit a reviewable M-01 v2 artifact beside the published model."""
     from datetime import date
+    from pathlib import Path
 
     import duckdb
     import pandas as pd
@@ -214,7 +216,11 @@ def m1_train(
                          provenance={"gold_duckdb_sha256": readings._sha(gold),
                                      "timeseries_features_sha256": readings._sha(ts_path),
                                      "method": "docs/03_data_science/RESEARCH_LOG.md R13; model card M-01"})
-    path = readings.save(art)
+    destination = Path(out).resolve() if out else config.ROOT / "artifacts" / "models" / readings.ARTIFACT.name
+    if destination == readings.ARTIFACT.resolve() and (not reviewer or not art["fit_diagnostics"]["converged"]):
+        typer.echo("The published model requires a reviewed and converged artifact.", err=True)
+        raise typer.Exit(code=1)
+    path = readings.save(art, destination)
     m = art["metrics"]
     typer.echo(f"{art['model_id']}: n={art['cohort']['n']} ({art['cohort']['days']} days), C={m['oof_c_index']}, "
                f"oof ll/obs={m['oof_loglik_per_obs']} vs {m['oof_loglik_campaign_only']} -> {path.name} [{review['status']}]")
@@ -378,7 +384,7 @@ def timeseries(
         if done["n"] % 250 == 0:
             typer.echo(f"  ... {done['n']}/{len(reqs)}")
 
-    results = dl.fetch(reqs, progress=show, workers=workers)
+    results = dl.fetch(reqs, progress=show, workers=workers, max_file_mb=b["max_file_mb"])
     report = dl.write_report(results, "timeseries", extra={"lock": lock.name})
     ok = sum(r.get("http_status") == 200 for r in results)
     mism = [r for r in results if r.get("size_matches") is False]

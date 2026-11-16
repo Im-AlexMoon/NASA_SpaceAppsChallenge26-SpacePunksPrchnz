@@ -7,8 +7,9 @@ class Provider:
     def __init__(self, settings):
         self.settings = settings
 
-    def generate(self, schema, instructions, payload):
+    def generate(self, schema, instructions, payload, *, timeout=None):
         s = self.settings
+        timeout = s.timeout_seconds if timeout is None else timeout
         if not s.model:
             raise ValueError("Configure FLAMESAFE_LLM_MODEL explicitly.")
         if s.provider == "gemini":
@@ -18,7 +19,7 @@ class Provider:
             with genai.Client(
                 api_key=os.environ["GEMINI_API_KEY"],
                 http_options=types.HttpOptions(
-                    timeout=s.timeout_seconds * 1000,
+                    timeout=max(1, int(timeout * 1000)),
                     retry_options=types.HttpRetryOptions(attempts=1),
                 ),
             ) as client:
@@ -41,7 +42,7 @@ class Provider:
             from openai import OpenAI
 
             with OpenAI(
-                api_key=os.environ["OPENAI_API_KEY"], timeout=s.timeout_seconds, max_retries=0
+                api_key=os.environ["OPENAI_API_KEY"], timeout=timeout, max_retries=0
             ) as client:
                 response = client.responses.parse(
                     model=s.model,

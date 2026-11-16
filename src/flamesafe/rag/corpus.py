@@ -16,7 +16,7 @@ def build_corpus(investigations, count, registry_path=None):
     registry = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
     sources, chunks, definitions, hashes = [], [], [], {}
 
-    def add(source, heading, text):
+    def add(source, heading, text, language=None):
         if not text.strip():
             return
         if not any(s.source_id == source.source_id for s in sources):
@@ -34,7 +34,7 @@ def build_corpus(investigations, count, registry_path=None):
                     text=body,
                     section=heading,
                     token_count=count(body),
-                    language=source.language,
+                    language=language or source.language,
                 )
             )
 
@@ -101,9 +101,22 @@ def build_corpus(investigations, count, registry_path=None):
                         "source_id": sid,
                     }
                 )
+    publication = config.publication()
+    findings_path = config.ROOT / publication["findings"]["source"]
+    finding_status = {entry["id"]: entry["status"] for entry in yaml.safe_load(
+        findings_path.read_text(encoding="utf-8")
+    )["findings"]} if publication["findings"]["enabled"] else {}
+    hashes["configs/publication.yaml"] = file_hash(config.CONFIG_DIR / "publication.yaml")
     for item in registry.get("documents", []):
+        if any(not publication[key]["enabled"] or publication[key]["status"] != "reviewed"
+               for key in item.get("publication_blocks", [])):
+            continue
         path = (config.ROOT / item["path"]).resolve()
         path.relative_to(config.ROOT)
+        if path.stem in finding_status and finding_status[path.stem] != "reviewed":
+            continue
+        if path.stem == "STUDY_SUMMARY" and any(status != "reviewed" for status in finding_status.values()):
+            continue
         if path.name.startswith("_") or path.suffix.lower() not in {".md", ".pdf"}:
             raise ValueError("Only curated Markdown/PDF sources are allowed.")
         if (
@@ -122,6 +135,7 @@ def build_corpus(investigations, count, registry_path=None):
             source_type="reviewed_document",
             sha256=actual,
             locator=item["path"],
+            language=item.get("language", "es"),
             review_status="reviewed",
             reviewed_by=item["reviewed_by"],
             license_or_terms=item["license_or_terms"],
@@ -142,6 +156,6 @@ def build_corpus(investigations, count, registry_path=None):
             if heading in selected:
                 if not text.strip():
                     raise ValueError("Empty extraction; OCR/curation required.")
-                add(source, heading, text)
+                add(source, heading, text, item.get("section_languages", {}).get(heading))
     chunks = list({chunk.chunk_id: chunk for chunk in chunks}.values())
     return sources, chunks, pd.DataFrame(definitions), hashes

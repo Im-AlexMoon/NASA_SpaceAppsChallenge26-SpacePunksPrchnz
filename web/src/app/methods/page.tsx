@@ -10,7 +10,7 @@ const STEPS = [
   ["ISS flame video", "All 335 CFI-G videos measured on Google Cloud Run. Video burn times match the table with Spearman 0.97 over 264 flames."],
   ["Burn-time law", `A log-logistic survival model on ${meta.counts.model_cohort} flames from ${meta.counts.model_days} days, validated by leaving one operations day out.`],
   ["Ranking", "Seven criteria scored from versioned inputs and combined with published weights. Every weight can be changed."],
-  ["Physics review", "Every finding, reading rule and recommendation is signed by the team's physics reviewer before it is shown."],
+  ["Physics review", "The release records physics review and identifies candidate content."],
 ];
 
 export default function Page() {
@@ -18,7 +18,7 @@ export default function Page() {
     <div className="page">
       <div className="wrap stack" style={{ gap: 48 }}>
         <header className="page-head" data-enter style={{ marginBottom: 0 }}>
-          <p className="eyebrow">Methods · Build {meta.build_id}</p>
+          <p className="eyebrow">Evidence version {meta.build_id}</p>
           <h1>How every number is made</h1>
           <p className="lede">From NASA&apos;s public files to a reading on screen, each step is versioned and checked.</p>
         </header>
@@ -40,25 +40,25 @@ export default function Page() {
             <table>
               <thead><tr><th>Level</th><th>When</th><th>What you see</th></tr></thead>
               <tbody>
-                <tr><td><TierBadge tier="A" /></td><td>At least 5 real tests from 2 or more days within ±0.05 O₂ and ±25% pressure</td><td>The observed median first, the model beside it</td></tr>
+                <tr><td><TierBadge tier="A" /></td><td>At least 5 real tests from 2 or more days within ±0.05 O₂ and ±25% pressure</td><td>Observations are shown separately. A model estimate appears only within its supported domain.</td></tr>
                 <tr><td><TierBadge tier="B" /></td><td>Inside the tested range of every physical input and close enough to tested flames</td><td>The model median with its 90% interval</td></tr>
                 <tr><td><TierBadge tier="C" /></td><td>Outside the tested range of any physical input, or too far from every tested flame</td><td>No number, and the experiment that is missing</td></tr>
               </tbody>
             </table>
           </div>
-          <p className="small">Lunar and Martian gravity are always level C: the microgravity value is shown as a likely lower bound, with a warning.</p>
+          <p className="small">The analyzed tests do not establish the effect of lunar or Martian gravity. The estimate uses microgravity at the selected atmosphere.</p>
         </section>
 
-        <section className="stack" aria-labelledby="model-title">
+        {meta.publication.model_readings.enabled && <section className="stack" aria-labelledby="model-title">
           <h2 id="model-title" style={{ fontSize: "clamp(26px,3vw,36px)" }}>Model M-01 v2</h2>
           <div className="stats" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
             <div><span className="label">Out-of-sample C-index</span><strong className="num">{readings.metrics.oof_c_index.toFixed(2)}</strong></div>
-            <div><span className="label">Flames · days</span><strong className="num">{meta.counts.model_cohort} · {meta.counts.model_days}</strong></div>
+            <div><span className="label">Flames and days</span><strong className="num">{meta.counts.model_cohort} flames over {meta.counts.model_days} days</strong></div>
             <div><span className="label">Interval</span><strong className="num">90%, day bootstrap</strong></div>
             <div><span className="label">Reviewed</span><strong>{readings.review.phy_reviewer}</strong></div>
           </div>
           <p className="small">Domain: readings for spherical ethane, propane and butane flames in microgravity, inside the tested range. Model card M-01 in the repository.</p>
-        </section>
+        </section>}
 
         <section className="stack" aria-labelledby="src-title">
           <h2 id="src-title" style={{ fontSize: "clamp(26px,3vw,36px)" }}>Sources</h2>

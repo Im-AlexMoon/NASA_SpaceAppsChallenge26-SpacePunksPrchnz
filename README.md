@@ -9,69 +9,27 @@ pressurized rovers and Mars.
 > **Status:** 🚧 in development. Plan: [docs/00_executive/EXECUTIVE_PLAN.md](docs/00_executive/EXECUTIVE_PLAN.md) ·
 > Progress: [docs/01_management/PROGRESS.md](docs/01_management/PROGRESS.md)
 
-> **Current RAG and dashboard plan (2026-11-15):** follow [RAG_IMPLEMENTATION_PLAN.md](docs/03_data_science/RAG_IMPLEMENTATION_PLAN.md) and [ADR-0004](docs/01_management/decisions/ADR-0004-rag-web-architecture.md). A local Next.js/FastAPI pilot is implemented; its commands and explicit release limits are in [RAG_RUNBOOK.md](docs/03_data_science/RAG_RUNBOOK.md). Generation initially selects verified quotations; exact figures come from bounded database tools. Scientific approval, live-provider evaluation and deployment remain separate gates. Streamlit is retained during transition. Document architecture/scope changes before departing from the current plan.
+## Run the public dashboard
 
-## Run the RAG pilot
+The dashboard uses the versioned data in `web/src/content`. From a clone, use Node 22 or newer:
 
 ```powershell
-uv sync --locked --extra api --extra rag --extra rag-gemini --extra rag-openai --extra pipeline --extra analysis --extra dev
-uv run --no-sync flamesafe rag-index --source-mode sample --allow-model-download
-uv run --no-sync flamesafe rag-validate
-uv run --no-sync flamesafe rag-ask --evidence-only --question "Where does burn_time_s come from?"
-uv run --no-sync uvicorn flamesafe.api.main:app --host 127.0.0.1 --port 8000 --workers 1
+npm --prefix web ci
+npm --prefix web run dev
 ```
 
-Configure the private backend/dashboard tokens using `.env.example` and `web/.env.example`.
-Then run `npm --prefix web ci` and `npm --prefix web run dev` with Node LTS >=22.
-The backend runs without a generation key in evidence-only mode. Gemini/OpenAI generation
-requires an explicitly configured model and quotas; see the runbook before enabling it.
-Full-data builds use `--source-mode full`; samples are never silently substituted.
+Open the address printed by Next.js. The public pages use the static snapshot. The optional chat uses a separate FastAPI service and a dashboard access token.
 
-## What it does
+## What FlameSafe does
 
-| | Capability |
-|---|---|
-| 🔎 **Find** | Catalog of the 24 PSI combustion investigations, ranked by relevance to prevention / detection / suppression and to each crew environment, with adjustable weights |
-| ⚖️ **Compare** | Side-by-side objectives, fuels, oxygen, pressure, flow, variables and sensors |
-| 📊 **Understand** | Statistically supported findings, each with physical interpretation and a citation to the source file / DOI |
-| 🎯 **Predict** | *Habitat Fire Risk Explorer*: set O₂, pressure, flow and gravity regime, get risk indicators with uncertainty and an explicit extrapolation warning |
-| 💬 **Ask** | RAG assistant that answers only from cited evidence (documents + queries over curated data) |
-| 🚀 **Act** | Actionable recommendations and the next experiments needed (e.g., partial-gravity data) |
+- Shows where the analyzed ISS combustion tests support an atmosphere comparison and where new measurements are needed.
+- Reports observed outcomes and model estimates separately. M‑01 v2 describes the persistence of an already-lit laboratory gas flame in microgravity.
+- Ranks the 24 investigations in the PSI snapshot using adjustable criteria.
+- Serves exact queries and source excerpts through the optional chat.
 
-## Architecture
+NASA PSI data pass through Bronze, Silver and Gold. The Gold tables, curated findings and model feed the static Next.js site and the FastAPI evidence service. Streamlit is a historical prototype.
 
-```text
-NASA PSI API → bronze (raw + sha256) → silver (typed, units, flags) → gold (analysis-ready, DuckDB)
-                                                                     ├→ statistics & findings
-                                                                     ├→ predictive models (+ uncertainty)
-                                                                     ├→ relevance ranking (MCDA)
-                                                                     └→ RAG index ──→ Streamlit dashboard
-```
-
-## Repository layout
-
-```text
-app/            Streamlit dashboard (multipage)
-configs/        YAML configs: data sources, pipeline, models, RAG
-data/           Medallion layers (bronze/silver/gold are generated, not committed; sample/ fixtures are)
-docs/           Plans, methodology, scientific documentation, milestones, ADRs  →  docs/README.md
-notebooks/      Exploration & EDA (reusable code goes to src/)
-src/flamesafe/  Python package: ingestion, pipeline, quality, analysis, models, physics, ranking, rag
-tests/          Unit and integration tests
-reports/        Generated figures
-artifacts/      Trained models and RAG indices (generated)
-```
-
-## Quickstart
-
-```bash
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -e ".[all]"
-cp .env.example .env                                 # add ANTHROPIC_API_KEY for the assistant
-pytest -m "not integration"
-make pipeline        # or: flamesafe catalog && flamesafe bronze && flamesafe silver && flamesafe gold
-make app             # streamlit run app/Home.py
-```
+See [the release procedure](docs/06_submission/RELEASE_PROCEDURE.md) for reproduction, checks and rollback.
 
 ## Data & credits
 

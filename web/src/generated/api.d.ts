@@ -613,6 +613,7 @@ export interface operations {
     parameters: {
       query?: never;
       header?: {
+        "x-evidence-build"?: string | null;
         authorization?: string;
       };
       path?: never;

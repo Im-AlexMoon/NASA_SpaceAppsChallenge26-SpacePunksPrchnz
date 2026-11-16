@@ -34,3 +34,7 @@ API esté desplegada.
   gcloud run services describe flamesafe-api --region=us-west1 --project=flamesafe-psi --format="value(status.url)"
   gcloud secrets versions access latest --secret=flamesafe-api-token --project=flamesafe-psi
   ```
+
+## Presupuesto de síntesis
+
+Para activar el proveedor en Cloud Run, configurar el proyecto del ledger con `FLAMESAFE_FIRESTORE_PROJECT`, habilitar Firestore y dar a la cuenta de servicio acceso limitado a las transacciones del ledger. Mantener las cuotas diarias y mensuales. Sin ledger compartido la API conserva las consultas y pasajes. El uso local emplea SQLite. Publicar el frontend con el mismo bundle que monta la API.

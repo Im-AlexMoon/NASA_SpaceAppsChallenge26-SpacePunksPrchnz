@@ -15,6 +15,9 @@ class Settings(Contract):
     generation_enabled: bool = False
     max_output_tokens: int = Field(default=1500, ge=128, le=4096)
     max_input_chars: int = Field(default=24000, ge=1000, le=50000)
+    request_deadline_seconds: int = Field(default=65, ge=1, le=100)
+    firestore_project: str | None = None
+    cloud_runtime: bool = False
     timeout_seconds: int = Field(default=30, ge=1, le=120)
     daily_calls: int = Field(default=0, ge=0)
     monthly_calls: int = Field(default=0, ge=0)
@@ -46,6 +49,8 @@ def settings() -> Settings:
         artifact_root=Path(
             os.getenv("FLAMESAFE_RAG_DIR", config.ROOT / "artifacts" / "rag")
         ).resolve(),
+        firestore_project=os.getenv("FLAMESAFE_FIRESTORE_PROJECT"),
+        cloud_runtime=bool(os.getenv("K_SERVICE")),
         ledger_path=Path(
             os.getenv("FLAMESAFE_LEDGER_PATH", config.ROOT / "artifacts" / "rag_usage.sqlite")
         ).resolve(),

@@ -44,6 +44,19 @@ export type NearbyTest = {
   extinction_mode: string | null;
 };
 
+export type Nearby = {
+  n_tests: number;
+  n_days: number;
+  n_known_ignition: number;
+  n_ignited: number;
+  n_self_extinguished: number;
+  n_flow_cut: number;
+  same_fuel_tests: number;
+  fuel_counts: Record<string, number>;
+  ignition_rate: number | null;
+  median_burn_s_self_extinguished: number | null;
+};
+
 export type Reading = {
   key: string;
   label: string;
@@ -56,14 +69,10 @@ export type Reading = {
     median_burn_s_90ci: [number, number];
     p_still_burning_30s: number;
     p_still_burning_60s: number;
+    p_still_burning_30s_90ci: [number, number];
+    p_still_burning_60s_90ci: [number, number];
   } | null;
-  nearby: {
-    n_tests: number;
-    n_days: number;
-    ignition_rate: number | null;
-    median_burn_s_self_extinguished: number | null;
-    tests: NearbyTest[];
-  };
+  nearby: Nearby & { tests: NearbyTest[] };
   physics: { tad_k: number | null; zst: number | null };
   support: { distance_ratio_to_training: number | null };
   caveats: string[];
@@ -72,6 +81,10 @@ export type Reading = {
 };
 
 export type GridPoint = {
+  nearby: Nearby;
+  reason?: string;
+  p30_ci: [number, number] | null;
+  p60_ci: [number, number] | null;
   tier: Tier;
   median: number | null;
   ci: [number, number] | null;
@@ -96,6 +109,9 @@ export type GasTest = {
   extinction_mode: string | null;
   burn_time_s: number | null;
   cool_flame: boolean | null;
+  source_file: string | null;
+  source_row: number | null;
+  outcome_source: string | null;
 };
 
 export const findings = findingsJson.findings as Finding[];
@@ -108,7 +124,7 @@ export const ranking = rankingJson as unknown as {
   sensitivity: {
     perturbation: number;
     top_k: number;
-    by_profile: Record<string, { n_perturbations: number; perturbations_changing_top_k: number; max_changed: number }>;
+    by_profile: Record<string, { n_perturbations: number; perturbations_changing_top_k: number; max_changed: number; joint: { n_scenarios: number; max_changed: number } }>;
   };
   investigations: {
     psi_id: string;
@@ -117,8 +133,11 @@ export const ranking = rankingJson as unknown as {
     tier: number;
     access_status: string;
     n_gold_tests: number | null;
+    hardware_family: string | null;
+    flight_platform: string | null;
+    doi: string | null;
   }[];
-  scores: Record<string, Record<string, number>[]>;
+  scores: Record<string, (Record<string, number | string> & { psi_id: string })[]>;
 };
 export const readings = readingsJson as unknown as {
   model_id: string;
@@ -134,4 +153,4 @@ export const gasTests: GasTest[] = (testsJson.rows as unknown[][]).map((row) =>
 );
 
 export const finding = (id: string) => findings.find((f) => f.id === id)!;
-export const reference = (key: string) => readings.references.find((r) => r.key === key)!;
+export const reference = (key: string) => readings.references.find((r) => r.key === key);

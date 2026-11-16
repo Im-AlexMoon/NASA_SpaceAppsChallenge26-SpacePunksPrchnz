@@ -96,7 +96,7 @@ def test_no_provider_in_evidence_mode(service):
 
 def test_prediction_guard(service):
     response = service.ask(ChatRequest(question="Predict ignition on Mars"))
-    assert response.navigation == "/habitat"
+    assert response.navigation == "/atmosphere"
     assert not response.claims
 
 

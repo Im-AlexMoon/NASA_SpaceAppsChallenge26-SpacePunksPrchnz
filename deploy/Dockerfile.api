@@ -8,7 +8,7 @@ COPY configs ./configs
 COPY docs/03_data_science/findings ./docs/03_data_science/findings
 # Lexical retrieval + Gemini generation (ADR-0011, ADR-0012). For hybrid E5 retrieval pass
 # EXTRAS="--extra api --extra rag --extra rag-gemini --extra rag-openai".
-ARG EXTRAS="--extra api --extra rag-gemini"
+ARG EXTRAS="--extra api --extra rag-gemini --extra rag-cloud"
 RUN uv sync --locked --no-dev $EXTRAS
 RUN useradd --create-home --uid 10001 flamesafe && mkdir /state && chown flamesafe /state
 ENV PATH="/app/.venv/bin:$PATH" FLAMESAFE_RAG_DIR=/evidence/rag FLAMESAFE_EMBEDDING_PATH=/evidence/embedding-model FLAMESAFE_LEDGER_PATH=/state/usage.sqlite HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1

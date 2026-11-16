@@ -1,5 +1,7 @@
 # Cómo contribuir (equipo SpacePunks)
 
+Para cambios en ciencia, web o chat, seguir el [procedimiento de release](docs/06_submission/RELEASE_PROCEDURE.md).
+
 1. **Toma una tarea** del [plan ejecutivo](docs/00_executive/EXECUTIVE_PLAN.md) por su ID (p. ej. `DE-07`) y márcala como en curso en
    [PROGRESS.md](docs/01_management/PROGRESS.md).
 2. **Rama:** `<track>/<ID>-<slug>` → `de/DE-07-silver-parsers`, `ds/DS-10-m1-logistic`, `phy/PHY-07-atmospheres`.
