@@ -7,12 +7,14 @@ import { BANDS, CAMPAIGN_COLOR, fmtS, km, lin, logScale, r2, survivalAt } from "
 const T_MAX = 300;
 
 // Fraction of flames still burning against time, one step curve per oxygen band (Kaplan-Meier, observed data).
-export function SurvivalChart({ rows }: { rows: GasTest[] }) {
+export function SurvivalChart({ rows, single }: { rows: GasTest[]; single?: string }) {
   const W = 640, H = 300, M = { l: 44, r: 16, t: 12, b: 34 };
   const x = logScale(1, T_MAX, M.l, W - M.r);
   const y = lin(0, 1, H - M.b, M.t);
   const [hover, setHover] = useState<number | null>(null);
-  const curves = BANDS.map((b) => ({ ...b, ...km(rows.filter((t) => t.xo2 != null && b.test(t.xo2))) })).filter((c) => c.n >= 5);
+  const curves = (single
+    ? [{ key: "all", label: single, color: "#4f8dff", ...km(rows) }]
+    : BANDS.map((b) => ({ ...b, ...km(rows.filter((t) => t.xo2 != null && b.test(t.xo2))) }))).filter((c) => c.n >= 5);
   const path = (steps: { t: number; s: number }[]) => {
     let d = `M${x(1)},${y(1)}`;
     steps.slice(1).forEach((p) => { d += `H${x(p.t)}V${y(p.s)}`; });
@@ -50,18 +52,20 @@ export function SurvivalChart({ rows }: { rows: GasTest[] }) {
 }
 
 // Burn duration against oxygen for every flame with a recorded duration; colour = campaign.
-export function ScatterChart({ rows }: { rows: GasTest[] }) {
+export function ScatterChart({ rows, burner = false }: { rows: GasTest[]; burner?: boolean }) {
   const W = 640, H = 300, M = { l: 44, r: 16, t: 12, b: 34 };
-  const x = lin(0.12, 0.5, M.l, W - M.r);
+  const X1 = burner ? 0.9 : 0.5;
+  const x = lin(0.12, X1, M.l, W - M.r);
+  const ticks = burner ? [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] : [0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45];
   const y = logScale(1, 400, H - M.b, M.t);
   const [hover, setHover] = useState<GasTest | null>(null);
-  const pts = rows.filter((t) => t.burn_time_s != null && t.burn_time_s > 0 && t.xo2 != null);
+  const pts = rows.filter((t) => t.burn_time_s != null && t.burn_time_s > 0 && t.xo2 != null && t.xo2 >= 0.12 && t.xo2 <= X1);
   return (
     <div className="chart-box">
       <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Burn duration against oxygen mole fraction" onPointerLeave={() => setHover(null)}>
         <g className="grid">
           {[1, 3, 10, 30, 100, 300].map((t) => <g key={t}><line x1={M.l} x2={W - M.r} y1={y(t)} y2={y(t)} /><text x={M.l - 8} y={y(t) + 4} textAnchor="end">{t}s</text></g>)}
-          {[0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45].map((v) => <text key={v} x={x(v)} y={H - 10} textAnchor="middle">{Math.round(v * 100)}%</text>)}
+          {ticks.map((v) => <text key={v} x={x(v)} y={H - 10} textAnchor="middle">{Math.round(v * 100)}%</text>)}
         </g>
         {pts.map((t) => (
           <circle key={t.campaign + t.test_id} cx={x(t.xo2!)} cy={y(t.burn_time_s!)} r={hover === t ? 6 : 3.5}

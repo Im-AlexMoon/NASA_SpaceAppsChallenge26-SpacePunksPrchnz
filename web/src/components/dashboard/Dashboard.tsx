@@ -27,10 +27,14 @@ export default function Dashboard() {
   };
 
   const rows = useMemo(() => applyFilters(gasTests, f), [f]);
+  // Normal flames breathe the ambient air; inverse flames get their oxygen from the burner. The two O2 values are not
+  // comparable, so O2-based charts show normal flames unless inverse flames are selected on their own.
+  const inverse = f.flame === "inverse";
+  const o2rows = useMemo(() => (inverse ? rows : rows.filter((t) => t.flame_type === "normal")), [rows, inverse]);
   const ignited = rows.filter((t) => t.ignition_outcome === "yes").length;
   const known = rows.filter((t) => t.ignition_outcome != null).length;
   const selfOut = rows.filter((t) => t.extinction_mode === "self_extinguished" && t.burn_time_s != null).map((t) => t.burn_time_s!);
-  const surv = km(rows);
+  const surv = km(o2rows);
   const active = KEYS.filter((k) => f[k] !== "all").length;
   const m = dashboard.model;
 
@@ -65,21 +69,22 @@ export default function Dashboard() {
 
       <h2 className="dash-h">What the flames did</h2>
       <div className="dash-grid">
-        <Panel id="p-surv" span={7} title="How many flames are still burning"
-          note="Each step is a flame going out on its own; flames whose fuel flow was cut count until the cut. More oxygen keeps flames alight far longer. Durations come from CFI-G: Flame Design tests have no burn time in the published test table.">
-          <SurvivalChart rows={rows} />
+        <Panel id="p-surv" span={7} title={inverse ? "How many inverse flames are still burning" : "How many flames are still burning"}
+          note={`Each step is a flame going out on its own; flames whose fuel flow was cut count until the cut. ${inverse ? "Inverse flames take their oxygen from the burner, so they are shown as one group." : "Normal flames only, grouped by the oxygen of the surrounding air: more oxygen keeps them alight far longer."} Durations come from CFI-G: Flame Design tests have no burn time in the published test table.`}>
+          <SurvivalChart rows={o2rows} single={inverse ? "All inverse flames" : undefined} />
         </Panel>
         <Panel id="p-out" span={5} title="How each test ended" note="Missing records stay visible as their own category, never as zero.">
           <OutcomeBars rows={rows} />
         </Panel>
-        <Panel id="p-scatter" span={7} title="Burn duration against oxygen" note="Hover a point for its test. Filled points went out on their own. CFI-G only, for the same reason.">
-          <ScatterChart rows={rows} />
+        <Panel id="p-scatter" span={7} title={inverse ? "Burn duration against burner oxygen" : "Burn duration against oxygen in the air"}
+          note={`Hover a point for its test. Filled points went out on their own. CFI-G only, for the same reason. ${inverse ? "Inverse flames: oxygen fraction of the burner stream." : "Normal flames; select Inverse in the Flame filter to see inverse flames on their own axis."}`}>
+          <ScatterChart rows={o2rows} burner={inverse} />
         </Panel>
         <Panel id="p-fuel" span={5} title="Tests by fuel" note="Click a fuel to filter every chart.">
           <FuelBars rows={applyFilters(gasTests, { ...f, fuel: "all" })} active={f.fuel} onPick={(fuel) => set({ fuel })} />
         </Panel>
-        <Panel id="p-heat" span={12} title="Where the tests are" note="Click a cell to narrow the dashboard to its oxygen and pressure band. The lunar-base reference sits in an empty region.">
-          <CoverageHeatmap rows={applyFilters(gasTests, { ...f, o2: "all", p: "all" })} onPick={(x, p) => set({
+        <Panel id="p-heat" span={12} title="Where the tests are" note="Normal flames, by the oxygen and pressure of the surrounding air. Click a cell to narrow the dashboard to its band. The lunar-base reference sits in an empty region.">
+          <CoverageHeatmap rows={applyFilters(gasTests, { ...f, flame: "normal", o2: "all", p: "all" })} onPick={(x, p) => set({
             o2: BANDS.find((b) => b.test(x))!.key,
             p: Object.keys(P_BANDS).find((k) => p >= P_BANDS[k][0] && p < P_BANDS[k][1]) ?? "all",
           })} />
