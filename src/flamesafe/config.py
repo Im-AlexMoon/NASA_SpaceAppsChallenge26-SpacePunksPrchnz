@@ -24,3 +24,7 @@ def load(name: str) -> dict:
 
 def data_dir() -> Path:
     return Path(os.getenv("FLAMESAFE_DATA_DIR", ROOT / "data")).resolve()
+
+
+def publication() -> dict:
+    return load("publication")["blocks"]

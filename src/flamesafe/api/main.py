@@ -1,6 +1,7 @@
 """Single-worker private API. The Node server holds the backend token."""
 
 import hmac
+import logging
 import os
 import threading
 from collections import deque
@@ -9,10 +10,14 @@ from time import monotonic
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 
+from flamesafe import config
 from flamesafe.api.content import AtmosphereRequest, ContentService, RankingRequest, publication
 from flamesafe.rag.schemas import AnswerResult, ChatRequest, ToolRequest
 from flamesafe.rag.service import RagService
 from flamesafe.rag.settings import settings as load_settings
+from flamesafe.rag.utils import file_hash
+
+logger = logging.getLogger("uvicorn.error")
 
 
 def create_app(settings=None, service=None, token=None):
@@ -64,11 +69,13 @@ def create_app(settings=None, service=None, token=None):
     def status():
         s = ready()
         return {
+            "schema_version": 2,
             "build_id": s.manifest.build_id,
+            "hashes": {key: file_hash(config.ROOT / block["source"]) for key, block in publication().items() if block["enabled"]},
             "source_mode": s.manifest.source_mode,
             "retrieval_mode": s.manifest.retrieval_mode,
             "row_counts": s.manifest.row_counts,
-            "generation_enabled": settings.generation_enabled,
+            "generation_enabled": settings.generation_enabled and (not settings.cloud_runtime or bool(settings.firestore_project)),
             "model_readings_enabled": bool(publication()["model_readings"]["enabled"]),
             "publication": {k: {"enabled": v["enabled"], "status": v["status"]} for k, v in publication().items()},
         }
@@ -99,8 +106,10 @@ def create_app(settings=None, service=None, token=None):
             raise HTTPException(422, str(exc)) from None
 
     @app.post("/v1/chat", response_model=AnswerResult, dependencies=private)
-    def chat(request: ChatRequest):
+    def chat(request: ChatRequest, x_evidence_build: str | None = Header(default=None)):
         s = ready()
+        if x_evidence_build is not None and x_evidence_build != s.manifest.build_id:
+            raise HTTPException(409, "The dashboard and evidence service use different releases.")
         with lock:
             now = monotonic()
             while recent and now - recent[0] >= 60:
@@ -111,7 +120,11 @@ def create_app(settings=None, service=None, token=None):
         if not slots.acquire(blocking=False):
             raise HTTPException(429, "Instance is busy")
         try:
-            return s.ask(request)
+            answer = s.ask(request)
+            logger.info("chat status=%s build=%s elapsed_ms=%d chunks=%d tool_results=%d",
+                        answer.status, s.manifest.build_id, (monotonic() - now) * 1000,
+                        len(answer.evidence.chunks), len(answer.evidence.tools))
+            return answer
         finally:
             slots.release()
 

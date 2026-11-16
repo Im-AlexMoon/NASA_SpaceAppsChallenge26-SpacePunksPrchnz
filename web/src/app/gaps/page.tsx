@@ -1,20 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import CoverageMap from "../../components/CoverageMap";
-import { reference } from "../../lib/content";
+import { meta, reference } from "../../lib/content";
 
 export const metadata: Metadata = { title: "Knowledge gaps" };
 
 export default function Page() {
+  if (!meta.publication.findings.enabled) return <div className="page wrap"><h1>Evidence gaps</h1><p>This section is unavailable in the current release.</p></div>;
   const lunar = reference("lunar_base_upper");
-  const ci = lunar.prediction?.median_burn_s_90ci;
+  const ci = lunar?.prediction?.median_burn_s_90ci;
   return (
     <div className="page">
       <div className="wrap stack" style={{ gap: 40 }}>
         <header className="page-head" data-enter style={{ marginBottom: 0 }}>
-          <p className="eyebrow">Gaps · Finding F-04</p>
-          <h1>What NASA has not tested yet</h1>
-          <p className="lede">The atmospheres planned for the Moon and Mars sit where the ISS flame record is thin or empty.</p>
+          <p className="eyebrow">Evidence gap in Finding F-04</p>
+          <h1>Gaps in the analyzed combustion data</h1>
+          <p className="lede">The reference atmospheres help identify where the analyzed flame records are sparse and what measurements would be useful.</p>
         </header>
 
         <div className="gap-list">
@@ -31,22 +32,22 @@ export default function Page() {
           <div className="card">
             <strong className="num">0</strong>
             <h3>Tests in partial gravity</h3>
-            <p>Every PSI combustion test ran in microgravity. Lunar and Martian values are bounds, never measurements.</p>
+            <p>The analyzed data do not establish how flame behavior changes in lunar or Martian gravity.</p>
           </div>
         </div>
 
         <section className="grid-gap panel" aria-label="Coverage map">
           <div className="section-head">
-            <h2 style={{ fontSize: "clamp(26px,3vw,36px)" }}>The model fills the gap, with a warning</h2>
-            <p className="muted">
-              Inside the empty window M-01 v2 reads {lunar.prediction?.median_burn_s.toFixed(0)} s
+            <h2 style={{ fontSize: "clamp(26px,3vw,36px)" }}>A model estimate for the lunar reference</h2>
+            {lunar?.prediction && <p className="muted">
+              Inside the empty window M-01 v2 reads {lunar?.prediction?.median_burn_s.toFixed(0)} s
               {ci ? ` (90% interval ${ci[0].toFixed(0)}–${ci[1].toFixed(0)} s)` : ""}, an interpolation at{" "}
-              {lunar.support.distance_ratio_to_training?.toFixed(2)}× the typical distance between tests. Tier B, not a
+              {lunar?.support.distance_ratio_to_training?.toFixed(2)}× the typical distance between tests. Tier B, not a
               measurement.
-            </p>
+            </p>}
             <Link className="link" href="/atmosphere">Open the lunar-base reading</Link>
           </div>
-          <CoverageMap />
+          <CoverageMap wide />
         </section>
 
         <section className="stack" aria-labelledby="exp-title">
@@ -55,7 +56,7 @@ export default function Page() {
             <li>
               <div className="card">
                 <h3>Spherical flames at 30% O₂ / 70 kPa</h3>
-                <p>With the ACME hardware on the ISS. Turns the lunar-base reading from tier B into tier A. (REC-02)</p>
+                <p>With the ACME hardware on the ISS. This would provide measured evidence near the lunar reference. See REC-02.</p>
               </div>
             </li>
             <li>

@@ -27,8 +27,7 @@ Escala de velocidades y tiempos (llama de radio r ≈ 17 mm medido en video; gas
 Incluso a 0.165 g la flotabilidad renueva el gas alrededor de la llama en ~0.1 s, órdenes de magnitud más rápido que el tiempo
 en que una llama esférica en µg se apaga por radiación (5–300 s en los datos). Consecuencias:
 
-1. **La autoextinción radiativa observada en µg no debe esperarse en la Luna o Marte.** Para la persistencia de la llama, la
-   duración en µg es probablemente una **cota inferior**, no un valor intermedio.
+1. **Hipótesis:** la flotabilidad podría cambiar la autoextinción radiativa. La dirección y magnitud dependen de geometría, ventilación y mecanismos de pérdida. El argumento de escala no establece una cota para la persistencia.
 2. **La velocidad inducida en gravedad parcial (~0.15–0.23 m/s) cae en el rango de las velocidades de ventilación de cabina**
    (⚠️ valores típicos de ventilación por verificar en NASA-STD-3001). Las investigaciones de sólidos (BASS, BASS-II; ver *Microgravity
    flammability boundary for PMMA rods in axial stagnation flow*, doi:10.1016/j.combustflame.2017.03.001) muestran que la
@@ -43,8 +42,7 @@ en que una llama esférica en µg se apaga por radiación (5–300 s en los dato
 
 ## 3. Cómo se muestra en el dashboard
 - La lectura para la Luna o Marte se calcula con la atmósfera del hábitat **en microgravedad** y se etiqueta así.
-- El **efecto de la gravedad** se marca siempre como **nivel C (sin evidencia)**, con el texto: "la flotabilidad debilita la
-  autoextinción radiativa; la duración en microgravedad es probablemente una cota inferior de la persistencia".
+- El **efecto de la gravedad** se indica como no estimable con los datos analizados. El texto identifica el régimen de microgravedad de la estimación.
 - Nunca se muestra una curva que interpole entre µg y 1 g.
 
 ## 4. Experimentos que cerrarían la brecha
@@ -53,5 +51,4 @@ en que una llama esférica en µg se apaga por radiación (5–300 s en los dato
 3. Materiales sólidos de cabina en la atmósfera de exploración con flujo controlado en el rango 0.05–0.25 m/s.
 
 ## 5. Confianza
-**Media-baja** para la dirección (cota inferior): el argumento de escala es robusto, pero no hay ninguna medición en gravedad
-parcial que lo confirme. **Alta** para la afirmación de que no hay datos (F-04).
+La estimación de escala formula una hipótesis. La auditoría de F-04 verifica la cobertura de la instantánea y no establece el efecto en gravedad parcial.

@@ -39,8 +39,7 @@ llama, se lleva los productos y da la forma de lágrima. En microgravedad la flo
 - **Presión parcial** pO₂ = XO₂ · P_total: lo que "ve" la química y la fisiología.
 - Ejemplo: 34% O₂ a 8.2 psi da pO₂ ≈ 19.2 kPa, similar al nivel del mar (≈ 21.2 kPa). Para los pulmones es casi lo mismo. Para
   el fuego no lo es: hay **mucho menos N₂ inerte** que absorba calor, así que la llama queda más caliente y los materiales son
-  más inflamables. ✔ para llamas de gas en µg: con 34 % O₂ la Tad calculada sube ~340 K y la llama dura ~7–10 veces más que cerca
-  de la cabina ISS (F-03). Para materiales sólidos sigue siendo ⚠️ (no hay datos tabulados en gold). Por eso el reto subraya que ≥ 30% O₂ hace a los materiales "mucho más inflamables".
+  más inflamables en algunos ensayos. Para la fuente de referencia, el modelo calcula una temperatura adiabática mayor. En F-03 se comparan cohortes con distintas mezclas de combustible. La transferencia a materiales sólidos requiere ensayos representativos.
 - Consecuencia para el análisis: **siempre** modelar con ambas variables y dejar que los datos digan cuál explica mejor (H1).
 
 ## 4. Flujo de aire: el factor que la Tierra esconde
@@ -71,9 +70,7 @@ llama, se lleva los productos y da la forma de lágrima. En microgravedad la flo
 - La flotabilidad escala con g. Un flujo inducido de pocos cm/s puede caer justo en el rango de **máxima inflamabilidad**. ⚠️
   La hipótesis es que la gravedad parcial podría ser el peor caso, no un punto intermedio "seguro".
 - PSI **no** tiene datos de gravedad parcial. E-FIELD Flames imitó un efecto tipo flotabilidad con campos eléctricos.
-- Estrategia del proyecto: el efecto de la gravedad es siempre nivel C; la duración en µg se trata como **cota inferior** de la
-  persistencia (la flotabilidad debilita la autoextinción radiativa). Detalle y estimaciones de escala en
-  [PARTIAL_GRAVITY_BOUNDING.md](PARTIAL_GRAVITY_BOUNDING.md). Los nombres LUCI y FM2 de versiones anteriores no se verificaron y se retiraron.
+- Estrategia del proyecto: mostrar la estimación de microgravedad y el efecto de gravedad como no estimable con la instantánea. El argumento de escala se documenta en [PARTIAL_GRAVITY_BOUNDING.md](PARTIAL_GRAVITY_BOUNDING.md).
 
 ## 8. Glosario rápido
 

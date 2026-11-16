@@ -23,6 +23,7 @@ import pandas as pd
 
 from flamesafe import config
 from flamesafe.ingestion.profile import read_text
+from flamesafe.pipeline.promotion import promote_files, stage_files
 
 KINDS = {"str", "text", "id", "int", "float", "bool_yesno", "category", "date"}
 
@@ -266,22 +267,26 @@ def run(only: list[str] | None = None, out_dir: Path | None = None) -> dict[str,
     out_dir.mkdir(parents=True, exist_ok=True)
     issues = Issues()
     tables: dict[str, Any] = {}
-    for name, fn in REGISTRY.items():
-        if only and name not in only:
-            continue
-        try:
-            produced = fn(issues)
-        except FileNotFoundError as exc:
-            issues.add("error", name, str(exc))
-            continue
-        for table, (df, meta) in produced.items():
-            df.to_parquet(out_dir / f"{table}.parquet", index=False)
-            flags = [c for c in df.columns if c.endswith("__flag")]
-            tables[table] = {"parser": name, "rows": len(df), "columns": len(df.columns),
-                             "flagged_values": {c[:-6]: int(df[c].notna().sum()) for c in flags}, **meta}
+    with stage_files(out_dir.parent, "silver") as stage:
+        for name, fn in REGISTRY.items():
+            if only and name not in only:
+                continue
+            try:
+                produced = fn(issues)
+            except FileNotFoundError as exc:
+                issues.add("error", name, str(exc))
+                continue
+            for table, (df, meta) in produced.items():
+                df.to_parquet(stage / f"{table}.parquet", index=False)
+                flags = [c for c in df.columns if c.endswith("__flag")]
+                tables[table] = {"parser": name, "rows": len(df), "columns": len(df.columns),
+                                 "flagged_values": {c[:-6]: int(df[c].notna().sum()) for c in flags}, **meta}
+        if not issues.n_errors:
+            promote_files(stage, out_dir)
     report = {
         "built_at_utc": datetime.now().astimezone().isoformat(timespec="seconds"),
         "tables": tables,
+        "selected_parsers": only,
         "issues": issues.items,
         "n_errors": issues.n_errors,
         "n_warnings": sum(i["level"] == "warning" for i in issues.items),

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { findings, type KeyNumber } from "../../lib/content";
+import { meta, findings, type KeyNumber } from "../../lib/content";
 
 export const metadata: Metadata = { title: "Findings" };
 
@@ -16,8 +16,8 @@ function Num({ k }: { k: KeyNumber }) {
         {k.unit && typeof k.value === "number" ? <span style={{ fontSize: 15, color: "var(--ink-3)", marginLeft: 3 }}>{k.unit === "per 1000/K" ? "" : k.unit}</span> : null}
       </strong>
       <span>{k.name}</span>
-      {ci && <span className="num">{level} CI {ci[0]} – {ci[1]}{k.n ? ` · n = ${k.n}` : ""}</span>}
-      {!ci && k.n ? <span className="num">n = {k.n}{k.groups ? ` · ${k.groups}` : ""}</span> : null}
+      {ci && <span className="num">{level} interval {ci[0]} to {ci[1]}{k.n ? `, n = ${k.n}` : ""}</span>}
+      {!ci && k.n ? <span className="num">n = {k.n}{k.groups ? `, ${k.groups}` : ""}</span> : null}
     </div>
   );
 }
@@ -27,15 +27,17 @@ export default function Page() {
     <div className="page">
       <div className="wrap">
         <header className="page-head" data-enter>
-          <p className="eyebrow">Understand · Reviewed by PHY</p>
-          <h1>Five things the ISS flames show</h1>
+          <p className="eyebrow">Combustion study</p>
+          <h1>Findings from ISS combustion experiments</h1>
           <p className="lede">Each finding states its numbers, the physics behind them and where they stop being valid.</p>
         </header>
+        {findings.length === 0 && <p>Findings are unavailable in the current release.</p>}
         {findings.map((f) => (
           <article key={f.id} id={f.id} className="finding" style={{ scrollMarginTop: 90 }}>
             <div className="finding-id">
               <strong>{f.id}</strong>
               <span className="chip">{PILLAR[f.pillar] ?? f.pillar}</span>
+              {(f.status !== "reviewed" || meta.publication.findings.status !== "reviewed") && <span className="chip">Candidate</span>}
               <span className="chip">{f.confidence} confidence</span>
             </div>
             <div className="finding-body">

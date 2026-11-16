@@ -47,17 +47,17 @@ findings:
     limits: "Inverse flames rank but do not calibrate across campaigns; Flame Design flames last ~1.75x longer at equal physics (fuel or rig)."
     page: insights
   - id: F-03
-    title: "Near the exploration atmosphere a flame lasts about 7-10 times longer than in an ISS-like cabin"
-    title_es: "Cerca de la atmósfera de exploración una llama dura unas 7-10 veces más que en una cabina tipo ISS"
+    title: "Observed burn durations were longer near the exploration atmosphere"
+    title_es: "Las duraciones observadas fueron mayores cerca de la atmósfera de exploración"
     claim: >-
       At 34 % O2 and 56.5 kPa (oxygen partial pressure close to sea level) real tests burned a median 62.5 s before
-      self-extinguishing, versus 9 s near the ISS cabin. Lowering the pressure does not compensate raising the oxygen.
+      self-extinguishing, versus 9 s near the ISS cabin. The cohorts differ in fuel composition and test conditions.
     pillar: prevention
     rq: RQ1
     confidence: medium
     status: reviewed
     key_numbers:
-      - {name: "Observed median burn, ISS-like (21 % O2, 101 kPa)", value: 9.0, unit: s, n: 21, groups: "6 days"}
+      - {name: "Observed median burn, ISS-like (21 % O2, 101 kPa)", value: 9.0, unit: s, n: 23, groups: "6 days"}
       - {name: "Observed median burn, exploration (34 % O2, 56.5 kPa), self-extinguished", value: 62.5, unit: s, n: 12, groups: "3 days"}
       - {name: "Model median, exploration (propane source)", value: 94.6, ci90: [74.6, 120.2], unit: s}
       - {name: "Calculated Tad, ISS vs exploration (propane, 30 % fuel)", value: "2171 K vs 2512 K"}
@@ -66,15 +66,15 @@ findings:
     physics: >-
       Lungs respond to oxygen partial pressure, flames also to the inert fraction: with ~34 % O2 the flame is ~340 K hotter.
       Lower pressure also lengthens flame life in these data (less radiation), so both choices push the same way.
-    limits: "Only 19 tests from 3 days near the exploration atmosphere; laboratory gas flames; microgravity."
+    limits: "Nineteen nearby tests span three days and use no propane. The propane estimate is separate. Four flames were still lit at flow cutoff."
     page: atmosphere
   - id: F-04
     title: "Knowledge gap: no tests near the lunar-base atmosphere and none in partial gravity"
     title_es: "Brecha: no hay pruebas cerca de la atmósfera de base lunar ni en gravedad parcial"
     claim: >-
-      PSI has zero normal-flame tests within ±0.05 O2 and ±25 % pressure of the lunar-base bound (30 % O2, 70 kPa), no
+      The analyzed PSI data contain zero normal-flame tests within ±0.05 O2 and ±25 % pressure of the lunar-base bound (30 % O2, 70 kPa), no
       CFI-G normal-flame tests between 24 % and 33 % O2 (Flame Design has only 6 ethylene flames near 30 % O2 at 1 atm,
-      with no burn time recorded), and no combustion data at lunar or Martian gravity.
+      with no burn time recorded). The analyzed data provide no measurement of the effect of lunar or Martian gravity.
     pillar: prevention
     rq: RQ1
     confidence: high
@@ -85,18 +85,17 @@ findings:
       - {name: "Distance to the 5th nearest tested flame vs typical spacing", value: 2.15}
     evidence: {psi: [PSI-159, PSI-10], research_log: [R14], physics: docs/04_physics/PARTIAL_GRAVITY_BOUNDING.md}
     physics: >-
-      Radiative self-extinction is a microgravity phenomenon; buoyancy at 0.165 g or 0.38 g removes products and feeds
-      oxygen, so microgravity self-extinction should not be counted on at the Moon or Mars.
+      Buoyancy could change the radiative extinction mechanism. The data do not establish the direction or magnitude of the change.
     limits: "The model reading inside the gap is an interpolation, not a measurement."
     page: gaps
     next_experiment: "Normal spherical flames at 30 % O2 / 70 kPa and across 24-33 % O2, then the same set in partial gravity."
   - id: F-05
-    title: "Flames shrink before they go out on their own: an optical early warning"
+    title: "Flame contraction preceded self-extinction in a retrospective video analysis"
     title_es: "La llama se encoge antes de apagarse sola: una alerta óptica temprana"
     claim: >-
       In the ISS video of every CFI-G test, 71 % of normal flames that later self-extinguished were already below 80 % of
       their mid-life radius 5-10 s before going out, versus 32 % of flames that kept burning until the flow was cut. The
-      fading of the yellow soot glow, by contrast, is not a warning.
+      fading of the yellow soot glow did not distinguish these groups.
     pillar: detection
     rq: RQ1
     confidence: medium

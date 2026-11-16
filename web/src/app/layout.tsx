@@ -9,11 +9,11 @@ const mono = DM_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://127.0.0.1:3000"),
-  title: { default: "FlameSafe · Space fire evidence", template: "%s · FlameSafe" },
+  title: { default: "FlameSafe: Space fire evidence", template: "%s | FlameSafe" },
   description:
     "How long a flame lasts in the air of a space habitat, read from 660 NASA flame tests on the ISS, with the evidence level of every number.",
   openGraph: {
-    title: "FlameSafe · Space fire evidence",
+    title: "FlameSafe: Space fire evidence",
     description: "24 NASA combustion investigations, ranked, read and tested against the atmospheres of future habitats.",
     type: "website",
   },
@@ -42,7 +42,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               investigations). Flame video frames: NASA, CC0. Microgravity results only; no partial-gravity data exist.
             </p>
             <p>
-              Team SpacePunks · NASA Space Apps Challenge 2026 ·{" "}
+              Team SpacePunks, NASA Space Apps Challenge 2026.{" "}
               <a href="https://github.com/Im-AlexMoon/NASA_SpaceAppsChallenge26-SpacePunksPrchnz">Source code</a>
             </p>
           </div>

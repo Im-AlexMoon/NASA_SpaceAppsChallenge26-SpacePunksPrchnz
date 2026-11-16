@@ -38,12 +38,8 @@
 ## Lectura física (para la narrativa)
 - La pO₂ de las atmósferas de exploración es **casi normóxica** (19–21 kPa): por eso son aceptables para la tripulación.
 - Para la llama cuenta además la fracción de **inertes**: la razón N₂/O₂ cae de 3.8 (aire) a 1.9 (34 % O₂). La llama nace ~340 K más
-  caliente (Tad calculada) y, en microgravedad, dura ~7–10 veces más que cerca de la cabina ISS (F-03). Bajar la presión no lo
-  compensa: en los datos, menos presión también alarga la llama (F-01, F-02).
-- Ninguna combinación de "Luna/Marte + atmósfera enriquecida" tiene datos de combustión medidos en PSI. Todo lo que el dashboard
-  muestre ahí es interpolación en µg o acotamiento, y debe decirlo (F-04, PARTIAL_GRAVITY_BOUNDING.md).
+  caliente según el cálculo para la fuente de referencia. Los grupos CFI-G comparados en F-03 difieren en condiciones y combustible. Su diferencia de duración es descriptiva.
+- Ninguna combinación de "Luna/Marte + atmósfera enriquecida" tiene datos de combustión medidos en PSI. El dashboard identifica la extrapolación pendiente y muestra por separado la estimación bajo microgravedad (F-04).
 
 ## Gravedad parcial: política de acotamiento (PHY-05)
-Ver [PARTIAL_GRAVITY_BOUNDING.md](PARTIAL_GRAVITY_BOUNDING.md). Resumen: el efecto de la gravedad es siempre nivel C; la duración
-en µg es probablemente una **cota inferior** de la persistencia de la llama en la Luna o Marte, porque la flotabilidad debilita
-la autoextinción radiativa. No se interpola linealmente en g.
+Ver [PARTIAL_GRAVITY_BOUNDING.md](PARTIAL_GRAVITY_BOUNDING.md). La flotabilidad podría cambiar la autoextinción radiativa. Los datos analizados no establecen la dirección o magnitud del cambio en persistencia.

@@ -39,6 +39,7 @@ class AFTFit:
     family: str
     theta: np.ndarray  # intercept, slopes..., log(sigma)
     log_likelihood: float
+    converged: bool = True
 
     @property
     def coef(self) -> pd.Series:
@@ -75,7 +76,9 @@ def fit_aft(df: pd.DataFrame, columns: list[str], family: str = "loglogistic", d
     x, y, e = design(df, columns), np.log(df[duration].to_numpy(float)), df[event].to_numpy()
     start = np.r_[np.linalg.lstsq(x, y, rcond=None)[0], 0.0]
     res = optimize.minimize(lambda th: -_loglik(th, x, y, e, family).sum(), start, method="BFGS")
-    return AFTFit(list(columns), family, res.x, float(-res.fun))
+    if not np.isfinite(res.x).all() or not np.isfinite(res.fun):
+        raise ValueError("AFT adjustment returned a non-finite estimate.")
+    return AFTFit(list(columns), family, res.x, float(-res.fun), bool(res.success))
 
 
 def grouped_oof_loglik(df: pd.DataFrame, columns: list[str], family: str = "loglogistic", groups: str = "test_day",

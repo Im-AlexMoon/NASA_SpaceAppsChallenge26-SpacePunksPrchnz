@@ -1,5 +1,7 @@
 # RAG: ejecución local y límites de esta entrega
 
+> **Procedimiento vigente.** Para reconstruir el release, seguir [RELEASE_PROCEDURE.md](../06_submission/RELEASE_PROCEDURE.md). El chat organiza pasajes exactos y conserva consultas explícitas. En Cloud Run, la síntesis utiliza el ledger compartido configurado. Los pasos originales se conservan abajo como referencia histórica.
+
 El plan vigente sigue siendo [RAG_IMPLEMENTATION_PLAN.md](RAG_IMPLEMENTATION_PLAN.md)
 y ADR-0004. Este documento explica la implementación y sus controles de publicación;
 no sustituye la revisión científica ni declara superadas las fases de evaluación live.

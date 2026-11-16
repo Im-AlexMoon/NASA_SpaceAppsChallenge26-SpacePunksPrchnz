@@ -6,6 +6,7 @@ dictionary: docs/02_data_engineering/DATA_DICTIONARY.md
 # Reviewed 2026-11-15 by the project PHY reviewer. Any edit to a file changes its sha256 and requires a new review.
 documents:
   - path: docs/03_data_science/findings/F-01.md
+    publication_blocks: [findings]
     title: "F-01 Oxygen controls flame persistence"
     sha256: 7c25bd9cf4c50dd8bd6b4e5312e4ae19ab7aec31b8668e5e21d5621b8d658977
     reviewed_by: "Alexander Moon (PHY), 2026-11-15"
@@ -19,6 +20,7 @@ documents:
       - Limitaciones y amenazas a la validez
       - Implicación para seguridad contra incendios
   - path: docs/03_data_science/findings/F-02.md
+    publication_blocks: [findings]
     title: "F-02 Physical burn-time law"
     sha256: 754f6279c232453cf38ccefea1a9e865f0ef9797d34507c2068b3c6f5f38d98d
     reviewed_by: "Alexander Moon (PHY), 2026-11-15"
@@ -32,21 +34,27 @@ documents:
       - Limitaciones
       - Implicación para seguridad
   - path: docs/03_data_science/findings/F-03.md
+    publication_blocks: [findings]
     title: "F-03 Exploration atmosphere vs ISS cabin"
-    sha256: 3cfd1385de8adaf5230cc2bbfe7682b3a22ccb092a8c83934379b48f2df9ac80
+    sha256: 8d04d63de13172df8d023a115283308a53688eb057cdcf1a1f488dfbb588b153
     reviewed_by: "Alexander Moon (PHY), 2026-11-15"
     license_or_terms: "Repository license (MIT)"
     allow_provider: true
     approved_sections:
-      - F-03 — Cerca de la atmósfera de exploración una llama dura unas 7–10 veces más que en una cabina tipo ISS
+      - F-03. Las duraciones observadas fueron mayores cerca de la atmósfera de exploración
       - Afirmación
       - Evidencia
       - Interpretación física (PHY)
       - Limitaciones
       - Implicación para seguridad
   - path: docs/03_data_science/findings/STUDY_SUMMARY.md
+    publication_blocks: [findings, model_readings]
     title: "Study summary: key findings ranked by relevance"
-    sha256: d798ce8bfc87f459048b19236f4cdefddf538eed985f1c534ac6e63274695e4c
+    language: bilingual
+    section_languages:
+      Key findings of the study, ranked by relevance: en
+      Hallazgos clave del estudio, ordenados por relevancia: es
+    sha256: 9d13fbd3fd6d95e6e234d67db27e0b924222333cf6e1e70786b19be84ea7a2a8
     reviewed_by: "Alexander Moon (PHY), 2026-11-15"
     license_or_terms: "Repository license (MIT)"
     allow_provider: true
@@ -55,8 +63,9 @@ documents:
       - Hallazgos clave del estudio, ordenados por relevancia
       - What the study did — Qué hizo el estudio
   - path: docs/03_data_science/findings/F-04.md
+    publication_blocks: [findings]
     title: "F-04 Lunar-base and partial-gravity data gap"
-    sha256: a3df7154841e86dbc41f4aca0ff078dd126b55d468d201eb6c19412b3b545417
+    sha256: f6f4fd34a671694c21e600a99d35d1a8d69f0d17e7e704582269801d08e1b0d7
     reviewed_by: "Alexander Moon (PHY), 2026-11-15"
     license_or_terms: "Repository license (MIT)"
     allow_provider: true
@@ -68,6 +77,7 @@ documents:
       - Limitaciones
       - Implicación para seguridad — experimento que falta
   - path: docs/03_data_science/findings/F-05.md
+    publication_blocks: [findings]
     title: "F-05 Flame shrinking as early warning"
     sha256: 1c0bb57609da920e7d3f8c4dec2e82049beffb9327442ff028386f9ed3573d94
     reviewed_by: "Alexander Moon (PHY), 2026-11-15"
@@ -79,49 +89,42 @@ documents:
       - Evidencia
       - Interpretación física (PHY)
       - Limitaciones
-      - Implicación para seguridad
   - path: docs/04_physics/RECOMMENDATIONS.md
+    publication_blocks: [findings, model_readings]
     title: "Recommendations REC-01..REC-07"
-    sha256: e5d5a3a044770c9380bd070ad0d588d5df454e6aa785e632a88626adc682080d
+    sha256: a035538b8d4c8bd3eed305cc1b3014214526fa01f542c3ea2b90bddd88859bd7
     reviewed_by: "Alexander Moon (PHY), 2026-11-15"
     license_or_terms: "Repository license (MIT)"
     allow_provider: true
     approved_sections:
       - Recomendaciones accionables y agenda de investigación
-      - REC-01 — Tratar la atmósfera de exploración como un régimen de llamas más persistentes
       - 'REC-02 — Medir lo que falta: llamas a 30 % O₂ / 70 kPa y en todo el rango 24–33 % O₂'
-      - REC-03 — No contar con la autoextinción al reducir la presión de cabina
-      - REC-04 — Vigilar el tamaño relativo de la llama como alerta temprana, y no confiar en que deje de verse amarilla
-      - REC-05 — No extrapolar a la Luna o Marte la autoextinción observada en microgravedad
       - REC-06 — Registrar la causa de cada corte de flujo y conservar el video en los experimentos de combustión
       - REC-07 — Usar la ley de duración M-01 v2 solo dentro de su dominio y con su nivel de evidencia
       - Aplicaciones en Tierra (add-on)
   - path: docs/04_physics/HABITAT_ATMOSPHERES.md
     title: "Reference habitat atmospheres"
-    sha256: 10a93b4986ea2900c313b27722fd51d4e8025ae7d90b94018ad4f030accc34df
+    sha256: 9b4c7310082ba787195d5666b669bdd175f78e2e8f26a64035a00df244799305
     reviewed_by: "Alexander Moon (PHY), 2026-11-15"
     license_or_terms: "Repository license (MIT)"
     allow_provider: true
     approved_sections:
       - Atmósferas de hábitat de referencia
       - Lectura física (para la narrativa)
-      - 'Gravedad parcial: política de acotamiento (PHY-05)'
   - path: docs/04_physics/PARTIAL_GRAVITY_BOUNDING.md
     title: "Partial-gravity bounding"
-    sha256: ad27d6a6b872e19711dcd2ca5ef9b0f8638e1203284c295128ee2676dbe23df2
+    sha256: c9a6105f7842b5f858b82b757b4b3234cf1f3aff4e85ffc97dfb2e0ef1a2e969
     reviewed_by: "Alexander Moon (PHY), 2026-11-15"
     license_or_terms: "Repository license (MIT)"
     allow_provider: true
     approved_sections:
       - Acotamiento de gravedad parcial (PHY-05)
       - 1. Qué tenemos y qué no
-      - 2. Por qué la microgravedad no es un caso "seguro" para la Luna o Marte
-      - 3. Cómo se muestra en el dashboard
       - 4. Experimentos que cerrarían la brecha
       - 5. Confianza
   - path: docs/04_physics/PHYSICS_PRIMER.md
     title: "Physics primer: microgravity combustion"
-    sha256: 7b537a055cc9454bf0743009074dcacad2d873e2ff5e186100c2e61e755307a7
+    sha256: bbdc74e0936329bb9594ccdc3996bb8d0f38912184fc996bbc29578254da8bc6
     reviewed_by: "Alexander Moon (PHY), 2026-11-15"
     license_or_terms: "Repository license (MIT)"
     allow_provider: true
@@ -137,8 +140,9 @@ documents:
       - 8. Glosario rápido
       - 9. Lo que aprendimos de los datos (2026-11-15)
   - path: docs/03_data_science/model_cards/M-01.md
+    publication_blocks: [model_readings]
     title: "Model card M-01 v2 burn duration"
-    sha256: fad442137718999b325c773f774ff1c3c9da5b1db664e9e73cc7bbb9ff3c640a
+    sha256: 208bf81eb8a312e829c8186b55801635c156adc59f8b4e5341d5f78faf51f1cf
     reviewed_by: "Alexander Moon (PHY), 2026-11-15"
     license_or_terms: "Repository license (MIT)"
     allow_provider: true
@@ -154,6 +158,7 @@ documents:
       - Limitaciones y consideraciones de seguridad
       - Historial
   - path: docs/03_data_science/RANKING_METHODOLOGY.md
+    publication_blocks: [ranking]
     title: "Ranking methodology (MCDA)"
     sha256: 4a627ab063c7e25136d004c3ed248460424f17fd5cc83ed2188220e149aceb02
     reviewed_by: "Alexander Moon (PHY), 2026-11-15"

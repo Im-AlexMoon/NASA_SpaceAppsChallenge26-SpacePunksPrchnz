@@ -115,6 +115,27 @@ class PSIClient:
         """Raw search response (all investigations, every research area)."""
         return self._get(self.url("search")).json()
 
+    def search_pages(self, first: dict[str, Any], load_page=None) -> Iterator[tuple[int, dict[str, Any]]]:
+        """Preserve raw page boundaries while walking the repository's reported total."""
+        load_page = load_page or (lambda offset, url: self._get(url).json())
+        page = first
+        offset = 0
+        total = page.get("hits", {}).get("total")
+        if isinstance(total, dict):
+            total = total.get("value")
+        while True:
+            yield offset, page
+            count = len(page.get("hits", {}).get("hits", []))
+            if total is None or offset + count >= total:
+                return
+            if not count:
+                raise ValueError("PSI search ended before its reported total.")
+            offset += count
+            url = re.sub(r"([?&]from=)\d+", lambda match, offset=offset: match[1] + str(offset), self.url("search"))
+            if url == self.url("search"):
+                raise ValueError("PSI search endpoint does not expose a page offset.")
+            page = load_page(offset, url)
+
     @staticmethod
     def iter_sources(search_response: dict[str, Any]) -> Iterator[dict[str, Any]]:
         for hit in search_response.get("hits", {}).get("hits", []):
@@ -122,7 +143,8 @@ class PSIClient:
 
     def list_investigations(self, research_area: str | None = None) -> list[dict[str, Any]]:
         """Search hits' `_source` dicts, optionally filtered by exact Research Area."""
-        sources = list(self.iter_sources(self.search()))
+        sources = list({row['Accession']: row for _, page in self.search_pages(self.search())
+                        for row in self.iter_sources(page) if row.get('Accession')}.values())
         if research_area:
             sources = [s for s in sources if s.get("Research Area") == research_area]
         return sorted(sources, key=lambda s: _accession_key(s.get("Accession", "")))
@@ -136,19 +158,30 @@ class PSIClient:
         url = self.url("download", psi_id=psi_id, filename=file_name) + "&redirect=false"
         return self._get(url).text.strip()
 
-    def download(self, psi_id: str, file_name: str, dest: Path, chunk: int = 1 << 20) -> DownloadResult:
-        """Stream a file to `dest`, hashing on the fly. Writes atomically via a .part file."""
+    def download(
+        self, psi_id: str, file_name: str, dest: Path, chunk: int = 1 << 20, *,
+        expected_bytes: int | None = None, max_bytes: int | None = None,
+    ) -> DownloadResult:
+        """Stream and verify a file before replacing the destination."""
         url = self.url("download", psi_id=psi_id, filename=file_name)
         dest.parent.mkdir(parents=True, exist_ok=True)
         tmp = dest.with_suffix(dest.suffix + ".part")
         digest, size = hashlib.sha256(), 0
-        with self._get(url, stream=True) as resp, open(tmp, "wb") as fh:
-            ctype = resp.headers.get("Content-Type", "")
-            for block in resp.iter_content(chunk):
-                fh.write(block)
-                digest.update(block)
-                size += len(block)
-        tmp.replace(dest)
+        allowed = min((limit for limit in (expected_bytes, max_bytes) if limit is not None), default=None)
+        try:
+            with self._get(url, stream=True) as resp, open(tmp, "wb") as fh:
+                ctype = resp.headers.get("Content-Type", "")
+                for block in resp.iter_content(chunk):
+                    size += len(block)
+                    if allowed is not None and size > allowed:
+                        raise ValueError(f"Download exceeded the allowed {allowed} bytes.")
+                    fh.write(block)
+                    digest.update(block)
+            if expected_bytes is not None and size != expected_bytes:
+                raise ValueError(f"Downloaded {size} bytes; expected {expected_bytes}.")
+            tmp.replace(dest)
+        finally:
+            tmp.unlink(missing_ok=True)
         return DownloadResult(psi_id, file_name, 200, size, digest.hexdigest(), ctype)
 
     def probe(self, psi_id: str, file_name: str) -> int:

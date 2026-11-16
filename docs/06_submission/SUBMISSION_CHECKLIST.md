@@ -1,5 +1,7 @@
 # Checklist de entrega final (F8 · G8)
 
+> La implementación se registra en [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md). Para comprobar el release vigente, seguir [RELEASE_PROCEDURE.md](RELEASE_PROCEDURE.md).
+
 > Actualizado el 2026-11-15 tras completar los puntos 1, 3 y 4 de la propuesta de valor. ✔ hecho y verificado · ◐ parcial ·
 > ☐ pendiente · ⚠️ bloqueante. "Luz verde para el frontend" = todo lo de §A está ✔.
 

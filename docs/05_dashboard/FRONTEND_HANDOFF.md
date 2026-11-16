@@ -1,5 +1,7 @@
 # Entrega al frontend — luz verde (2026-11-15)
 
+> Consultar el [procedimiento de release](../06_submission/RELEASE_PROCEDURE.md) para reconstruir el bundle y verificar los cambios de ciencia.
+
 > **Actualización 2026-11-15 (ADR-0011):** el frontend ya está construido en `web/` y se aloja en Vercel. Las páginas leen el
 > contenido de `web/src/content/*.json` (generado con `flamesafe web-content`) en lugar de llamar a la API; solo *Ask the data*
 > usa el gateway `/api/backend/*`. Las reglas de presentación de abajo siguen vigentes y la UI las cumple.

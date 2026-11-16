@@ -7,7 +7,7 @@ const W = 720, H = 300, M = { l: 48, r: 16, t: 14, b: 34 };
 const T0 = 2, T1 = 400;
 
 export default function BurnChart({ xo2, row, p, selected, tests }: {
-  xo2: number[]; row: GridPoint[]; p: number; selected: number; tests: GasTest[];
+  xo2: number[]; row: GridPoint[]; p: number; selected: number | null; tests: GasTest[];
 }) {
   const [hover, setHover] = useState<number | null>(null);
   const X0 = xo2[0], X1 = xo2[xo2.length - 1];
@@ -27,7 +27,7 @@ export default function BurnChart({ xo2, row, p, selected, tests }: {
       t.xo2 != null && t.p_kpa != null && Math.abs(t.p_kpa / p - 1) <= 0.25 && t.xo2 >= X0 && t.xo2 <= X1,
   );
   const hi = hover ?? selected;
-  const hp = row[hi];
+  const hp = hi == null ? undefined : row[hi];
 
   const onMove = (e: React.PointerEvent<SVGSVGElement>) => {
     const box = e.currentTarget.getBoundingClientRect();
@@ -64,12 +64,12 @@ export default function BurnChart({ xo2, row, p, selected, tests }: {
           <circle key={t.campaign + t.test_id} cx={x(t.xo2!)} cy={y(t.burn_time_s!)} r={4}
             fill={t.campaign === "CFI-G" ? "var(--c1)" : "var(--c2)"} stroke="var(--surface)" strokeWidth={2} opacity={0.85} />
         ))}
-        <line className="cursor" x1={x(xo2[hi])} x2={x(xo2[hi])} y1={M.t} y2={H - M.b} />
-        {hp.median != null && hp.tier !== "C" && <circle cx={x(xo2[hi])} cy={y(hp.median)} r={5} fill="var(--ink)" />}
+        {hi != null && <line className="cursor" x1={x(xo2[hi])} x2={x(xo2[hi])} y1={M.t} y2={H - M.b} />}
+        {hi != null && hp && hp.median != null && hp.tier !== "C" && <circle cx={x(xo2[hi])} cy={y(hp.median)} r={5} fill="var(--ink)" />}
       </svg>
-      {hover != null && (
+      {hover != null && hp && (
         <div className="tip" style={{ left: `${(x(xo2[hover]) / W) * 100}%`, top: `${((hp.median != null && hp.tier !== "C" ? y(hp.median) : M.t + 20) / H) * 100}%` }}>
-          {(xo2[hover] * 100).toFixed(0)}% O₂ · {hp.tier === "C" || hp.median == null ? "no reading" : `${hp.median.toFixed(0)} s (${hp.ci![0].toFixed(0)}–${hp.ci![1].toFixed(0)})`} · tier {hp.tier}
+          {(xo2[hover] * 100).toFixed(0)}% oxygen: {hp.tier === "C" || hp.median == null ? "no reading" : `${hp.median.toFixed(0)} s (${hp.ci![0].toFixed(0)}–${hp.ci![1].toFixed(0)})`} (tier {hp.tier})
         </div>
       )}
       <div className="legend" style={{ marginTop: 10 }}>

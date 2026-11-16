@@ -2,7 +2,7 @@
 
 > **Visión vigente del producto:** [PRODUCT_VISION.md](PRODUCT_VISION.md) (qué nos distingue, niveles de evidencia y recorrido principal) y [ADR-0007](../01_management/decisions/ADR-0007-evidence-tiers-in-dashboard.md).
 
-> **ESPECIFICACIÓN ANTERIOR — MIGRACIÓN PLANIFICADA.** Desde el 2026-11-15, seguir [RAG_IMPLEMENTATION_PLAN.md](../03_data_science/RAG_IMPLEMENTATION_PLAN.md) y [ADR-0004](../01_management/decisions/ADR-0004-rag-web-architecture.md). El objetivo vigente es migrar todas las páginas a Next.js/Node.js en GoDaddy con backend Python separado. Streamlit se conserva durante la transición; predicciones y resultados no aprobados no se habilitan en la primera versión. El contenido histórico siguiente no prevalece sobre el plan nuevo ni indica funcionalidad implementada.
+> **Especificación histórica.** La web vigente usa Next.js en Vercel y un backend FastAPI en Cloud Run. Consultar [RELEASE_PROCEDURE.md](../06_submission/RELEASE_PROCEDURE.md) para configuración, ciencia publicada y verificación.
 
 > Tareas APP-01 → APP-08. Cierra en **G6**. Código: `app/` (Streamlit multipage). Idioma de la UI: **inglés** (jurado internacional).
 

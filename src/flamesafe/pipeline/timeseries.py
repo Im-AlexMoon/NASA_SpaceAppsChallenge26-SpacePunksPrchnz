@@ -277,6 +277,9 @@ def _notes(folder: Path, psi_id: str, test_id: str) -> dict[str, object]:
 def build_features(files_root: Path | None = None, out_path: Path | None = None) -> pd.DataFrame:
     """Reduce every downloaded `*_data.csv` of PSI-159 / PSI-10 to one row and write the silver table."""
     root = files_root or config.data_dir() / "bronze" / "files"
+    from flamesafe.rag.utils import file_hash
+
+    revision = file_hash(Path(__file__))
     rows = []
     for psi in ("PSI-159", "PSI-10"):
         for path in sorted((root / psi).glob("*_data.csv")):
@@ -284,7 +287,7 @@ def build_features(files_root: Path | None = None, out_path: Path | None = None)
             if not m:
                 continue
             row: dict[str, object] = {"psi_id": m.group(1), "test_id": m.group(2), "file_variant": m.group(3),
-                                      "source_file": path.name}
+                                      "source_file": path.name, "source_sha256": file_hash(path), "extractor_sha256": revision}
             try:
                 meta, df = parse_stream(path)
                 row |= extract_features(meta, df)

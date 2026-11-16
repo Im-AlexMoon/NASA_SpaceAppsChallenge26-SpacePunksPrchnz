@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from types import SimpleNamespace
 
 import duckdb
@@ -76,3 +77,14 @@ def test_publication_switch(client, monkeypatch):
     monkeypatch.setattr("flamesafe.api.main.publication",
                         lambda: {**blocks, "model_readings": {**blocks["model_readings"], "enabled": False}})
     assert client.get("/v1/readings/atmospheres", headers=H).status_code == 403
+
+
+def test_static_export_omits_disabled_blocks(client, monkeypatch, tmp_path):
+    from flamesafe import web_content
+
+    policy = {key: {**block, "enabled": False} for key, block in content.publication().items()}
+    monkeypatch.setattr(web_content, "publication", lambda: policy)
+    web_content.export(tmp_path, client.app.state.service.bundle)
+    assert json.loads((tmp_path / "findings.json").read_text()) == {"findings": []}
+    assert json.loads((tmp_path / "readings.json").read_text())["references"] == []
+    assert json.loads((tmp_path / "ranking.json").read_text())["investigations"] == []

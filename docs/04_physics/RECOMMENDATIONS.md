@@ -8,9 +8,7 @@
 - **Pilar:** prevención · **Entorno:** base lunar, rover presurizado, Marte · **Audiencia:** ingenieros de hábitat, agencias
 - **Evidencia:** F-01, F-03, M-01 v2; [PSI-159], [PSI-10]; HABITAT_ATMOSPHERES [S3]
 - **Confianza:** media
-- **Acción propuesta:** al elegir 34 % O₂ / 56.5 kPa, asumir que una llama de gas encendida dura ~7–10 veces más que en una cabina
-  tipo ISS (mediana observada 62.5 s frente a 9 s; modelo 95 s, IC 90 % 75–120). Calificar materiales y dimensionar la respuesta con
-  la **fracción de O₂ del hábitat**, no con la del aire, y no tomar la pO₂ normóxica como indicador de riesgo de incendio.
+- **Acción propuesta:** priorizar ensayos en condiciones representativas de exploración. Las medianas de 62.5 s y 9.0 s describen grupos de llamas que se autoextinguieron y que tienen distintas mezclas de combustible.
 - **Siguiente experimento:** materiales sólidos de cabina en la atmósfera de exploración con flujo controlado.
 
 ### REC-02 — Medir lo que falta: llamas a 30 % O₂ / 70 kPa y en todo el rango 24–33 % O₂
@@ -43,8 +41,7 @@
 - **Pilar:** prevención · **Entorno:** base lunar, Marte · **Audiencia:** agencias, ingenieros de hábitat
 - **Evidencia:** F-04; PARTIAL_GRAVITY_BOUNDING.md (flotabilidad renueva el gas en ~0.1 s a 0.165 g frente a 5–300 s de vida en µg)
 - **Confianza:** media-baja (argumento de escala, sin mediciones en gravedad parcial)
-- **Acción propuesta:** tratar la duración en µg como **cota inferior** de la persistencia de una llama en gravedad parcial. Priorizar
-  experimentos de combustión en gravedad lunar y marciana (vuelos parabólicos, centrífuga en la ISS).
+- **Acción propuesta:** reunir evidencia comparable en gravedad lunar y marciana antes de transferir resultados de microgravedad. Registrar geometría, material y ventilación.
 - **Siguiente experimento:** llamas esféricas y sólidos en gravedad parcial con la atmósfera de exploración.
 
 ### REC-06 — Registrar la causa de cada corte de flujo y conservar el video en los experimentos de combustión

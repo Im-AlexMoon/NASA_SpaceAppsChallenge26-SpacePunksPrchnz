@@ -23,6 +23,7 @@ import pandas as pd
 
 from flamesafe import config
 from flamesafe.physics import units
+from flamesafe.pipeline.promotion import promote_files, stage_files
 
 QUALIFIER_TOKENS = {"RAMP", "RAMPED", "LOW O2"}
 FUEL_CANON = {"c2h4": "ethylene", "c3h8": "propane", "ethylene": "ethylene", "ethane": "ethane", "propane": "propane",
@@ -293,6 +294,11 @@ def invariants(gas: pd.DataFrame, drops: pd.DataFrame) -> list[dict[str, Any]]:
 def run(out_dir: Path | None = None) -> dict[str, Any]:
     out_dir = out_dir or gold_dir()
     out_dir.mkdir(parents=True, exist_ok=True)
+    silver_report = config.data_dir() / "silver" / "_reports" / "tables_parse_report.json"
+    if silver_report.is_file():
+        prior = json.loads(silver_report.read_text(encoding="utf-8"))
+        if prior["n_errors"] or prior.get("selected_parsers"):
+            raise ValueError("Build all Silver tables successfully before publishing Gold.")
     gas, gchk = build_gas_flame_tests()
     drops, dchk = build_droplet_tests()
     refs, rchk = build_droplet_reference_points()
@@ -300,10 +306,13 @@ def run(out_dir: Path | None = None) -> dict[str, Any]:
     pubs, pchk = build_publications()
     tables = {"gas_flame_tests": gas, "droplet_tests": drops, "droplet_reference_points": refs,
               "investigations": inv, "publications": pubs}
-    for name, df in tables.items():
-        df.to_parquet(out_dir / f"{name}.parquet", index=False)
-    _write_duckdb(out_dir, tables)
     inv_checks = invariants(gas, drops)
+    bad_diameter = drops.loc[drops.d_ext_hot_mm > 1.05 * drops.d0_mm]
+    approved = (bad_diameter.psi_id.eq("PSI-39") & bad_diameter.test_id.eq("1274A")
+                & bad_diameter.source_row.eq(71))
+    allowed_count = int(approved.sum())
+    if sum(item["violations"] for item in inv_checks) > allowed_count:
+        raise ValueError("Gold contains an unreviewed physical invariant violation.")
     report = {
         "built_at_utc": datetime.now().astimezone().isoformat(timespec="seconds"),
         "row_counts": {k: len(v) for k, v in tables.items()},
@@ -319,12 +328,20 @@ def run(out_dir: Path | None = None) -> dict[str, Any]:
         },
         "invariants": inv_checks,
         "n_invariant_violations": sum(i["violations"] for i in inv_checks),
+        "exceptions": [{"psi_id": "PSI-39", "test_id": "1274A", "source_row": 71,
+                        "reason": "Extinction diameter exceeds documented tolerance; retained for provenance."}]
+        if allowed_count else [],
     }
-    rep = out_dir / "_reports"
-    rep.mkdir(exist_ok=True)
-    with open(rep / "gold_report.json", "w", encoding="utf-8", newline="\n") as fh:
-        json.dump(report, fh, indent=2, ensure_ascii=False, default=str)
-        fh.write("\n")
+    with stage_files(out_dir.parent, "gold") as stage:
+        for name, df in tables.items():
+            df.to_parquet(stage / f"{name}.parquet", index=False)
+        _write_duckdb(stage, tables)
+        report_dir = stage / "_reports"
+        report_dir.mkdir()
+        (report_dir / "gold_report.json").write_text(
+            json.dumps(report, indent=2, ensure_ascii=False, default=str) + "\n", encoding="utf-8"
+        )
+        promote_files(stage, out_dir)
     report["out_dir"] = str(out_dir)
     return report
 

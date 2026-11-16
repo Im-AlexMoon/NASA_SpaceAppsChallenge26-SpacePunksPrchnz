@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -68,10 +69,15 @@ def reconcile(silver_dir: Path, gold_dir: Path) -> list[dict[str, Any]]:
             rows.append({"stage": "bronze->silver", "table": table, "expected": expected, "actual": meta["rows"],
                          "ok": expected == meta["rows"]})
     for gold_table, sources in GOLD_FROM_SILVER.items():
-        expected = sum(len(pd.read_parquet(silver_dir / f"{s}.parquet")) for s in sources)
-        actual = len(pd.read_parquet(gold_dir / f"{gold_table}.parquet"))
+        keys = ["psi_id", "source_file", "source_row"]
+        inputs = pd.concat([pd.read_parquet(silver_dir / f"{s}.parquet") for s in sources])
+        output = pd.read_parquet(gold_dir / f"{gold_table}.parquet")
+        expected, actual = len(inputs), len(output)
+        identity_ok = Counter(inputs[keys].itertuples(index=False, name=None)) == Counter(
+            output[keys].itertuples(index=False, name=None)
+        )
         rows.append({"stage": "silver->gold", "table": gold_table, "expected": expected, "actual": actual,
-                     "ok": expected == actual, "sources": sources})
+                     "ok": expected == actual and identity_ok, "identity_ok": identity_ok, "sources": sources})
     return rows
 
 

@@ -1,5 +1,7 @@
 # Plan Ejecutivo — FlameSafe · Flames in Free Fall (NASA Space Apps 2026)
 
+> **Versión vigente.** El [procedimiento de release](../06_submission/RELEASE_PROCEDURE.md) define el sitio, la reconstrucción y el cierre actuales. Las fases siguientes registran el alcance original.
+
 > **Estado:** v1.0 · **Horizonte:** 24 h (H+0 → H+24) · **Equipo:** SpacePunks
 > **Cómo usar este documento:** es la fuente de verdad del *qué* y el *cuándo*. El avance real se marca en
 > [MILESTONES.md](../01_management/MILESTONES.md) (checklist) y [PROGRESS.md](../01_management/PROGRESS.md) (tablero).

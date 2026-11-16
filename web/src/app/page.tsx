@@ -2,13 +2,7 @@ import Link from "next/link";
 import BurnCompare from "../components/BurnCompare";
 import CoverageMap from "../components/CoverageMap";
 import FlameCanvas from "../components/FlameCanvas";
-import { meta } from "../lib/content";
-
-const Arrow = () => (
-  <svg className="arrow" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-    <path d="M2 7h9M7.5 3.5 11 7l-3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
+import { meta, reference } from "../lib/content";
 
 const glyphs = {
   atmosphere: (
@@ -46,12 +40,14 @@ const glyphs = {
 };
 
 export default function Home() {
+  const iss = reference("iss_cabin");
+  const exploration = reference("exploration_8p2_34");
   return (
     <>
       <section className="hero" aria-labelledby="hero-title">
         <FlameCanvas />
         <div className="wrap hero-copy" data-enter>
-          <p className="eyebrow">NASA PSI · Combustion in microgravity</p>
+          <p className="eyebrow">NASA PSI combustion experiments in microgravity</p>
           <h1 id="hero-title">Fire safety evidence for space habitats</h1>
           <p className="lede">
             Choose the air of a future habitat and see how long a flame lasts, read from real flames on the ISS and
@@ -59,7 +55,7 @@ export default function Home() {
           </p>
           <div className="actions">
             <Link className="btn btn-primary" href="/atmosphere">
-              Explore an atmosphere <Arrow />
+              Explore an atmosphere
             </Link>
             <Link className="btn btn-ghost" href="/findings">
               Read the findings
@@ -82,32 +78,36 @@ export default function Home() {
         </div>
       </section>
 
+      {meta.publication.findings.enabled && meta.publication.model_readings.enabled && (
       <section className="screen" aria-labelledby="air-title">
         <div className="wrap">
           <div className="section-head">
-            <p className="eyebrow">Finding F-03 · Measured on the ISS</p>
-            <h2 id="air-title">Exploration air keeps a flame alive seven times longer</h2>
-            <p className="lede">Same spherical flame, less nitrogen around it. Median burn before it went out on its own.</p>
+            <p className="eyebrow">Finding F-03 from ISS measurements</p>
+            <h2 id="air-title">Nearby tests had longer burn durations under exploration conditions</h2>
+            <p className="lede">Median duration among flames that went out on their own. The two groups used different mixes of fuels.</p>
           </div>
-          <BurnCompare
-            lanes={[
-              { name: "ISS cabin", air: "21% O₂ · 101 kPa", seconds: 9, n: 21 },
-              { name: "Exploration habitat", air: "34% O₂ · 56.5 kPa", seconds: 62.5, n: 12 },
-            ]}
-          />
+          {iss && exploration && <BurnCompare lanes={[iss, exploration].flatMap((reading) => {
+            const seconds = reading.nearby.median_burn_s_self_extinguished;
+            return seconds == null ? [] : [{
+              name: reading.key === "iss_cabin" ? "ISS cabin" : "Exploration atmosphere",
+              air: Math.round(reading.inputs.xo2 * 100) + "% oxygen at " + reading.inputs.p_kpa.toFixed(1) + " kPa",
+              seconds, n: reading.nearby.n_self_extinguished,
+            }];
+          })} />}
           <div className="actions">
             <Link className="link" href="/findings#F-03">
-              21 and 12 self-extinguished flames · see the evidence
+              Read the comparison and its limits
             </Link>
           </div>
         </div>
       </section>
+      )}
 
       <section className="screen" aria-labelledby="ways-title">
         <div className="wrap">
           <div className="section-head">
             <p className="eyebrow">Four ways in</p>
-            <h2 id="ways-title">Find, understand and predict, then see what is missing</h2>
+            <h2 id="ways-title">Find evidence, compare conditions and identify what is missing</h2>
           </div>
           <div className="cards">
             <Link className="card" href="/atmosphere">
@@ -134,26 +134,26 @@ export default function Home() {
             <Link className="card" href="/gaps">
               <div className="glyph">{glyphs.gaps}</div>
               <span className="label">Gaps</span>
-              <h3>What NASA has not tested</h3>
-              <p>The conditions a lunar base needs and no experiment has covered.</p>
+              <h3>Where the analyzed evidence is limited</h3>
+              <p>See where the reference conditions lack nearby measurements.</p>
               <span className="go">See the gaps</span>
             </Link>
           </div>
         </div>
       </section>
 
-      <section className="screen" aria-labelledby="gap-title">
+      {meta.publication.findings.enabled && <section className="screen" aria-labelledby="gap-title">
         <div className="wrap grid-gap">
           <div className="section-head">
-            <p className="eyebrow">Finding F-04 · Knowledge gap</p>
-            <h2 id="gap-title">No normal flame has been tested in lunar-base air</h2>
+            <p className="eyebrow">Evidence gap in Finding F-04</p>
+            <h2 id="gap-title">The analyzed dataset has no normal-flame tests near the lunar reference atmosphere</h2>
             <p className="lede">
               Every dot is a normal flame tested on the ISS. The dashed window around the lunar-base atmosphere is
-              empty, and no test anywhere was run in lunar or Martian gravity.
+              empty. The analyzed tests do not measure the effect of lunar or Martian gravity.
             </p>
             <div className="actions">
               <Link className="btn btn-ghost" href="/gaps">
-                See the gaps <Arrow />
+                See the gaps
               </Link>
             </div>
           </div>
@@ -161,7 +161,7 @@ export default function Home() {
             <CoverageMap />
           </div>
         </div>
-      </section>
+      </section>}
     </>
   );
 }

@@ -33,11 +33,13 @@ def test_tiers(art):
     a = readings.read(art, 0.21, 101.3, _gas(8, 0.21, 101.3, [1, 2]))
     assert a["tier"] == "A" and a["prediction"]["median_burn_s"] > 0 and a["nearby"]["n_tests"] == 8
     b = readings.read(art, 0.30, 70.3, _gas(8, 0.21, 101.3, [1, 2]))
-    assert b["tier"] == "B" and b["nearby"]["n_tests"] == 0 and "interpolation" in b["caveats"][0]
+    assert b["tier"] == "B" and b["nearby"]["n_tests"] == 0 and "no tests" in b["caveats"][0]
     lo, hi = b["prediction"]["median_burn_s_90ci"]
     assert lo < b["prediction"]["median_burn_s"] < hi
     one_day = readings.read(art, 0.21, 101.3, _gas(8, 0.21, 101.3, [1]))
-    assert one_day["tier"] == "B"  # many tests but a single day is not enough for tier A
+    assert one_day["tier"] == "B" and one_day["coverage"] == "limited"
+    outside = readings.read(art, 0.21, 101.3, _gas(8, 0.21, 101.3, [1, 2]), m_fuel_mg_s=100)
+    assert outside["coverage"] == "sufficient" and outside["prediction"] is None
 
 
 def test_no_evidence_withholds_numbers(art):
